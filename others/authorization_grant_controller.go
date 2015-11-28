@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/phuc0302/go-cocktail"
-	"github.com/phuc0302/go-cocktail/common"
 )
 
 type AuthorizationGrantController struct {
@@ -33,14 +32,14 @@ func (a *AuthorizationGrantController) HandleForm(c *cocktail.Context) {
 
 	/* Condition validation: Validate request */
 	if values == nil {
-		err := common.Status{Status: 400, Title: "Invalid Request", Description: "Invalid Request."}
+		err := Status{Status: 400, Error: "Invalid Request", ErrorDescription: "Invalid Request."}
 		c.OutputError(&err)
 		return
 	}
 
 	/* Condition validation: Validate client_id */
 	if len(info.ClientId) == 0 {
-		err := common.Status{Status: 400, Title: "Invalid Request", Description: "Missing client_id parameter."}
+		err := Status{Status: 400, Error: "Invalid Request", ErrorDescription: "Missing client_id parameter."}
 		c.OutputError(&err)
 		return
 	}
@@ -48,11 +47,11 @@ func (a *AuthorizationGrantController) HandleForm(c *cocktail.Context) {
 	/* Condition validation: Validate response_type */
 	responseType := values.Get(ResponseType)
 	if len(responseType) == 0 {
-		err := common.Status{Status: 400, Title: "Invalid Request", Description: "Missing response_type parameter."}
+		err := common.Status{Status: 400, Error: "Invalid Request", ErrorDescription: "Missing response_type parameter."}
 		c.OutputError(&err)
 		return
 	} else if responseType != "code" {
-		err := common.Status{Status: 400, Title: "Invalid Request", Description: "Invalid response_type parameter (must be \"code\")."}
+		err := common.Status{Status: 400, Error: "Invalid Request", ErrorDescription: "Invalid response_type parameter (must be \"code\")."}
 		c.OutputError(&err)
 		return
 	}
@@ -61,7 +60,7 @@ func (a *AuthorizationGrantController) HandleForm(c *cocktail.Context) {
 	//	/* Condition validation: Validate redirect_uri */
 	//	redirectUri := values.Get(RedirectUri)
 	//	if len(RedirectUri) == 0 {
-	//		err := common.Status{Status: 400, Title: "Invalid Request", Description: "Missing redirect_uri parameter."}
+	//		err := common.Status{Status: 400, Error: "Invalid Request", ErrorDescription: "Missing redirect_uri parameter."}
 	//		c.OutputError(&err)
 	//		return
 	//	}
@@ -69,7 +68,7 @@ func (a *AuthorizationGrantController) HandleForm(c *cocktail.Context) {
 	/* Condition validation: Validate client credentials */
 	client := a.store.FindClient(info.ClientId, info.ClientSecret, info.RedirectUri)
 	if client == nil {
-		err := common.Status{Status: 400, Title: "Invalid Request", Description: "Invalid client credentials."}
+		err := common.Status{Status: 400, Error: "Invalid Request", ErrorDescription: "Invalid client credentials."}
 		c.OutputError(&err)
 		return
 	}

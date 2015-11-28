@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/phuc0302/go-cocktail"
-	"github.com/phuc0302/go-cocktail/common"
 )
 
 type TokenGrantController struct {
