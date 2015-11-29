@@ -23,35 +23,6 @@ import (
 //	}
 //}
 
-func (s *Server) ShouldAllow(method string) bool {
-	isAllowed := false
-	for _, allowedMethod := range s.AllowMethods {
-		if method == allowedMethod {
-			isAllowed = true
-			break
-		}
-	}
-	return isAllowed
-}
-func (s *Server) ServeRequest(context *Context) bool {
-	isHandled := false
-
-	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
-	for _, route := range s.routes {
-		ok, pathParams := route.Match(context.Method, context.UrlPath)
-		if !ok {
-			continue
-		}
-
-		context.Params.PathQueries = pathParams
-		route.InvokeHandler(context)
-		isHandled = true
-		break
-	}
-
-	return isHandled
-}
-
 /** Create a group of related functions. */
 func (s *Server) Group(urlGroup string, function func(s *Server)) {
 	s.groups = append(s.groups, urlGroup)
@@ -128,6 +99,12 @@ func (s *Server) Unlink(urlPath string, handler interface{}) {
 
 // MARK: Struct's private functions
 func (s *Server) addRoute(method string, pattern string, handler interface{}) {
+	//	var buffer bytes.Buffer
+	//    for i := 0; i < 1000; i++ {
+	//        buffer.WriteString("a")
+	//    }
+	//    fmt.Println(buffer.String())
+
 	// Condition validation: If pattern belong to group or not
 	if len(s.groups) > 0 {
 		groupPattern := ""

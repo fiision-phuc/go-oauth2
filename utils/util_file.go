@@ -7,6 +7,12 @@ import (
 	"os"
 )
 
+/** Check if file exist at path or not. */
+func FileExisted(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
+}
+
 /** Move upload file to a folder. */
 func MoveFile(uploadFile multipart.File, newPath string) error {
 	/* Condition validation */
@@ -25,10 +31,4 @@ func MoveFile(uploadFile multipart.File, newPath string) error {
 	// Move file to new location
 	_, err = io.Copy(output, uploadFile)
 	return err
-}
-
-/** Check if file exist at path or not. */
-func FileExisted(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return err == nil
 }

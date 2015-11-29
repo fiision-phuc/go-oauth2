@@ -5,32 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
-const (
-	COPY    = "COPY"
-	DELETE  = "DELETE"
-	GET     = "GET"
-	HEAD    = "HEAD"
-	LINK    = "LINK"
-	OPTIONS = "OPTIONS"
-	PATCH   = "PATCH"
-	POST    = "POST"
-	PURGE   = "PURGE"
-	PUT     = "PUT"
-	UNLINK  = "UNLINK"
-)
-
-//var (
-//	groups  []string = make([]string, 0)
-//	methods []string = []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK}
-//)
-
 type Server struct {
-	AllowMethods  []string
-	StaticFolders []string
+	*Config
 
 	routes []Route
 	groups []string
@@ -39,9 +18,16 @@ type Server struct {
 
 // MARK: Struct's constructors
 func DefaultServer() *Server {
+	// Load configuration file
+	config := LoadConfigs()
+	if config == nil {
+		CreateConfigs()
+		config = LoadConfigs()
+	}
+
+	// Create default server
 	return &Server{
-		AllowMethods:  []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
-		StaticFolders: make([]string, 0),
+		Config: config,
 
 		routes: make([]Route, 0),
 		groups: make([]string, 0),
@@ -51,20 +37,12 @@ func DefaultServer() *Server {
 
 // MARK: Struct's public functions
 func (s *Server) Run() {
-	headersSize := GetEnv(ENV_HEADERS_SIZE)
-	readTimeout := GetEnv(ENV_TIMEOUT_READ)
-	writeTimeout := GetEnv(ENV_TIMEOUT_WRITE)
-
 	address := fmt.Sprintf("%s:%s", GetEnv(ENV_HOST), GetEnv(ENV_PORT))
-	t1, _ := strconv.ParseInt(headersSize, 10, 64)
-	t2, _ := strconv.ParseInt(readTimeout, 10, 64)
-	t3, _ := strconv.ParseInt(writeTimeout, 10, 64)
-
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    time.Duration(t2) * time.Second,
-		WriteTimeout:   time.Duration(t3) * time.Second,
-		MaxHeaderBytes: int(t1) << 10, // 512kb
+		ReadTimeout:    s.TimeoutRead * time.Second,
+		WriteTimeout:   s.TimeoutWrite * time.Second,
+		MaxHeaderBytes: s.HeaderSize << 10,
 		Handler:        s,
 	}
 
@@ -72,20 +50,12 @@ func (s *Server) Run() {
 	s.logger.Fatalln(server.ListenAndServe())
 }
 func (s *Server) RunTLS(certFile string, keyFile string) {
-	headersSize := GetEnv(ENV_HEADERS_SIZE)
-	readTimeout := GetEnv(ENV_TIMEOUT_READ)
-	writeTimeout := GetEnv(ENV_TIMEOUT_WRITE)
-
-	address := fmt.Sprintf("%s:%s", GetEnv(ENV_HOST), GetEnv(ENV_PORT))
-	t1, _ := strconv.ParseInt(headersSize, 10, 64)
-	t2, _ := strconv.ParseInt(readTimeout, 10, 64)
-	t3, _ := strconv.ParseInt(writeTimeout, 10, 64)
-
+	address := fmt.Sprintf("%s:%s", s.Host, s.Port)
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    time.Duration(t2) * time.Second,
-		WriteTimeout:   time.Duration(t3) * time.Second,
-		MaxHeaderBytes: int(t1) << 10, // 512kb
+		ReadTimeout:    s.TimeoutRead * time.Second,
+		WriteTimeout:   s.TimeoutWrite * time.Second,
+		MaxHeaderBytes: s.HeaderSize << 10,
 		Handler:        s,
 	}
 
