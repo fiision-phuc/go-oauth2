@@ -7,22 +7,6 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-//type Server struct {
-//	routes  []Route
-//	groups  []string
-//	methods []string
-//	logger  *log.Logger
-//}
-
-//// MARK: Struct's constructors
-//func createDefaultRouter(logger *log.Logger) *Server {
-//	return &Server{
-//		groups:  make([]string, 0),
-//		methods: []string{DELETE, GET, PATCH, POST},
-//		logger:  logger,
-//	}
-//}
-
 /** Create a group of related functions. */
 func (s *Server) Group(urlGroup string, function func(s *Server)) {
 	s.groups = append(s.groups, urlGroup)

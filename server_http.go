@@ -54,28 +54,23 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 // MARK: Struct's private functions
 func (s *Server) serveRequest(context *Context) {
-	//	isAllowed := s.Router.ShouldAllow(context.Method)
-	//	if !isAllowed {
-	//		context.OutputError(Status405())
-	//		return
-	//	}
+	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
+	isHandled := false
+	for _, route := range s.routes {
+		ok, pathParams := route.Match(context.Method, context.UrlPath)
+		if !ok {
+			continue
+		}
 
-	//	// Let delegate decide if the request should be handled or not
-	//	if s.Delegate != nil && !s.Delegate.ShouldServeHTTP(context) {
-	//		context.OutputError(Status404())
-	//		return
-	//	} else if s.Delegate != nil {
-	//		s.Delegate.WillServeHTTP(context)
-	//	}
+		context.Params.PathQueries = pathParams
+		route.InvokeHandler(context)
+		isHandled = true
+		break
+	}
 
-	//	isHandled := s.Router.ServeRequest(context)
-	//	if !isHandled {
-	//		context.OutputError(Status503())
-	//	}
-
-	//	if s.Delegate != nil {
-	//		s.Delegate.DidServeHTTP(context)
-	//	}
+	if !isHandled {
+		context.OutputError(Status503())
+	}
 }
 
 func (s *Server) serveResource(context *Context, request *http.Request, response http.ResponseWriter) {
@@ -103,23 +98,4 @@ func (s *Server) serveResource(context *Context, request *http.Request, response
 		return
 	}
 	http.ServeContent(response, request, resourcePath, info.ModTime(), file)
-}
-
-func (s *Server) ServeRequest(context *Context) bool {
-	isHandled := false
-
-	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
-	for _, route := range s.routes {
-		ok, pathParams := route.Match(context.Method, context.UrlPath)
-		if !ok {
-			continue
-		}
-
-		context.Params.PathQueries = pathParams
-		route.InvokeHandler(context)
-		isHandled = true
-		break
-	}
-
-	return isHandled
 }
