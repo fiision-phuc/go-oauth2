@@ -56,7 +56,7 @@ func (s *Server) serveRequest(context *Context) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 	isHandled := false
 	for _, route := range s.routes {
-		ok, pathParams := route.Match(context.Method, context.UrlPath)
+		ok, pathParams := route.Match(context.Method, context.URLPath)
 		if !ok {
 			continue
 		}

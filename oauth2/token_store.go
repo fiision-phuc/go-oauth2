@@ -6,14 +6,14 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type OAuth2User struct {
-	//	Id       bson.ObjectId `bson:"_id,omitempty" json:"user_id,omitempty"`
-	Username string `bson:"username,omitempty" json:"username,omitempty"`
-	Password string `bson:"password,omitempty" json:"password,omitempty"`
+type User struct {
+	Id       bson.ObjectId `bson:"_id,omitempty" json:"user_id,omitempty"`
+	Username string        `bson:"username,omitempty" json:"username,omitempty"`
+	Password string        `bson:"password,omitempty" json:"password,omitempty"`
 
-	//	FirstName string `bson:"first_name,omitempty" json:"first_name,omitempty"`
-	//	LastName  string `bson:"last_name,omitempty" json:"last_name,omitempty"`
-	//	Email     string `bson:"email,omitempty" json:"email,omitempty"`
+	FirstName string `bson:"first_name,omitempty" json:"first_name,omitempty"`
+	LastName  string `bson:"last_name,omitempty" json:"last_name,omitempty"`
+	Email     string `bson:"email,omitempty" json:"email,omitempty"`
 }
 
 // type OAuth2Client struct {
@@ -22,7 +22,7 @@ type OAuth2User struct {
 
 // 	RedirectUri []string `bson:"redirect_uri,omitempty" json:"redirect_uri,omitempty"`
 // }
-type OAuth2AccessToken struct {
+type AccessToken struct {
 	Id       bson.ObjectId `bson:"_id,omitempty" json:"-"`
 	UserId   bson.ObjectId `bson:"user_id,omitempty" json:"-"`
 	ClientId bson.ObjectId `bson:"client_id,omitempty" json:"-"`
@@ -32,7 +32,7 @@ type OAuth2AccessToken struct {
 	CreatedTime time.Time `bson:"created_time,omitempty" json:"-"`
 	ExpiredTime time.Time `bson:"expired_time,omitempty" json:"-"`
 }
-type OAuth2RefreshToken struct {
+type RefreshToken struct {
 	Id       string `bson:"_id,omitempty" json:"-"`
 	UserId   string `bson:"user_id,omitempty" json:"-"`
 	ClientId string `bson:"client_id,omitempty" json:"-"`
@@ -44,11 +44,11 @@ type OAuth2RefreshToken struct {
 }
 
 type TokenStore interface {
-	FindUser(username string, password string) *OAuth2User
+	FindUser(username string, password string) *User
 	FindClient(clientId string, clientSecret string, redirectUri string) *OAuth2Client
 
-	FindAccessToken(accessToken string) *OAuth2AccessToken
-	FindRefreshToken(refreshToken string) *OAuth2RefreshToken
+	FindAccessToken(accessToken string) *AccessToken
+	FindRefreshToken(refreshToken string) *RefreshToken
 
 	ValidateGrantType(clientId string, grantType string) bool
 

@@ -53,7 +53,7 @@ func RecoveryInternal(logger *log.Logger) {
 func RecoveryRequest(c *Context) {
 	if err := recover(); err != nil {
 		log := log_message{
-			Uri:         c.UrlPath,
+			Uri:         c.URLPath,
 			Method:      fmt.Sprintf("%s | %s", c.Protocol, c.Method),
 			RequestTime: time.Now().UTC().Format(time.RFC822),
 
@@ -82,9 +82,9 @@ func RecoveryRequest(c *Context) {
 		}
 
 		// Should include stack trace or not
-		if Development {
+//		if Development {
 			httpError.StackTrace = log
-		}
+//		}
 
 		c.OutputError(httpError)
 	}

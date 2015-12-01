@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/phuc0302/go-cocktail"
+	"github.com/phuc0302/go-oauth2/context"
 )
 
 type AuthorizationGrantController struct {
@@ -26,7 +26,7 @@ func CreateAuthorizationGrantController(oauth2Config *Config) *AuthorizationGran
  * @param  {Function} done
  * @this   OAuth
  */
-func (a *AuthorizationGrantController) HandleForm(c *cocktail.Context) {
+func (a *AuthorizationGrantController) HandleForm(c *context.Context) {
 	info := CreateOAuth2Client(c)
 	values := c.Queries
 

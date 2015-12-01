@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/phuc0302/go-cocktail"
+	"github.com/phuc0302/go-oauth2/context"
 )
 
 type TokenGrantController struct {
@@ -24,7 +24,7 @@ func CreateTokenGrantController(oauth2Config *Config) *TokenGrantController {
 }
 
 // MARK: Struct's public functions
-func (t *TokenGrantController) HandleForm(c *cocktail.Context) {
+func (t *TokenGrantController) HandleForm(c *context.Context) {
 	info := CreateOAuth2Client(c)
 	values := c.Queries
 
@@ -92,7 +92,7 @@ func (t *TokenGrantController) HandleForm(c *cocktail.Context) {
 }
 
 // MARK: Struct's private functions
-func (t *TokenGrantController) handleAuthorizationCodeGrant(c *cocktail.Context, values url.Values, client *OAuth2Client) {
+func (t *TokenGrantController) handleAuthorizationCodeGrant(c *context.Context, values url.Values, client *OAuth2Client) {
 	/* Condition validation: Validate code */
 	authorizationCode := values.Get(Code)
 	if len(authorizationCode) == 0 {

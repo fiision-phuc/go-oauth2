@@ -1,6 +1,6 @@
 package oauth2
 
-import "github.com/phuc0302/go-cocktail"
+import "github.com/phuc0302/go-oauth2/context"
 
 type OAuth2Client struct {
 	ClientId     string
@@ -9,7 +9,7 @@ type OAuth2Client struct {
 }
 
 // MARK: Struct's constructors
-func CreateOAuth2Client(c *cocktail.Context) *OAuth2Client {
+func CreateOAuth2Client(c *context.Context) *OAuth2Client {
 	basicAuth := CreateBasicAuthentication(c)
 
 	if basicAuth != nil {
