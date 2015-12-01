@@ -13,7 +13,7 @@ func Test_CreateConfig(t *testing.T) {
 	defer os.Remove("oauth2.cnf")
 
 	if !isCreated {
-		t.Error("Expected true but found %t", isCreated)
+		t.Errorf("Expected true but found %t", isCreated)
 	}
 
 	if !utils.FileExisted("oauth2.cnf") {

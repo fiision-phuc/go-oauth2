@@ -8,9 +8,7 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-var Development = false
-
-/** Persist all configuration to file. */
+// CreateConfigs persist all configuration to file.
 func CreateConfigs() bool {
 	// Remove old file is existed
 	if utils.FileExisted("oauth2.cnf") {
@@ -27,28 +25,28 @@ func CreateConfigs() bool {
 	}
 
 	// Create default config
-	config := map[string]interface{}{
-		ENV_HOST: host,
-		ENV_PORT: port,
+	config := Config{
+		Development:  true,
+		Host:         host,
+		Port:         port,
+		HeaderSize:   5,
+		TimeoutRead:  15,
+		TimeoutWrite: 15,
 
-		ENV_HEADERS_SIZE:  5,
-		ENV_TIMEOUT_READ:  15,
-		ENV_TIMEOUT_WRITE: 15,
-
-		ENV_ALLOW_METHODS:  []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
-		ENV_STATIC_FOLDERS: map[string]string{"/resources": "resources"},
+		AllowMethods:  []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
+		StaticFolders: map[string]string{"/resources": "resources"},
 	}
 
 	// Create new file
-	configJson, _ := json.MarshalIndent(config, "", "  ")
+	configJSON, _ := json.MarshalIndent(config, "", "  ")
 	file, _ := os.Create("oauth2.cnf")
-	file.Write(configJson)
+	file.Write(configJSON)
 	file.Close()
 
 	return true
 }
 
-/** Retrieve preset configuration file. */
+// LoadConfigs retrieve preset configuration file.
 func LoadConfigs() *Config {
 	if !utils.FileExisted("oauth2.cnf") {
 		return nil
@@ -75,7 +73,7 @@ func LoadConfigs() *Config {
 	return &config
 }
 
-/** Retrieve value from environment. */
+// GetEnv retrieve value from environment.
 func GetEnv(key string) string {
 	if len(key) == 0 {
 		return ""
@@ -83,7 +81,7 @@ func GetEnv(key string) string {
 	return os.Getenv(key)
 }
 
-/** Persist key-value to environment. */
+// SetEnv persist key-value to environment.
 func SetEnv(key string, value string) {
 	if len(key) == 0 || len(value) == 0 {
 		return

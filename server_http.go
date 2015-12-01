@@ -9,7 +9,6 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-// MARK: http.Handler's members
 func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	request.URL.Path = utils.FormatPath(request.URL.Path)
 	request.Method = strings.ToUpper(request.Method)

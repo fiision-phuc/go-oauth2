@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Server object description.
 type Server struct {
 	*Config
 
@@ -16,7 +17,7 @@ type Server struct {
 	logger *log.Logger
 }
 
-// MARK: Struct's constructors
+// DefaultServer create a server object with preset config.
 func DefaultServer() *Server {
 	// Load configuration file
 	config := LoadConfigs()
@@ -35,7 +36,7 @@ func DefaultServer() *Server {
 	}
 }
 
-// MARK: Struct's public functions
+// Run will start server on http port.
 func (s *Server) Run() {
 	address := fmt.Sprintf("%s:%s", GetEnv(ENV_HOST), GetEnv(ENV_PORT))
 	server := &http.Server{
@@ -49,6 +50,8 @@ func (s *Server) Run() {
 	s.logger.Printf("listening on %s\n", address)
 	s.logger.Fatalln(server.ListenAndServe())
 }
+
+// RunTLS will start server on https port.
 func (s *Server) RunTLS(certFile string, keyFile string) {
 	address := fmt.Sprintf("%s:%s", s.Host, s.Port)
 	server := &http.Server{

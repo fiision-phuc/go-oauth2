@@ -7,7 +7,7 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-/** Create a group of related functions. */
+// Group all url with same prefix.
 func (s *Server) Group(urlGroup string, function func(s *Server)) {
 	s.groups = append(s.groups, urlGroup)
 	function(s)
@@ -15,67 +15,67 @@ func (s *Server) Group(urlGroup string, function func(s *Server)) {
 	s.groups = s.groups[:len(s.groups)-1]
 }
 
-/** Handle COPY method. */
+// Copy method.
 func (s *Server) Copy(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(COPY, urlPath, handler)
 }
 
-/** Handle DELETE method. */
+// Delete method.
 func (s *Server) Delete(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(DELETE, urlPath, handler)
 }
 
-/** Handle GET method. */
+// Get method.
 func (s *Server) Get(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(GET, urlPath, handler)
 }
 
-/** Handle HEAD method. */
+// Head method.
 func (s *Server) Head(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(HEAD, urlPath, handler)
 }
 
-/** Handle LINK method. */
+// Link method.
 func (s *Server) Link(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(LINK, urlPath, handler)
 }
 
-/** Handle OPTIONS method. */
+// Options method.
 func (s *Server) Options(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(OPTIONS, urlPath, handler)
 }
 
-/** Handle PATCH method. */
+// Patch method.
 func (s *Server) Patch(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(PATCH, urlPath, handler)
 }
 
-/** Handle POST method. */
+// Post method.
 func (s *Server) Post(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(POST, urlPath, handler)
 }
 
-/** Handle PURGE method. */
+// Purge method.
 func (s *Server) Purge(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(PURGE, urlPath, handler)
 }
 
-/** Handle PUT method. */
+// Put method.
 func (s *Server) Put(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(PUT, urlPath, handler)
 }
 
-/** Handle UNLINK method. */
+// Unlink method.
 func (s *Server) Unlink(urlPath string, handler interface{}) {
 	defer RecoveryInternal(s.logger)
 	s.addRoute(UNLINK, urlPath, handler)

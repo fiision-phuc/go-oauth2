@@ -19,16 +19,11 @@ const (
 const (
 	ENV_HOST = "HOST"
 	ENV_PORT = "PORT"
-
-	ENV_HEADERS_SIZE  = "headers_size" // In Kb
-	ENV_TIMEOUT_READ  = "timeout_read" // In seconds
-	ENV_TIMEOUT_WRITE = "timeout_wrte" // In seconds
-
-	ENV_ALLOW_METHODS  = "allow_methods"
-	ENV_STATIC_FOLDERS = "static_folders"
 )
 
 type Config struct {
+	Development bool `json:"development,omitempty"`
+
 	Host string `json:"HOST,omitempty"`
 	Port string `json:"PORT,omitempty"`
 
