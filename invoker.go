@@ -1,4 +1,4 @@
-package context
+package oauth2
 
 import (
 	"fmt"

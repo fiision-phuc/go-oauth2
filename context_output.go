@@ -1,9 +1,11 @@
-package context
+package oauth2
 
 import (
 	"encoding/json"
 	"net/http"
 	"text/template"
+
+	"github.com/phuc0302/go-oauth2/utils"
 )
 
 // OutputHeader return an additional header.
@@ -12,23 +14,23 @@ func (c *Context) OutputHeader(headerName string, headerValue string) {
 }
 
 // OutputError return an error json.
-func (c *Context) OutputError(status *Status) {
+func (c *Context) OutputError(status *utils.Status) {
 	c.response.Header().Set("Content-Type", "application/problem+json")
-	c.response.WriteHeader(status.Status)
+	c.response.WriteHeader(status.Code)
 
 	cause, _ := json.Marshal(status)
 	c.response.Write(cause)
 }
 
 // OutputRedirect return a redirect instruction.
-func (c *Context) OutputRedirect(status *Status, url string) {
-	http.Redirect(c.response, c.request, url, status.Status)
+func (c *Context) OutputRedirect(status *utils.Status, url string) {
+	http.Redirect(c.response, c.request, url, status.Code)
 }
 
 // OutputJSON return a json.
-func (c *Context) OutputJSON(status *Status, model interface{}) {
+func (c *Context) OutputJSON(status *utils.Status, model interface{}) {
 	c.response.Header().Set("Content-Type", "application/json")
-	c.response.WriteHeader(status.Status)
+	c.response.WriteHeader(status.Code)
 
 	data, _ := json.Marshal(model)
 	c.response.Write(data)
@@ -38,7 +40,7 @@ func (c *Context) OutputJSON(status *Status, model interface{}) {
 func (c *Context) OutputHTML(filePath string, model interface{}) {
 	tmpl, error := template.ParseFiles(filePath)
 	if error != nil {
-		c.OutputError(Status404())
+		c.OutputError(utils.Status404())
 	} else {
 		tmpl.Execute(c.response, model)
 	}

@@ -26,7 +26,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 		}
 	}
 	if !isAllowed {
-		context.OutputError(Status405())
+		context.OutputError(utils.Status405())
 		return
 	}
 
@@ -56,19 +56,19 @@ func (s *Server) serveRequest(context *Context) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 	isHandled := false
 	for _, route := range s.routes {
-		ok, pathParams := route.Match(context.Method, context.URLPath)
+		ok, pathQueries := route.Match(context.Method(), context.URLPath)
 		if !ok {
 			continue
 		}
 
-		context.Params.PathQueries = pathParams
+		context.PathQueries = pathQueries
 		route.InvokeHandler(context)
 		isHandled = true
 		break
 	}
 
 	if !isHandled {
-		context.OutputError(Status503())
+		context.OutputError(utils.Status503())
 	}
 }
 
@@ -77,7 +77,7 @@ func (s *Server) serveResource(context *Context, request *http.Request, response
 
 	/* Condition validation: Check if file exist or not */
 	if !utils.FileExisted(resourcePath) {
-		context.OutputError(Status404())
+		context.OutputError(utils.Status404())
 		return
 	}
 
@@ -86,14 +86,14 @@ func (s *Server) serveResource(context *Context, request *http.Request, response
 	defer file.Close()
 
 	if err != nil {
-		context.OutputError(Status404())
+		context.OutputError(utils.Status404())
 		return
 	}
 
 	/* Condition validation: Only serve file, not directory */
 	info, _ := file.Stat()
 	if info.IsDir() {
-		context.OutputError(Status403())
+		context.OutputError(utils.Status403())
 		return
 	}
 	http.ServeContent(response, request, resourcePath, info.ModTime(), file)

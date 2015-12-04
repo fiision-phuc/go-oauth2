@@ -112,7 +112,7 @@ func (s *Server) addRoute(method string, pattern string, handler interface{}) {
 	}
 
 	// Create new route
-	newRoute := createDefaultRoute(pattern)
+	newRoute := CreateDefaultRoute(pattern)
 	newRoute.AddHandler(method, handler)
 
 	// Add to collection

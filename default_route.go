@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
-	"strings"
 
 	"github.com/phuc0302/go-cocktail-di"
-	"github.com/phuc0302/go-oauth2/utils"
 )
 
 type DefaultRoute struct {
@@ -17,7 +15,7 @@ type DefaultRoute struct {
 }
 
 // MARK: Struct's constructors
-func createDefaultRoute(pattern string) *DefaultRoute {
+func CreateDefaultRoute(pattern string) *DefaultRoute {
 	regex := regexp.MustCompile(`:[^/#?()\.\\]+`)
 
 	// Convert param to regular expression
@@ -38,36 +36,6 @@ func (r *DefaultRoute) AddHandler(method string, handler interface{}) {
 	r.handlers[method] = handler
 }
 func (r *DefaultRoute) InvokeHandler(c *Context) {
-	switch c.request.Method {
-
-	case GET:
-		params := c.request.URL.Query()
-		if len(params) > 0 {
-			c.Params.Queries = params
-		}
-		break
-
-	case POST, PATCH:
-		contentType := strings.ToLower(c.request.Header.Get("CONTENT-TYPE"))
-
-		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-			params := utils.ParseForm(c.request)
-			if len(params) > 0 {
-				c.Params.Queries = params
-			}
-		} else if strings.Contains(contentType, "multipart/form-data") {
-			params := utils.ParseMultipartForm(c.request)
-
-			if len(params) > 0 {
-				c.Params.Queries = params
-			}
-		}
-		break
-
-	default:
-		break
-	}
-
 	injector := di.Injector()
 	handler := r.handlers[c.request.Method]
 

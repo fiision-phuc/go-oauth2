@@ -9,11 +9,11 @@ import (
 )
 
 func Test_CreateConfig(t *testing.T) {
-	isCreated := CreateConfigs()
+	config := CreateConfigs()
 	defer os.Remove("oauth2.cnf")
 
-	if !isCreated {
-		t.Errorf("Expected true but found %t", isCreated)
+	if config == nil {
+		t.Error("Expected config is not nil but found nil.")
 	}
 
 	if !utils.FileExisted("oauth2.cnf") {

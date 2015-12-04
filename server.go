@@ -22,23 +22,30 @@ func DefaultServer() *Server {
 	// Load configuration file
 	config := LoadConfigs()
 	if config == nil {
-		CreateConfigs()
-		config = LoadConfigs()
+		config = CreateConfigs()
 	}
 
 	// Create default server
-	return &Server{
+	server := &Server{
 		Config: config,
 
 		routes: make([]Route, 0),
 		groups: make([]string, 0),
 		logger: log.New(os.Stdout, "[OAuth2] ", 0),
 	}
+
+	// Pre-define oauth2 urls
+	grantAuthorization := new(GrantAuthorization)
+	grantToken := new(GrantToken)
+
+	server.Get("/auth", grantAuthorization.HandleForm)
+	server.Post("/token", grantToken.HandleForm)
+	return server
 }
 
 // Run will start server on http port.
 func (s *Server) Run() {
-	address := fmt.Sprintf("%s:%s", GetEnv(ENV_HOST), GetEnv(ENV_PORT))
+	address := fmt.Sprintf("%s:%s", s.Host, s.Port)
 	server := &http.Server{
 		Addr:           address,
 		ReadTimeout:    s.TimeoutRead * time.Second,

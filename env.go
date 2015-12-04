@@ -2,21 +2,24 @@ package oauth2
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
 // CreateConfigs persist all configuration to file.
-func CreateConfigs() bool {
+func CreateConfigs() *Config {
 	// Remove old file is existed
 	if utils.FileExisted("oauth2.cnf") {
 		os.Remove("oauth2.cnf")
 	}
 
-	host := GetEnv(ENV_HOST)
-	port := GetEnv(ENV_PORT)
+	host := GetEnv("HOST")
+	port := GetEnv("PORT")
 	if len(host) == 0 {
 		host = "localhost"
 	}
@@ -26,15 +29,20 @@ func CreateConfigs() bool {
 
 	// Create default config
 	config := Config{
-		Development:  true,
-		Host:         host,
-		Port:         port,
-		HeaderSize:   5,
-		TimeoutRead:  15,
-		TimeoutWrite: 15,
+		Development: true,
 
+		Host:          host,
+		Port:          port,
+		HeaderSize:    5,
+		TimeoutRead:   15,
+		TimeoutWrite:  15,
 		AllowMethods:  []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
 		StaticFolders: map[string]string{"/resources": "resources"},
+
+		Grant:             []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
+		DurationAccessToken:       3600,
+		DurationRefreshToken:      1209600,
+		DurationAuthorizationCode: 30,
 	}
 
 	// Create new file
@@ -43,7 +51,7 @@ func CreateConfigs() bool {
 	file.Write(configJSON)
 	file.Close()
 
-	return true
+	return &config
 }
 
 // LoadConfigs retrieve preset configuration file.
@@ -70,6 +78,9 @@ func LoadConfigs() *Config {
 		folders[utils.FormatPath(path)] = folder
 	}
 	config.StaticFolders = folders
+
+	//	regexp.MustCompile(`:[^/#?()\.\\]+`)
+	config.grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.Grant, "|")))
 	return &config
 }
 

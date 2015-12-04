@@ -1,11 +1,11 @@
-package oauth2
+package utils
 
 import "net/http"
 
 type Status struct {
-	Status           int    `json:"status,omitempty"`
-	Error            string `json:"error,omitempty"`
-	ErrorDescription string `json:"error_description,omitempty"`
+	Code        int    `json:"status,omitempty"`
+	Error       string `json:"error,omitempty"`
+	Description string `json:"error_description,omitempty"`
 
 	StackTrace interface{} `json:"stack_trace,omitempty"`
 }
@@ -57,6 +57,11 @@ func Status307() *Status {
 
 func Status400() *Status {
 	return genericStatus(http.StatusBadRequest)
+}
+func Status400WithDescription(description string) *Status {
+	status := genericStatus(http.StatusBadRequest)
+	status.Description = description
+	return status
 }
 func Status401() *Status {
 	return genericStatus(http.StatusUnauthorized)
@@ -171,15 +176,15 @@ func Status511() *Status {
 // MARK: Struct's private constructors
 func genericStatus(statusCode int) *Status {
 	return &Status{
-		Status:           statusCode,
-		Error:            http.StatusText(statusCode),
-		ErrorDescription: http.StatusText(statusCode),
+		Code:        statusCode,
+		Error:       http.StatusText(statusCode),
+		Description: http.StatusText(statusCode),
 	}
 }
 func specificStatus(statusCode int, title string) *Status {
 	return &Status{
-		Status:           statusCode,
-		Error:            title,
-		ErrorDescription: title,
+		Code:        statusCode,
+		Error:       title,
+		Description: title,
 	}
 }

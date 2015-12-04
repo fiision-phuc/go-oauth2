@@ -1,6 +1,9 @@
 package utils
 
-import "testing"
+import (
+	"net/url"
+	"testing"
+)
 
 type TestStruct struct {
 	ValueString string  `inject:"string"`
@@ -23,13 +26,13 @@ func Test_BindForm(t *testing.T) {
 		t.Error("Expected error return when sending non struct type.")
 	}
 
-	values := map[string]interface{}{
-		"string":      "A String",
-		"bool":        "FaLSE",
-		"float":       "1234.94502",
-		"int":         "-100",
-		"uint":        "200",
-		"invalid_int": "abcdef",
+	values := url.Values{
+		"string":      []string{"A String"},
+		"bool":        []string{"FaLSE"},
+		"float":       []string{"1234.94502"},
+		"int":         []string{"-100"},
+		"uint":        []string{"200"},
+		"invalid_int": []string{"abcdef"},
 	}
 	testStruct := TestStruct{}
 	err = BindForm(values, &testStruct)

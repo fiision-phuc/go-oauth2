@@ -11,6 +11,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/phuc0302/go-oauth2/utils"
 )
 
 var (
@@ -60,7 +62,7 @@ func RecoveryRequest(c *Context) {
 			Trace: callStack(3),
 
 			Body: &log_body{
-				ContentType:   c.Headers.Get("Content-Type"),
+				ContentType:   c.Header("Content-Type"),
 				RequestBody:   c.Queries,
 				RequestParams: c.PathQueries,
 			},
@@ -73,18 +75,18 @@ func RecoveryRequest(c *Context) {
 		}
 
 		// Define status error
-		var httpError *Status
-		if status, ok := reflect.ValueOf(err).Interface().(Status); ok {
+		var httpError *utils.Status
+		if status, ok := reflect.ValueOf(err).Interface().(utils.Status); ok {
 			httpError = &status
 		} else {
-			httpError = Status500()
-			httpError.ErrorDescription = fmt.Sprintf("%s", err)
+			httpError = utils.Status500()
+			httpError.Description = fmt.Sprintf("%s", err)
 		}
 
 		// Should include stack trace or not
-//		if Development {
-			httpError.StackTrace = log
-//		}
+		//		if Development {
+		httpError.StackTrace = log
+		//		}
 
 		c.OutputError(httpError)
 	}

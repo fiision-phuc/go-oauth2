@@ -10,7 +10,7 @@ import (
 )
 
 /** Bind data into form object. */
-func BindForm(values map[string]interface{}, inputForm interface{}) error {
+func BindForm(values url.Values, inputForm interface{}) error {
 	/* Condition validation */
 	if values == nil || inputForm == nil {
 		return fmt.Errorf("Input must not be nil.")
@@ -33,7 +33,7 @@ func BindForm(values map[string]interface{}, inputForm interface{}) error {
 
 		if property.CanSet() && len(propertyTag) != 0 {
 			propertyType := property.Type()
-			data := values[propertyTag]
+			data := values.Get(propertyTag)
 
 			dataType := reflect.TypeOf(data)
 			value := reflect.ValueOf(data)
@@ -100,11 +100,9 @@ func ParseMultipartForm(request *http.Request) url.Values {
 	if err != nil {
 		panic(err)
 	}
-
-	// request.URL.Query()
 	params := url.Values(request.MultipartForm.Value)
-	for k, v := range request.URL.Query() {
-		params[k] = v
-	}
+	//	for k, v := range request.URL.Query() {
+	//		params[k] = v
+	//	}
 	return params
 }
