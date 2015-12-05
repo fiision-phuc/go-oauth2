@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -407,17 +406,52 @@ func Test_PasswordGrantFlow(t *testing.T) {
 }
 
 func Test_RefreshGrantFlow(t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "something failed", http.StatusInternalServerError)
+	defer os.Remove("oauth2.cnf")
+	store := createStore()
+	config := LoadConfigs()
+	controller := CreateGrantToken(config, store)
+	templateError := "Invalid %s parameter."
+	templateErrorMessage := "Expected \"Invalid %s parameter.\" but found \"%s\""
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := CreateRequestContext(r, w)
+		controller.HandleForm(context)
+	}))
+	defer ts.Close()
+
+	// Send first request to get refresh token
+	response, _ := http.PostForm(ts.URL, url.Values{
+		"grant_type":    []string{PasswordGrant},
+		"client_id":     []string{store.clients[0].ClientID},
+		"client_secret": []string{store.clients[0].ClientSecret},
+		"username":      []string{"admin"},
+		"password":      []string{"admin"},
+	})
+	token1 := parseResult(response)
+
+	// Test missing refresh_token
+	response, _ = http.PostForm(ts.URL, url.Values{
+		"grant_type":    []string{RefreshTokenGrant},
+		"client_id":     []string{store.clients[0].ClientID},
+		"client_secret": []string{store.clients[0].ClientSecret},
+	})
+	status := parseError(response)
+	if status.Description != fmt.Sprintf(templateError, "refresh_token") {
+		t.Errorf(templateErrorMessage, "refresh_token", status.Description)
 	}
 
-	req, err := http.NewRequest("GET", "http://example.com/foo", nil)
-	if err != nil {
-		log.Fatal(err)
+	// Send valid request
+	response, _ = http.PostForm(ts.URL, url.Values{
+		"grant_type":    []string{RefreshTokenGrant},
+		"client_id":     []string{store.clients[0].ClientID},
+		"client_secret": []string{store.clients[0].ClientSecret},
+		"refresh_token": []string{token1.RefreshToken},
+	})
+	token2 := parseResult(response)
+	if token2.AccessToken == token1.AccessToken {
+		t.Errorf("Expect new access token but found %s", token1.AccessToken)
 	}
-
-	w := httptest.NewRecorder()
-	handler(w, req)
-
-	fmt.Printf("%d - %s", w.Code, w.Body.String())
+	if token2.RefreshToken == token1.RefreshToken {
+		t.Errorf("Expect new refresh token but found %s", token1.RefreshToken)
+	}
 }
