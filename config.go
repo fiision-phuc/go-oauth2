@@ -29,22 +29,6 @@ const (
 	RefreshTokenGrant      = "refresh_token"      // Should allow refresh token or not
 )
 
-// Define keywords for oauth2.0 elements.
-//const (
-//	AccessToken  = "access_token"
-//	ClientID     = "client_id"
-//	ClientSecret = "client_secret"
-//	Code         = "code"
-//	GrantType    = "grant_type"
-//	Password     = "password"
-//	RedirectURI  = "redirect_uri"
-//	RefreshToken = "refresh_token"
-//	ResponseType = "response_type"
-//	Scope        = "scope"
-//	State        = "state"
-//	Username     = "username"
-//)
-
 // Config struct descripts a configuration  object  that  will  be  used  during
 // application life time.
 type Config struct {
@@ -63,6 +47,7 @@ type Config struct {
 	DurationRefreshToken      time.Duration `json:"duration_refresh_token,omitempty"`      // In seconds
 	DurationAuthorizationCode time.Duration `json:"duration_authorization_code,omitempty"` // In seconds
 
-	clientValidation *regexp.Regexp `json:"-"`
-	grantsValidation *regexp.Regexp `json:"-"`
+	clientValidation  *regexp.Regexp `json:"-"`
+	grantsValidation  *regexp.Regexp `json:"-"`
+	allowRefreshToken bool           `json:"-"`
 }

@@ -19,16 +19,9 @@ type Server struct {
 
 // DefaultServer create a server object with preset config.
 func DefaultServer() *Server {
-	// Load configuration file
 	config := LoadConfigs()
-	if config == nil {
-		config = CreateConfigs()
-	}
-
-	// Create default server
 	server := &Server{
 		Config: config,
-
 		routes: make([]Route, 0),
 		groups: make([]string, 0),
 		logger: log.New(os.Stdout, "[OAuth2] ", 0),

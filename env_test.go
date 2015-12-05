@@ -9,7 +9,7 @@ import (
 )
 
 func Test_CreateConfig(t *testing.T) {
-	config := CreateConfigs()
+	config := LoadConfigs()
 	defer os.Remove("oauth2.cnf")
 
 	if config == nil {
@@ -24,12 +24,10 @@ func Test_CreateConfig(t *testing.T) {
 func Test_LoadConfig(t *testing.T) {
 	defer os.Remove("oauth2.cnf")
 	config := LoadConfigs()
-	if config != nil {
-		t.Errorf("Expected return nil when oauth2.cnf is not available.")
-	}
 
-	CreateConfigs()
-	config = LoadConfigs()
+	if config == nil {
+		t.Errorf("Expected not nil when oauth2.cnf is not available.")
+	}
 
 	allowMethods := []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK}
 	if !reflect.DeepEqual(allowMethods, config.AllowMethods) {

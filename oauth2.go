@@ -7,19 +7,7 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////
-// Access Token																  //
-////////////////////////////////////////////////////////////////////////////////
-type AccessToken struct {
-	TokenID     bson.ObjectId `bson:"_id,omitempty" json:"-"`
-	UserID      bson.ObjectId `bson:"user_id,omitempty" json:"-"`
-	ClientID    bson.ObjectId `bson:"client_id,omitempty" json:"-"`
-	AccessToken string        `bson:"access_token,omitempty" json:"access_token,omitempty"`
-	CreatedTime time.Time     `bson:"created_time,omitempty" json:"-"`
-	ExpiredTime time.Time     `bson:"expired_time,omitempty" json:"-"`
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Access Token																  //
+// Client																	  //
 ////////////////////////////////////////////////////////////////////////////////
 type Client struct {
 	ClientID     string   `bson:"_id,omitempty" json:"client_id,omitempty" inject:"client_id"`
@@ -31,7 +19,7 @@ type Client struct {
 	RedirectURI string `bson:"-" json:"redirect_uri,omitempty" inject:"redirect_uri"`
 }
 
-func createClient(c *Context) *Client {
+func createClient(c *RequestContext) *Client {
 	client := Client{}
 	c.BindForm(&client)
 
@@ -47,19 +35,33 @@ func createClient(c *Context) *Client {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Access Token																  //
+// Token																	  //
 ////////////////////////////////////////////////////////////////////////////////
-type RefreshToken struct {
-	TokenID      bson.ObjectId `bson:"_id,omitempty"`
-	UserID       bson.ObjectId `bson:"user_id,omitempty"`
-	ClientID     bson.ObjectId `bson:"client_id,omitempty"`
-	RefreshToken string        `bson:"refresh_token,omitempty"`
-	CreatedTime  time.Time     `bson:"created_time,omitempty"`
-	ExpiredTime  time.Time     `bson:"expired_time,omitempty"`
+type Token struct {
+	TokenID     bson.ObjectId `bson:"_id,omitempty"`
+	UserID      bson.ObjectId `bson:"user_id,omitempty"`
+	ClientID    string        `bson:"client_id,omitempty"`
+	Token       string        `bson:"token,omitempty"`
+	CreatedTime time.Time     `bson:"created_time,omitempty"`
+	ExpiredTime time.Time     `bson:"expired_time,omitempty"`
+}
+
+func (t *Token) isExpired() bool {
+	return time.Now().Unix() >= t.ExpiredTime.Unix()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Access Token																  //
+// Token Response															  //
+////////////////////////////////////////////////////////////////////////////////
+type TokenResponse struct {
+	TokenType    string `json:"token_type,omitempty"`
+	AccessToken  string `json:"access_token,omitempty"`
+	ExpiresIn    int64  `json:"expires_in,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// User     																  //
 ////////////////////////////////////////////////////////////////////////////////
 type User struct {
 	UserID   bson.ObjectId `bson:"_id,omitempty" json:"user_id,omitempty"`

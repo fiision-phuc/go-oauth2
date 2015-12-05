@@ -52,7 +52,7 @@ func RecoveryInternal(logger *log.Logger) {
 		logger.Println(string(cause))
 	}
 }
-func RecoveryRequest(c *Context) {
+func RecoveryRequest(c *RequestContext) {
 	if err := recover(); err != nil {
 		log := log_message{
 			Uri:         c.URLPath,

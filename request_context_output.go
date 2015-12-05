@@ -9,12 +9,12 @@ import (
 )
 
 // OutputHeader return an additional header.
-func (c *Context) OutputHeader(headerName string, headerValue string) {
+func (c *RequestContext) OutputHeader(headerName string, headerValue string) {
 	c.response.Header().Set(headerName, headerValue)
 }
 
 // OutputError return an error json.
-func (c *Context) OutputError(status *utils.Status) {
+func (c *RequestContext) OutputError(status *utils.Status) {
 	c.response.Header().Set("Content-Type", "application/problem+json")
 	c.response.WriteHeader(status.Code)
 
@@ -23,12 +23,12 @@ func (c *Context) OutputError(status *utils.Status) {
 }
 
 // OutputRedirect return a redirect instruction.
-func (c *Context) OutputRedirect(status *utils.Status, url string) {
+func (c *RequestContext) OutputRedirect(status *utils.Status, url string) {
 	http.Redirect(c.response, c.request, url, status.Code)
 }
 
 // OutputJSON return a json.
-func (c *Context) OutputJSON(status *utils.Status, model interface{}) {
+func (c *RequestContext) OutputJSON(status *utils.Status, model interface{}) {
 	c.response.Header().Set("Content-Type", "application/json")
 	c.response.WriteHeader(status.Code)
 
@@ -37,7 +37,7 @@ func (c *Context) OutputJSON(status *utils.Status, model interface{}) {
 }
 
 // OutputHTML will render a html page.
-func (c *Context) OutputHTML(filePath string, model interface{}) {
+func (c *RequestContext) OutputHTML(filePath string, model interface{}) {
 	tmpl, error := template.ParseFiles(filePath)
 	if error != nil {
 		c.OutputError(utils.Status404())

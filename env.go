@@ -12,7 +12,7 @@ import (
 )
 
 // CreateConfigs persist all configuration to file.
-func CreateConfigs() *Config {
+func CreateConfigs() {
 	// Remove old file is existed
 	if utils.FileExisted("oauth2.cnf") {
 		os.Remove("oauth2.cnf")
@@ -39,7 +39,7 @@ func CreateConfigs() *Config {
 		AllowMethods:  []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
 		StaticFolders: map[string]string{"/resources": "resources"},
 
-		Grant:             []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
+		Grant:                     []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
 		DurationAccessToken:       3600,
 		DurationRefreshToken:      1209600,
 		DurationAuthorizationCode: 30,
@@ -50,14 +50,12 @@ func CreateConfigs() *Config {
 	file, _ := os.Create("oauth2.cnf")
 	file.Write(configJSON)
 	file.Close()
-
-	return &config
 }
 
 // LoadConfigs retrieve preset configuration file.
 func LoadConfigs() *Config {
 	if !utils.FileExisted("oauth2.cnf") {
-		return nil
+		CreateConfigs()
 	}
 
 	file, err := os.Open("oauth2.cnf")
@@ -79,8 +77,20 @@ func LoadConfigs() *Config {
 	}
 	config.StaticFolders = folders
 
+	// Convert duration to seconds
+	config.DurationAccessToken = config.DurationAccessToken * 999999999
+	config.DurationRefreshToken = config.DurationRefreshToken * 999999999
+	config.DurationAuthorizationCode = config.DurationAuthorizationCode * 999999999
+
+	// Define regular expressions
 	//	regexp.MustCompile(`:[^/#?()\.\\]+`)
 	config.grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.Grant, "|")))
+	for _, grant := range config.Grant {
+		if grant == RefreshTokenGrant {
+			config.allowRefreshToken = true
+			break
+		}
+	}
 	return &config
 }
 

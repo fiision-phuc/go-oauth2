@@ -8,24 +8,24 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-// Context represent a request scope.
-type Context struct {
+// RequestContext represent a request scope.
+type RequestContext struct {
 	URLPath     string
 	Queries     url.Values
 	PathQueries map[string]string
 
 	AuthUser         *User
 	AuthClient       *Client
-	AuthAccessToken  *AccessToken
-	AuthRefreshToken *RefreshToken
+	AuthAccessToken  *Token
+	AuthRefreshToken *Token
 
 	request  *http.Request
 	response http.ResponseWriter
 }
 
 // CreateContext return a default context.
-func CreateContext(request *http.Request, response http.ResponseWriter) *Context {
-	context := &Context{
+func CreateRequestContext(request *http.Request, response http.ResponseWriter) *RequestContext {
+	context := &RequestContext{
 		URLPath:  request.URL.Path,
 		request:  request,
 		response: response,

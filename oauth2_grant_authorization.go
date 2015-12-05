@@ -26,7 +26,7 @@ func CreateAuthorizationGrantController(oauth2Config *Config) *GrantAuthorizatio
  * @param  {Function} done
  * @this   OAuth
  */
-func (a *GrantAuthorization) HandleForm(c *Context) {
+func (a *GrantAuthorization) HandleForm(c *RequestContext) {
 	client := createClient(c)
 	values := c.Queries
 	/* Condition validation: Validate client_id */

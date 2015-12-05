@@ -4,7 +4,7 @@ type Route interface {
 	/** Add handler to route. */
 	AddHandler(method string, handler interface{})
 	/** Invoke handler. */
-	InvokeHandler(c *Context)
+	InvokeHandler(c *RequestContext)
 
 	/** Look up matched url path. */
 	GetPattern() string

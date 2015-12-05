@@ -11,7 +11,7 @@ import (
 var bearerRegex = regexp.MustCompile("^Bearer\\s(\\w+)$")
 
 // getBearerToken extract token from request according to RFC6750
-func (c *Context) getBearerToken() string {
+func (c *RequestContext) getBearerToken() string {
 	headerToken := strings.Trim(c.Header("Authorization"), " ")
 	//	getToken := c.Queries.Get(AccessToken)
 	//	postToken := this.req.body ? this.req.body.access_token : undefined;
@@ -48,7 +48,7 @@ func (c *Context) getBearerToken() string {
  * @param  {Function} done
  * @this   OAuth
  */
-func (c *Context) checkToken() {
+func (c *RequestContext) checkToken() {
 	// var self = this;
 	accessToken := c.getBearerToken()
 	// this.model.getAccessToken(this.bearerToken, function (err, token) {

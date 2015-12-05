@@ -26,7 +26,7 @@ func CreateGrantToken(config *Config, store Store) *GrantToken {
 }
 
 // MARK: Struct's public functions
-func (g *GrantToken) HandleForm(c *Context) {
+func (g *GrantToken) HandleForm(c *RequestContext) {
 	err := g.validateForm(c)
 	if err != nil {
 		c.OutputError(err)
@@ -36,11 +36,11 @@ func (g *GrantToken) HandleForm(c *Context) {
 }
 
 // MARK: Struct's private functions
-func (g *GrantToken) validateForm(c *Context) *utils.Status {
+func (g *GrantToken) validateForm(c *RequestContext) *utils.Status {
 	queryClient := createClient(c)
 
 	/* Condition validation: Validate grant_type */
-	if len(queryClient.GrantType) == 0 || !g.config.grantsValidation.MatchString(queryClient.GrantType) {
+	if !(len(queryClient.GrantType) >= 0 && g.config.grantsValidation.MatchString(queryClient.GrantType)) {
 		return utils.Status400WithDescription("Invalid grant_type parameter.")
 	}
 
@@ -100,7 +100,7 @@ func (g *GrantToken) validateForm(c *Context) *utils.Status {
 	return nil
 }
 
-func (t *GrantToken) handleAuthorizationCodeGrant(c *Context, values url.Values, client *Client) {
+func (t *GrantToken) handleAuthorizationCodeGrant(c *RequestContext, values url.Values, client *Client) {
 	//	/* Condition validation: Validate redirect_uri */
 	//	if len(queryClient.RedirectURI) == 0 {
 	//		err := utils.Status400WithDescription("Missing redirect_uri parameter.")
@@ -173,7 +173,7 @@ func (t *GrantToken) handleClientCredentialsGrant() {
 	// });
 }
 
-func (g *GrantToken) usePasswordFlow(c *Context) *utils.Status {
+func (g *GrantToken) usePasswordFlow(c *RequestContext) *utils.Status {
 	queryUser := User{}
 	c.BindForm(&queryUser)
 
@@ -192,7 +192,7 @@ func (g *GrantToken) usePasswordFlow(c *Context) *utils.Status {
 	return nil
 }
 
-func (g *GrantToken) useRefreshTokenFlow(c *Context) *utils.Status {
+func (g *GrantToken) useRefreshTokenFlow(c *RequestContext) *utils.Status {
 	/* Condition validation: Validate refresh_token parameter */
 	queryToken := c.Queries.Get("refresh_token")
 	if len(queryToken) == 0 {
@@ -211,146 +211,78 @@ func (g *GrantToken) useRefreshTokenFlow(c *Context) *utils.Status {
 	c.AuthAccessToken = g.store.FindAccessTokenWithCredential(recordToken.ClientID, recordToken.UserID)
 	c.AuthUser = g.store.FindUserWithID(recordToken.UserID)
 	c.AuthRefreshToken = recordToken
+	now := time.Now()
 
 	// Update access token
-	c.AuthAccessToken.AccessToken = utils.GenerateToken()
-	c.AuthAccessToken.CreatedTime = time.Now()
-	c.AuthAccessToken.ExpiredTime = c.AuthAccessToken.CreatedTime.Add(g.config.DurationAccessToken)
-
+	c.AuthAccessToken.Token = utils.GenerateToken()
+	c.AuthAccessToken.CreatedTime = now
+	c.AuthAccessToken.ExpiredTime = now.Add(g.config.DurationAccessToken)
 	g.store.SaveAccessToken(c.AuthAccessToken)
+
+	// Update refresh token
+	c.AuthRefreshToken.Token = utils.GenerateToken()
+	c.AuthRefreshToken.CreatedTime = now
+	c.AuthRefreshToken.ExpiredTime = now.Add(g.config.DurationRefreshToken)
+	g.store.SaveRefreshToken(c.AuthRefreshToken)
+
 	return nil
 }
 
-/**
- * Generate an access token
- *
- * @param  {Function} done
- * @this   OAuth
- */
-func (g *GrantToken) GenerateAccessToken() string {
-	return utils.GenerateToken()
-}
+func (g *GrantToken) finalizeToken(c *RequestContext) {
+	now := time.Now()
 
-/**
- * Save access token with model
- *
- * @param  {Function} done
- * @this   OAuth
- */
-func (g *GrantToken) SaveAccessToken() {
-	// var accessToken = this.accessToken;
-
-	// // Object idicates a reissue
-	// if (typeof accessToken === 'object' && accessToken.accessToken) {
-	//   this.accessToken = accessToken.accessToken;
-	//   return done();
-	// }
-
-	// var expires = null;
-	// if (this.config.accessTokenLifetime !== null) {
-	//   expires = new Date(this.now);
-	//   expires.setSeconds(expires.getSeconds() + this.config.accessTokenLifetime);
-	// }
-
-	// this.model.saveAccessToken(accessToken, this.client.clientId, expires,
-	//     this.user, function (err) {
-	//   if (err) return done(error('server_error', false, err));
-	//   done();
-	// });
-}
-
-/**
- * Generate a refresh token
- *
- * @param  {Function} done
- * @this   OAuth
- */
-func (g *GrantToken) GenerateRefreshToken() string {
-	// if (this.config.grants.indexOf('refresh_token') === -1) return done();
-	return utils.GenerateToken()
-}
-
-/**
- * Save refresh token with model
- *
- * @param  {Function} done
- * @this   OAuth
- */
-func (g *GrantToken) SaveRefreshToken() {
-	// var refreshToken = this.refreshToken;
-
-	// if (!refreshToken) return done();
-
-	// // Object idicates a reissue
-	// if (typeof refreshToken === 'object' && refreshToken.refreshToken) {
-	//   this.refreshToken = refreshToken.refreshToken;
-	//   return done();
-	// }
-
-	// var expires = null;
-	// if (this.config.refreshTokenLifetime !== null) {
-	//   expires = new Date(this.now);
-	//   expires.setSeconds(expires.getSeconds() + this.config.refreshTokenLifetime);
-	// }
-
-	// this.model.saveRefreshToken(refreshToken, this.client.clientId, expires,
-	//     this.user, function (err) {
-	//   if (err) return done(error('server_error', false, err));
-	//   done();
-	// });
-}
-
-/**
- * Create an access token and save it with the model
- *
- * @param  {Function} done
- * @this   OAuth
- */
-func (g *GrantToken) finalizeToken(c *Context) {
 	// Generate access token if neccessary
 	if c.AuthAccessToken == nil {
-		accessToken := AccessToken{
-			TokenID:     bson.NewObjectId(),
-			UserID:      c.AuthUser.UserID,
-			ClientID:    c.AuthClient.ClientID,
-			AccessToken: utils.GenerateToken(),
-			CreatedTime: time.Now(),
+		accessToken := g.store.FindAccessTokenWithCredential(c.AuthClient.ClientID, c.AuthUser.UserID)
+		if accessToken != nil && accessToken.isExpired() {
+			g.store.DeleteAccessToken(accessToken)
+			accessToken = nil
 		}
-		accessToken.ExpiredTime = accessToken.CreatedTime.Add(g.config.DurationAccessToken)
 
-		g.store.SaveAccessToken(accessToken)
+		if accessToken == nil {
+			accessToken = &Token{
+				TokenID:     bson.NewObjectId(),
+				UserID:      c.AuthUser.UserID,
+				ClientID:    c.AuthClient.ClientID,
+				Token:       utils.GenerateToken(),
+				CreatedTime: now,
+			}
+			accessToken.ExpiredTime = now.Add(g.config.DurationAccessToken)
+			g.store.SaveAccessToken(accessToken)
+		}
 		c.AuthAccessToken = accessToken
 	}
 
 	// Generate refresh token if neccessary
-	if c.AuthRefreshToken == nil {
-		refreshToken := RefreshToken{
-			TokenID:      bson.NewObjectId(),
-			UserID:       c.AuthUser.UserID,
-			ClientID:     c.AuthClient.ClientID,
-			RefreshToken: utils.GenerateToken(),
-			CreatedTime:  time.Now(),
+	if g.config.allowRefreshToken && c.AuthRefreshToken == nil {
+		refreshToken := g.store.FindRefreshTokenWithCredential(c.AuthClient.ClientID, c.AuthUser.UserID)
+		if refreshToken != nil && refreshToken.isExpired() {
+			g.store.DeleteRefreshToken(refreshToken)
+			refreshToken = nil
 		}
-		refreshToken.ExpiredTime = refreshToken.CreatedTime.Add(g.config.DurationRefreshToken)
 
-		g.store.SaveRefreshToken(refreshToken)
+		if refreshToken == nil {
+			refreshToken = &Token{
+				TokenID:     bson.NewObjectId(),
+				UserID:      c.AuthUser.UserID,
+				ClientID:    c.AuthClient.ClientID,
+				Token:       utils.GenerateToken(),
+				CreatedTime: now,
+			}
+			refreshToken.ExpiredTime = now.Add(g.config.DurationRefreshToken)
+			g.store.SaveRefreshToken(refreshToken)
+		}
 		c.AuthRefreshToken = refreshToken
 	}
 
-	// var response = {
-	//   token_type: 'bearer',
-	//   access_token: this.accessToken
-	// };
+	tokenResponse := &TokenResponse{
+		TokenType:   "Bearer",
+		AccessToken: c.AuthAccessToken.Token,
+		ExpiresIn:   c.AuthAccessToken.ExpiredTime.Unix() - time.Now().Unix(),
+	}
 
-	// if (this.config.accessTokenLifetime !== null) {
-	//   response.expires_in = this.config.accessTokenLifetime;
-	// }
-
-	// if (this.refreshToken) response.refresh_token = this.refreshToken;
-
-	// this.res.set({'Cache-Control': 'no-store', 'Pragma': 'no-cache'});
-	// this.res.jsonp(response);
-
-	// if (this.config.continueAfterResponse)
-	//   done();
+	if g.config.allowRefreshToken {
+		tokenResponse.RefreshToken = c.AuthRefreshToken.Token
+	}
+	c.OutputJSON(utils.Status200(), tokenResponse)
 }
