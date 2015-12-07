@@ -1,71 +1,79 @@
 package oauth2
 
-import (
-	"time"
+import "time"
 
-	"gopkg.in/mgo.v2/bson"
-)
+// AuthClient descripts an authenticated client.
+type AuthClient interface {
+	GetClientID() string
+	GetClientSecret() string
 
-////////////////////////////////////////////////////////////////////////////////
-// Client																	  //
-////////////////////////////////////////////////////////////////////////////////
-type Client struct {
-	ClientID     string   `bson:"_id,omitempty" json:"client_id,omitempty" inject:"client_id"`
-	ClientSecret string   `bson:"secret,omitempty" json:"client_secret,omitempty" inject:"client_secret"`
-	GrantTypes   []string `bson:"grant_types,omitempty" json:"-"`
-	RedirectURIs []string `bson:"redirect_uris,omitempty" json:"-"`
-
-	GrantType   string `bson:"-" json:"grant_type,omitempty" inject:"grant_type"`
-	RedirectURI string `bson:"-" json:"redirect_uri,omitempty" inject:"redirect_uri"`
+	GetGrantType() string      // Client side only
+	GetRedirectURI() string    // Client side only
+	GetGrantTypes() []string   // Server side only
+	GetRedirectURIs() []string // Server side only
 }
 
-func createClient(c *RequestContext) *Client {
-	client := Client{}
-	c.BindForm(&client)
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if len(client.ClientID) == 0 || len(client.ClientSecret) == 0 {
-		username, password, ok := c.BasicAuth()
+// AuthUser descripts an authenticated user.
+type AuthUser interface {
+	GetUserID() string
+	GetUsername() string
+	GetPassword() string
 
-		if ok {
-			client.ClientID = username
-			client.ClientSecret = password
-		}
-	}
-	return &client
+	GetUserRoles() []string
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Token																	  //
-////////////////////////////////////////////////////////////////////////////////
-type Token struct {
-	TokenID     bson.ObjectId `bson:"_id,omitempty"`
-	UserID      bson.ObjectId `bson:"user_id,omitempty"`
-	ClientID    string        `bson:"client_id,omitempty"`
-	Token       string        `bson:"token,omitempty"`
-	CreatedTime time.Time     `bson:"created_time,omitempty"`
-	ExpiredTime time.Time     `bson:"expired_time,omitempty"`
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Token descripts a token, it can be either access token or refresh token.
+type Token interface {
+	GetClientID() string
+	GetUserID() string
+
+	GetToken() string
+	SetToken(token string)
+
+	IsExpired() bool
+
+	GetCreatedTime() time.Time
+	SetCreatedTime(createdTime time.Time)
+
+	GetExpiredTime() time.Time
+	SetExpiredTime(expiredTime time.Time)
 }
 
-func (t *Token) isExpired() bool {
-	return time.Now().Unix() >= t.ExpiredTime.Unix()
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+// TokenStore descripts a token storage.
+type TokenStore interface {
+
+	// User
+	FindUserWithID(userID string) AuthUser
+	FindUserWithClient(clientID string, clientSecret string) AuthUser
+	FindUserWithCredential(username string, password string) AuthUser
+
+	// Client
+	FindClientWithCredential(clientID string, clientSecret string) AuthClient
+
+	// Token
+	FindToken(accessToken string) Token
+	FindTokenWithCredential(clientID string, userID string) Token
+	CreateToken(clientID string, userID string, token string, createdTime time.Time, expiredTime time.Time) Token
+	DeleteToken(accessToken Token)
+	SaveToken(accessToken Token)
+
+	//	// Authorization code
+	//	FindAuthorizationCode(authorizationCode string)
+	//	SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Token Response															  //
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+// TokenResponse descripts a granted response that will be returned to client.
 type TokenResponse struct {
 	TokenType    string `json:"token_type,omitempty"`
 	AccessToken  string `json:"access_token,omitempty"`
 	ExpiresIn    int64  `json:"expires_in,omitempty"`
 	RefreshToken string `json:"refresh_token,omitempty"`
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// User     																  //
-////////////////////////////////////////////////////////////////////////////////
-type User struct {
-	UserID   bson.ObjectId `bson:"_id,omitempty" json:"user_id,omitempty"`
-	Username string        `bson:"username,omitempty" json:"username,omitempty" inject:"username"`
-	Password string        `bson:"password,omitempty" json:"password,omitempty" inject:"password"`
-	Roles    []string      `bson:"roles,omitempty" json:"roles,omitempty"`
 }

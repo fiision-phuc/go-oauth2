@@ -26,58 +26,58 @@ var clientID = bson.NewObjectId()
 var createdTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
 
 type InMemoryStore struct {
-	users         []User
-	clients       []Client
+	users         []AuthUserDefault
+	clients       []AuthClientDefault
 	accessTokens  []Token
-	refreshTokens []Token
+	refreshTokens []TokenDefault
 }
 
 func createStore() *InMemoryStore {
 	return &InMemoryStore{
-		users: []User{
-			User{
+		users: []AuthUserDefault{
+			AuthUserDefault{
 				UserID:   bson.NewObjectId(),
 				Username: "admin",
 				Password: "admin",
 			},
-			User{
+			AuthUserDefault{
 				UserID:   userID,
 				Username: "admin2",
 				Password: "admin2",
 			},
 		},
-		clients: []Client{
-			Client{
+		clients: []AuthClientDefault{
+			AuthClientDefault{
 				ClientID:     bson.NewObjectId().Hex(),
 				ClientSecret: bson.NewObjectId().Hex(),
 				GrantTypes:   []string{PasswordGrant, RefreshTokenGrant},
 				RedirectURIs: []string{"http://sample01.com", "http://sample02.com"},
 			},
 		},
-		accessTokens: []Token{
-			Token{
+		accessTokens: []TokenDefault{
+			TokenDefault{
 				TokenID:     bson.NewObjectId(),
 				UserID:      userID,
 				ClientID:    clientID.Hex(),
 				Token:       utils.GenerateToken(),
 				CreatedTime: createdTime,
-				ExpiredTime: createdTime.Add(3600 * 999999999),
+				ExpiredTime: createdTime.Add(3600 * time.Second),
 			},
 		},
-		refreshTokens: []Token{
-			Token{
+		refreshTokens: []TokenDefault{
+			TokenDefault{
 				TokenID:     bson.NewObjectId(),
 				UserID:      userID,
 				ClientID:    clientID.Hex(),
 				Token:       utils.GenerateToken(),
 				CreatedTime: createdTime,
-				ExpiredTime: createdTime.Add(1209600 * 999999999),
+				ExpiredTime: createdTime.Add(1209600 * time.Second),
 			},
 		},
 	}
 }
 
-func (s *InMemoryStore) FindUserWithID(userID bson.ObjectId) *User {
+func (s *InMemoryStore) FindUserWithID(userID bson.ObjectId) *AuthUserDefault {
 	for _, user := range s.users {
 		if user.UserID == userID {
 			return &user
@@ -85,7 +85,10 @@ func (s *InMemoryStore) FindUserWithID(userID bson.ObjectId) *User {
 	}
 	return nil
 }
-func (s *InMemoryStore) FindUserWithCredential(username string, password string) *User {
+func (s *InMemoryStore) FindUserWithClient(clientID string, clientSecret string) *AuthUserDefault {
+	return nil
+}
+func (s *InMemoryStore) FindUserWithCredential(username string, password string) *AuthUserDefault {
 	for _, user := range s.users {
 		if user.Username == username && user.Password == password {
 			return &user
@@ -94,7 +97,7 @@ func (s *InMemoryStore) FindUserWithCredential(username string, password string)
 	return nil
 }
 
-func (s *InMemoryStore) FindClientWithCredential(clientID string, clientSecret string) *Client {
+func (s *InMemoryStore) FindClientWithCredential(clientID string, clientSecret string) *AuthClientDefault {
 	for _, client := range s.clients {
 		if client.ClientID == clientID && client.ClientSecret == clientSecret {
 			return &client
@@ -103,7 +106,7 @@ func (s *InMemoryStore) FindClientWithCredential(clientID string, clientSecret s
 	return nil
 }
 
-func (s *InMemoryStore) FindAccessToken(accessToken string) *Token {
+func (s *InMemoryStore) FindToken(accessToken string) Token {
 	for _, token := range s.accessTokens {
 		if token.Token == accessToken {
 			return &token
@@ -111,7 +114,7 @@ func (s *InMemoryStore) FindAccessToken(accessToken string) *Token {
 	}
 	return nil
 }
-func (s *InMemoryStore) FindAccessTokenWithCredential(clientID string, userID bson.ObjectId) *Token {
+func (s *InMemoryStore) FindTokenWithCredential(clientID string, userID bson.ObjectId) Token {
 	for _, token := range s.accessTokens {
 		if token.UserID == userID && token.ClientID == clientID {
 			return &token
@@ -119,7 +122,10 @@ func (s *InMemoryStore) FindAccessTokenWithCredential(clientID string, userID bs
 	}
 	return nil
 }
-func (s *InMemoryStore) DeleteAccessToken(accessToken *Token) {
+func (s *InMemoryStore) CreateToken(clientID string, userID string, token string, createdTime time.Time, expiredTime time.Time) Token {
+	return nil
+}
+func (s *InMemoryStore) DeleteToken(token Token) {
 	//	for idx, token := range s.accessTokens {
 	//		if token == *accessToken {
 	//			s.accessTokens = append(s.accessTokens[:idx], s.accessTokens[idx+1:]...)
@@ -127,61 +133,20 @@ func (s *InMemoryStore) DeleteAccessToken(accessToken *Token) {
 	//		}
 	//	}
 }
-func (s *InMemoryStore) SaveAccessToken(accessToken *Token) {
+func (s *InMemoryStore) SaveToken(queryToken Token) {
 	isUpdated := false
 	for _, token := range s.accessTokens {
-		if token.TokenID == accessToken.TokenID {
-			token.Token = accessToken.Token
-			token.CreatedTime = accessToken.CreatedTime
-			token.ExpiredTime = accessToken.ExpiredTime
-			isUpdated = true
-			break
-		}
+		//		if token.Token == queryToken.GetToken() {
+		//			token.Token = queryToken.GetToken()
+		//			token.CreatedTime = queryToken.CreatedTime
+		//			token.ExpiredTime = queryToken.ExpiredTime
+		//			isUpdated = true
+		//			break
+		//		}
 	}
 
 	if !isUpdated {
-		s.accessTokens = append(s.accessTokens, *accessToken)
-	}
-}
-
-func (s *InMemoryStore) FindRefreshToken(refreshToken string) *Token {
-	for _, token := range s.refreshTokens {
-		if token.Token == refreshToken {
-			return &token
-		}
-	}
-	return nil
-}
-func (s *InMemoryStore) FindRefreshTokenWithCredential(clientID string, userID bson.ObjectId) *Token {
-	for _, token := range s.refreshTokens {
-		if token.UserID == userID && token.ClientID == clientID {
-			return &token
-		}
-	}
-	return nil
-}
-func (s *InMemoryStore) DeleteRefreshToken(refreshToken *Token) {
-	//	for idx, token := range s.refreshTokens {
-	//		if token == *refreshToken {
-	//			s.refreshTokens = append(s.refreshTokens[:idx], s.refreshTokens[idx+1:]...)
-	//			break
-	//		}
-	//	}
-}
-func (s *InMemoryStore) SaveRefreshToken(refreshToken *Token) {
-	isUpdated := false
-	for _, token := range s.refreshTokens {
-		if token.TokenID == refreshToken.TokenID {
-			token.Token = refreshToken.Token
-			token.CreatedTime = refreshToken.CreatedTime
-			token.ExpiredTime = refreshToken.ExpiredTime
-			isUpdated = true
-			break
-		}
-	}
-
-	if !isUpdated {
-		s.refreshTokens = append(s.refreshTokens, *refreshToken)
+		s.accessTokens = append(s.accessTokens, *queryToken)
 	}
 }
 
@@ -218,10 +183,10 @@ func parseResult(response *http.Response) *TokenResponse {
 // Test																		  //
 ////////////////////////////////////////////////////////////////////////////////
 func Test_GeneralValidation(t *testing.T) {
-	defer os.Remove("oauth2.cnf")
+	defer os.Remove(ConfigFile)
 	store := createStore()
 	config := LoadConfigs()
-	controller := CreateGrantToken(config, store)
+	controller := CreateTokenGrant(config, store)
 	templateError := "Invalid %s parameter."
 	templateErrorMessage := "Expected \"Invalid %s parameter.\" but found \"%s\""
 
@@ -265,7 +230,7 @@ func Test_GeneralValidation(t *testing.T) {
 }
 
 func Test_NotAllowRefreshGrantFlow(t *testing.T) {
-	defer os.Remove("oauth2.cnf")
+	defer os.Remove(ConfigFile)
 	store := createStore()
 	config := LoadConfigs()
 
@@ -274,7 +239,7 @@ func Test_NotAllowRefreshGrantFlow(t *testing.T) {
 	config.allowRefreshToken = false
 	config.grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.Grant, "|")))
 
-	controller := CreateGrantToken(config, store)
+	controller := CreateTokenGrant(config, store)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := CreateRequestContext(r, w)
 		controller.HandleForm(context)
@@ -310,10 +275,10 @@ func Test_NotAllowRefreshGrantFlow(t *testing.T) {
 }
 
 func Test_PasswordGrantFlow(t *testing.T) {
-	defer os.Remove("oauth2.cnf")
+	defer os.Remove(ConfigFile)
 	store := createStore()
 	config := LoadConfigs()
-	controller := CreateGrantToken(config, store)
+	controller := CreateTokenGrant(config, store)
 	templateError := "Invalid %s parameter."
 	templateErrorMessage := "Expected \"Invalid %s parameter.\" but found \"%s\""
 
@@ -406,10 +371,10 @@ func Test_PasswordGrantFlow(t *testing.T) {
 }
 
 func Test_RefreshGrantFlow(t *testing.T) {
-	defer os.Remove("oauth2.cnf")
+	defer os.Remove(ConfigFile)
 	store := createStore()
 	config := LoadConfigs()
-	controller := CreateGrantToken(config, store)
+	controller := CreateTokenGrant(config, store)
 	templateError := "Invalid %s parameter."
 	templateErrorMessage := "Expected \"Invalid %s parameter.\" but found \"%s\""
 

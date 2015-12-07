@@ -10,23 +10,23 @@ import (
 
 func Test_CreateConfig(t *testing.T) {
 	config := LoadConfigs()
-	defer os.Remove("oauth2.cnf")
+	defer os.Remove(ConfigFile)
 
 	if config == nil {
 		t.Error("Expected config is not nil but found nil.")
 	}
 
-	if !utils.FileExisted("oauth2.cnf") {
-		t.Error("Expected oauth2.cnf file had been created but found nil.")
+	if !utils.FileExisted(ConfigFile) {
+		t.Errorf("Expected %s file had been created but found nil.", ConfigFile)
 	}
 }
 
 func Test_LoadConfig(t *testing.T) {
-	defer os.Remove("oauth2.cnf")
+	defer os.Remove(ConfigFile)
 	config := LoadConfigs()
 
 	if config == nil {
-		t.Errorf("Expected not nil when oauth2.cnf is not available.")
+		t.Errorf("Expected not nil when %s is not available.", ConfigFile)
 	}
 
 	allowMethods := []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK}
@@ -39,11 +39,11 @@ func Test_LoadConfig(t *testing.T) {
 		t.Errorf("Expected %s but found %s", staticFolders, config.StaticFolders)
 	}
 
-	if config.TimeoutRead != 15 {
+	if config.TimeoutRead != 10 {
 		t.Errorf("Expected read timeout is 15 seconds but found %d", config.TimeoutRead)
 	}
 
-	if config.TimeoutWrite != 15 {
+	if config.TimeoutWrite != 10 {
 		t.Errorf("Expected write timeout is 15 seconds but found %d", config.TimeoutRead)
 	}
 }

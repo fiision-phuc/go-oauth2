@@ -7,15 +7,18 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-// CreateConfigs persist all configuration to file.
+// ConfigFile defines configuration file's name.
+const ConfigFile = "oauth2.cfg"
+
+// CreateConfigs generates a default configuration file.
 func CreateConfigs() {
-	// Remove old file is existed
-	if utils.FileExisted("oauth2.cnf") {
-		os.Remove("oauth2.cnf")
+	if utils.FileExisted(ConfigFile) {
+		os.Remove(ConfigFile)
 	}
 
 	host := GetEnv("HOST")
@@ -34,8 +37,8 @@ func CreateConfigs() {
 		Host:          host,
 		Port:          port,
 		HeaderSize:    5,
-		TimeoutRead:   15,
-		TimeoutWrite:  15,
+		TimeoutRead:   10,
+		TimeoutWrite:  10,
 		AllowMethods:  []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
 		StaticFolders: map[string]string{"/resources": "resources"},
 
@@ -47,18 +50,18 @@ func CreateConfigs() {
 
 	// Create new file
 	configJSON, _ := json.MarshalIndent(config, "", "  ")
-	file, _ := os.Create("oauth2.cnf")
+	file, _ := os.Create(ConfigFile)
 	file.Write(configJSON)
 	file.Close()
 }
 
 // LoadConfigs retrieve preset configuration file.
 func LoadConfigs() *Config {
-	if !utils.FileExisted("oauth2.cnf") {
+	if !utils.FileExisted(ConfigFile) {
 		CreateConfigs()
 	}
 
-	file, err := os.Open("oauth2.cnf")
+	file, err := os.Open(ConfigFile)
 	if err != nil {
 		return nil
 	}
@@ -78,13 +81,15 @@ func LoadConfigs() *Config {
 	config.StaticFolders = folders
 
 	// Convert duration to seconds
-	config.DurationAccessToken = config.DurationAccessToken * 999999999
-	config.DurationRefreshToken = config.DurationRefreshToken * 999999999
-	config.DurationAuthorizationCode = config.DurationAuthorizationCode * 999999999
+	config.DurationAccessToken = config.DurationAccessToken * time.Second
+	config.DurationRefreshToken = config.DurationRefreshToken * time.Second
+	config.DurationAuthorizationCode = config.DurationAuthorizationCode * time.Second
 
 	// Define regular expressions
 	//	regexp.MustCompile(`:[^/#?()\.\\]+`)
 	config.grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.Grant, "|")))
+	config.methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.AllowMethods, "|")))
+
 	for _, grant := range config.Grant {
 		if grant == RefreshTokenGrant {
 			config.allowRefreshToken = true

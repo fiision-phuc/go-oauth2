@@ -24,9 +24,9 @@ const (
 const (
 	AuthorizationCodeGrant = "authorization_code" // For apps running on a web server
 	ClientCredentialsGrant = "client_credentials" // For application access
-	ImplicitGrant          = "implicit"           // For browser-based or mobile apps
-	PasswordGrant          = "password"           // For logging in with a username and password
-	RefreshTokenGrant      = "refresh_token"      // Should allow refresh token or not
+	//	ImplicitGrant          = "implicit"           // For browser-based or mobile apps
+	PasswordGrant     = "password"      // For logging in with a username and password
+	RefreshTokenGrant = "refresh_token" // Should allow refresh token or not
 )
 
 // Config struct descripts a configuration  object  that  will  be  used  during
@@ -49,5 +49,6 @@ type Config struct {
 
 	clientValidation  *regexp.Regexp `json:"-"`
 	grantsValidation  *regexp.Regexp `json:"-"`
+	methodsValidation *regexp.Regexp `json:"-"`
 	allowRefreshToken bool           `json:"-"`
 }

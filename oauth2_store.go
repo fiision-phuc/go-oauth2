@@ -1,37 +1,5 @@
 package oauth2
 
-import (
-	"time"
-
-	"gopkg.in/mgo.v2/bson"
-)
-
-type Store interface {
-
-	// User
-	FindUserWithID(userID bson.ObjectId) *User
-	FindUserWithCredential(username string, password string) *User
-
-	// Client
-	FindClientWithCredential(clientID string, clientSecret string) *Client
-
-	// Access token
-	FindAccessToken(accessToken string) *Token
-	FindAccessTokenWithCredential(clientID string, userID bson.ObjectId) *Token
-	DeleteAccessToken(accessToken *Token)
-	SaveAccessToken(accessToken *Token)
-
-	// Refresh token
-	FindRefreshToken(refreshToken string) *Token
-	FindRefreshTokenWithCredential(clientID string, userID bson.ObjectId) *Token
-	DeleteRefreshToken(refreshToken *Token)
-	SaveRefreshToken(refreshToken *Token)
-
-	// Authorization code
-	FindAuthorizationCode(authorizationCode string)
-	SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time)
-}
-
 //func (m *Model) GetAccessToken(accessToken string) *AccessToken {
 //	return nil
 //}

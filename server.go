@@ -20,6 +20,7 @@ type Server struct {
 // DefaultServer create a server object with preset config.
 func DefaultServer() *Server {
 	config := LoadConfigs()
+
 	server := &Server{
 		Config: config,
 		routes: make([]Route, 0),
@@ -28,10 +29,10 @@ func DefaultServer() *Server {
 	}
 
 	// Pre-define oauth2 urls
-	grantAuthorization := new(GrantAuthorization)
-	grantToken := new(GrantToken)
+	//	grantAuthorization := new(AuthorizationGrant)
+	grantToken := new(TokenGrant)
 
-	server.Get("/auth", grantAuthorization.HandleForm)
+	//	server.Get("/auth", grantAuthorization.HandleForm)
 	server.Post("/token", grantToken.HandleForm)
 	return server
 }

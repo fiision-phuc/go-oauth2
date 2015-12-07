@@ -7,6 +7,15 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
+type ContextSecurity struct {
+	AuthUser         *AuthUserDefault
+	AuthClient       *AuthClientDefault
+	AuthAccessToken  *TokenDefault
+	AuthRefreshToken *TokenDefault
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Client
 // Pre-compile regex
 var bearerRegex = regexp.MustCompile("^Bearer\\s(\\w+)$")
 
