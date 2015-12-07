@@ -203,7 +203,7 @@ func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext) *utils.Status {
 	}
 
 	/* Condition validation: Validate refresh_token */
-	recordToken := g.store.FindToken(queryToken)
+	recordToken := g.store.FindRefreshToken(queryToken)
 	if recordToken == nil || recordToken.GetClientID() != c.AuthClient.GetClientID() {
 		return utils.Status400WithDescription("Invalid refresh_token parameter.")
 
@@ -211,7 +211,7 @@ func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext) *utils.Status {
 		return utils.Status400WithDescription("refresh_token is expired.")
 	}
 
-	c.AuthAccessToken = g.store.FindTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
+	c.AuthAccessToken = g.store.FindAccessTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
 	c.AuthUser = g.store.FindUserWithID(recordToken.GetUserID())
 	c.AuthRefreshToken = recordToken
 	now := time.Now()
@@ -220,13 +220,13 @@ func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext) *utils.Status {
 	c.AuthAccessToken.SetToken(utils.GenerateToken())
 	c.AuthAccessToken.SetCreatedTime(now)
 	c.AuthAccessToken.SetExpiredTime(now.Add(g.config.DurationAccessToken))
-	g.store.SaveToken(c.AuthAccessToken)
+	g.store.SaveAccessToken(c.AuthAccessToken)
 
 	// Update refresh token
 	c.AuthRefreshToken.SetToken(utils.GenerateToken())
 	c.AuthRefreshToken.SetCreatedTime(now)
 	c.AuthRefreshToken.SetExpiredTime(now.Add(g.config.DurationRefreshToken))
-	g.store.SaveToken(c.AuthRefreshToken)
+	g.store.SaveRefreshToken(c.AuthRefreshToken)
 
 	return nil
 }
@@ -237,14 +237,14 @@ func (g *TokenGrant) finalizeToken(c *RequestContext) {
 
 	// Generate access token if neccessary
 	if c.AuthAccessToken == nil {
-		accessToken := g.store.FindTokenWithCredential(c.AuthClient.GetClientID(), c.AuthUser.GetUserID())
+		accessToken := g.store.FindAccessTokenWithCredential(c.AuthClient.GetClientID(), c.AuthUser.GetUserID())
 		if accessToken != nil && accessToken.IsExpired() {
-			g.store.DeleteToken(accessToken)
+			g.store.DeleteAccessToken(accessToken)
 			accessToken = nil
 		}
 
 		if accessToken == nil {
-			accessToken = g.store.CreateToken(
+			accessToken = g.store.CreateAccessToken(
 				c.AuthClient.GetClientID(),
 				c.AuthUser.GetUserID(),
 				utils.GenerateToken(),
@@ -257,14 +257,14 @@ func (g *TokenGrant) finalizeToken(c *RequestContext) {
 
 	// Generate refresh token if neccessary
 	if g.config.allowRefreshToken && c.AuthRefreshToken == nil {
-		refreshToken := g.store.FindTokenWithCredential(c.AuthClient.GetClientID(), c.AuthUser.GetUserID())
+		refreshToken := g.store.FindRefreshTokenWithCredential(c.AuthClient.GetClientID(), c.AuthUser.GetUserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
-			g.store.DeleteToken(refreshToken)
+			g.store.DeleteRefreshToken(refreshToken)
 			refreshToken = nil
 		}
 
 		if refreshToken == nil {
-			refreshToken = g.store.CreateToken(
+			refreshToken = g.store.CreateRefreshToken(
 				c.AuthClient.GetClientID(),
 				c.AuthUser.GetUserID(),
 				utils.GenerateToken(),

@@ -85,8 +85,11 @@ type TokenDefault struct {
 	ExpiredTime time.Time     `bson:"expired_time"`
 }
 
+// GetTokenID returns token_id.
+func (t *TokenDefault) GetTokenID() string { return t.TokenID.Hex() }
+
 // GetClientID returns client_id.
-func (t *TokenDefault) GetClientID() string { return t.TokenID.Hex() }
+func (t *TokenDefault) GetClientID() string { return t.ClientID }
 
 // GetUserID returns user_id.
 func (t *TokenDefault) GetUserID() string { return t.UserID.Hex() }

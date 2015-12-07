@@ -28,6 +28,8 @@ type AuthUser interface {
 
 // Token descripts a token, it can be either access token or refresh token.
 type Token interface {
+	GetTokenID() string
+
 	GetClientID() string
 	GetUserID() string
 
@@ -56,12 +58,19 @@ type TokenStore interface {
 	// Client
 	FindClientWithCredential(clientID string, clientSecret string) AuthClient
 
-	// Token
-	FindToken(accessToken string) Token
-	FindTokenWithCredential(clientID string, userID string) Token
-	CreateToken(clientID string, userID string, token string, createdTime time.Time, expiredTime time.Time) Token
-	DeleteToken(accessToken Token)
-	SaveToken(accessToken Token)
+	// Access Token
+	FindAccessToken(token string) Token
+	FindAccessTokenWithCredential(clientID string, userID string) Token
+	CreateAccessToken(clientID string, userID string, token string, createdTime time.Time, expiredTime time.Time) Token
+	DeleteAccessToken(token Token)
+	SaveAccessToken(token Token)
+
+	// Refresh Token
+	FindRefreshToken(token string) Token
+	FindRefreshTokenWithCredential(clientID string, userID string) Token
+	CreateRefreshToken(clientID string, userID string, token string, createdTime time.Time, expiredTime time.Time) Token
+	DeleteRefreshToken(token Token)
+	SaveRefreshToken(token Token)
 
 	//	// Authorization code
 	//	FindAuthorizationCode(authorizationCode string)

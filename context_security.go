@@ -21,7 +21,7 @@ var bearerRegex = regexp.MustCompile("^Bearer\\s(\\w+)$")
 
 // getBearerToken extract token from request according to RFC6750
 func (c *RequestContext) getBearerToken() string {
-	headerToken := strings.Trim(c.Header("Authorization"), " ")
+	headerToken := strings.Trim(c.Header["authorization"], " ")
 	//	getToken := c.Queries.Get(AccessToken)
 	//	postToken := this.req.body ? this.req.body.access_token : undefined;
 

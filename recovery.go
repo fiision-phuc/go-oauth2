@@ -62,7 +62,7 @@ func RecoveryRequest(c *RequestContext) {
 			Trace: callStack(3),
 
 			Body: &log_body{
-				ContentType:   c.Header("Content-Type"),
+				ContentType:   c.Header["content-type"],
 				RequestBody:   c.Queries,
 				RequestParams: c.PathQueries,
 			},
