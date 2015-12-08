@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// EncryptPassword will cipher user's password using bcrypt
 func EncryptPassword(password string) {
 	password = strings.Trim(password, " ")
 	input := []byte(password)

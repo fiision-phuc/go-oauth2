@@ -83,7 +83,6 @@ func (s *Server) Unlink(urlPath string, handler interface{}) {
 
 // MARK: Struct's private functions
 func (s *Server) addRoute(method string, pattern string, handler interface{}) {
-	/* Condition validation: If pattern belong to group or not */
 	if len(s.groups) > 0 {
 		var groupPattern bytes.Buffer
 
