@@ -52,7 +52,7 @@ func RecoveryInternal(logger *log.Logger) {
 		logger.Println(string(cause))
 	}
 }
-func RecoveryRequest(c *RequestContext) {
+func RecoveryRequest(c *RequestContext, isDevelopment bool) {
 	if err := recover(); err != nil {
 		log := log_message{
 			Uri:         c.URLPath,
@@ -84,9 +84,9 @@ func RecoveryRequest(c *RequestContext) {
 		}
 
 		// Should include stack trace or not
-		//		if Development {
-		httpError.StackTrace = log
-		//		}
+		if isDevelopment {
+			httpError.StackTrace = log
+		}
 
 		c.OutputError(httpError)
 	}

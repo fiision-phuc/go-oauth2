@@ -42,7 +42,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 	// Create context
 	context := CreateRequestContext(request, response)
-	defer RecoveryRequest(context)
+	defer RecoveryRequest(context, s.Development)
 
 	// Validate http request methods
 	if !s.methodsValidation.MatchString(request.Method) {
@@ -57,7 +57,6 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 			if strings.HasPrefix(request.URL.Path, prefix) {
 				newPath := strings.Replace(request.URL.Path, prefix, folder, 1)
 				request.URL, _ = url.Parse(newPath)
-
 				isStaticRequest = true
 				break
 			}
@@ -75,6 +74,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 func (s *Server) serveRequest(context *RequestContext) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 	isHandled := false
+
 	for _, route := range s.routes {
 		ok, pathQueries := route.Match(context.Method(), context.URLPath)
 		if !ok {
@@ -87,7 +87,12 @@ func (s *Server) serveRequest(context *RequestContext) {
 		securityContext, status := CreateSecurityContextWithRequestContext(context, s.tokenStore)
 		for rule, _ := range s.userRoles {
 			if rule.MatchString(context.URLPath) {
+				if securityContext.AuthUser != nil {
 
+				} else {
+					context.OutputError(status)
+					return
+				}
 				break
 			}
 		}
