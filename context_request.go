@@ -19,11 +19,6 @@ type RequestContext struct {
 	Queries     url.Values
 	PathQueries map[string]string
 
-	AuthUser         AuthUser
-	AuthClient       AuthClient
-	AuthAccessToken  Token
-	AuthRefreshToken Token
-
 	request  *http.Request
 	response http.ResponseWriter
 }
@@ -53,7 +48,7 @@ func CreateRequestContext(request *http.Request, response http.ResponseWriter) *
 		break
 
 	case POST, PATCH:
-		contentType := strings.ToLower(request.Header.Get("CONTENT-TYPE"))
+		contentType := request.Header.Get("content-type")
 
 		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
 			params := utils.ParseForm(request)

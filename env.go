@@ -36,6 +36,7 @@ func CreateConfigs() {
 
 		Host:          host,
 		Port:          port,
+		TLSPort:       "8443",
 		HeaderSize:    5,
 		TimeoutRead:   10,
 		TimeoutWrite:  10,

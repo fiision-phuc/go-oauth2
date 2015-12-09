@@ -37,6 +37,7 @@ type Config struct {
 
 	Host              string            `json:"host,omitempty"`
 	Port              string            `json:"port,omitempty"`
+	TLSPort           string            `json:"tls_port,omitempty"`
 	HeaderSize        int               `json:"headers_size,omitempty"`  // In KB
 	TimeoutRead       time.Duration     `json:"timeout_read,omitempty"`  // In seconds
 	TimeoutWrite      time.Duration     `json:"timeout_write,omitempty"` // In seconds

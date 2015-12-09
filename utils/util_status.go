@@ -66,6 +66,11 @@ func Status400WithDescription(description string) *Status {
 func Status401() *Status {
 	return genericStatus(http.StatusUnauthorized)
 }
+func Status401WithDescription(description string) *Status {
+	status := genericStatus(http.StatusBadRequest)
+	status.Description = description
+	return status
+}
 func Status402() *Status {
 	return genericStatus(http.StatusPaymentRequired)
 }

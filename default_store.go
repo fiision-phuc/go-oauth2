@@ -51,7 +51,7 @@ func (a *AuthClientDefault) GetGrantTypes() []string { return a.GrantTypes }
 // GetRedirectURIs returns redirect_uris.
 func (a *AuthClientDefault) GetRedirectURIs() []string { return a.RedirectURIs }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // AuthUserDefault descripts a mongodb AuthUser document.
 type AuthUserDefault struct {

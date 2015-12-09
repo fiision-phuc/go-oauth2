@@ -56,6 +56,7 @@ type TokenStore interface {
 	FindUserWithCredential(username string, password string) AuthUser
 
 	// Client
+	FindClientWithID(clientID string) AuthClient
 	FindClientWithCredential(clientID string, clientSecret string) AuthClient
 
 	// Access Token

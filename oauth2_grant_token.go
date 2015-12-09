@@ -25,16 +25,17 @@ func CreateTokenGrant(config *Config, store TokenStore) *TokenGrant {
 
 // MARK: Struct's public functions
 func (g *TokenGrant) HandleForm(c *RequestContext) {
-	err := g.validateForm(c)
+	securityContext := &SecurityContext{}
+	err := g.validateForm(c, securityContext)
 	if err != nil {
 		c.OutputError(err)
 	} else {
-		g.finalizeToken(c)
+		g.finalizeToken(c, securityContext)
 	}
 }
 
 // MARK: Struct's private functions
-func (g *TokenGrant) validateForm(c *RequestContext) *utils.Status {
+func (g *TokenGrant) validateForm(c *RequestContext, s *SecurityContext) *utils.Status {
 	grantType := c.Queries.Get("grant_type")
 	clientID := c.Queries.Get("client_id")
 	clientSecret := c.Queries.Get("client_secret")
@@ -71,7 +72,7 @@ func (g *TokenGrant) validateForm(c *RequestContext) *utils.Status {
 	if !isGranted {
 		return utils.Status400WithDescription("The grant_type is unauthorised for this client_id.")
 	}
-	c.AuthClient = recordClient
+	s.AuthClient = recordClient
 
 	// Choose authentication flow
 	switch grantType {
@@ -91,10 +92,10 @@ func (g *TokenGrant) validateForm(c *RequestContext) *utils.Status {
 		break
 
 	case PasswordGrant:
-		return g.usePasswordFlow(c)
+		return g.usePasswordFlow(c, s)
 
 	case RefreshTokenGrant:
-		return g.useRefreshTokenFlow(c)
+		return g.useRefreshTokenFlow(c, s)
 		break
 	}
 	return nil
@@ -174,7 +175,7 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 }
 
 // usePasswordFlow handle password flow.
-func (g *TokenGrant) usePasswordFlow(c *RequestContext) *utils.Status {
+func (g *TokenGrant) usePasswordFlow(c *RequestContext, s *SecurityContext) *utils.Status {
 	username := c.Queries.Get("username")
 	password := c.Queries.Get("password")
 
@@ -189,12 +190,12 @@ func (g *TokenGrant) usePasswordFlow(c *RequestContext) *utils.Status {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
 	}
 
-	c.AuthUser = recordUser
+	s.AuthUser = recordUser
 	return nil
 }
 
 // useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext) *utils.Status {
+func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext, s *SecurityContext) *utils.Status {
 	queryToken := c.Queries.Get("refresh_token")
 
 	/* Condition validation: Validate refresh_token parameter */
@@ -204,40 +205,40 @@ func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext) *utils.Status {
 
 	/* Condition validation: Validate refresh_token */
 	recordToken := g.store.FindRefreshToken(queryToken)
-	if recordToken == nil || recordToken.GetClientID() != c.AuthClient.GetClientID() {
+	if recordToken == nil || recordToken.GetClientID() != s.AuthClient.GetClientID() {
 		return utils.Status400WithDescription("Invalid refresh_token parameter.")
 
 	} else if recordToken.IsExpired() {
 		return utils.Status400WithDescription("refresh_token is expired.")
 	}
 
-	c.AuthAccessToken = g.store.FindAccessTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
-	c.AuthUser = g.store.FindUserWithID(recordToken.GetUserID())
-	c.AuthRefreshToken = recordToken
+	s.AuthAccessToken = g.store.FindAccessTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
+	s.AuthUser = g.store.FindUserWithID(recordToken.GetUserID())
+	s.AuthRefreshToken = recordToken
 	now := time.Now()
 
 	// Update access token
-	c.AuthAccessToken.SetToken(utils.GenerateToken())
-	c.AuthAccessToken.SetCreatedTime(now)
-	c.AuthAccessToken.SetExpiredTime(now.Add(g.config.DurationAccessToken))
-	g.store.SaveAccessToken(c.AuthAccessToken)
+	s.AuthAccessToken.SetToken(utils.GenerateToken())
+	s.AuthAccessToken.SetCreatedTime(now)
+	s.AuthAccessToken.SetExpiredTime(now.Add(g.config.DurationAccessToken))
+	g.store.SaveAccessToken(s.AuthAccessToken)
 
 	// Update refresh token
-	c.AuthRefreshToken.SetToken(utils.GenerateToken())
-	c.AuthRefreshToken.SetCreatedTime(now)
-	c.AuthRefreshToken.SetExpiredTime(now.Add(g.config.DurationRefreshToken))
-	g.store.SaveRefreshToken(c.AuthRefreshToken)
+	s.AuthRefreshToken.SetToken(utils.GenerateToken())
+	s.AuthRefreshToken.SetCreatedTime(now)
+	s.AuthRefreshToken.SetExpiredTime(now.Add(g.config.DurationRefreshToken))
+	g.store.SaveRefreshToken(s.AuthRefreshToken)
 
 	return nil
 }
 
 // finalizeToken summary and return result to client.
-func (g *TokenGrant) finalizeToken(c *RequestContext) {
+func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 	now := time.Now()
 
 	// Generate access token if neccessary
-	if c.AuthAccessToken == nil {
-		accessToken := g.store.FindAccessTokenWithCredential(c.AuthClient.GetClientID(), c.AuthUser.GetUserID())
+	if s.AuthAccessToken == nil {
+		accessToken := g.store.FindAccessTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
 		if accessToken != nil && accessToken.IsExpired() {
 			g.store.DeleteAccessToken(accessToken)
 			accessToken = nil
@@ -245,19 +246,19 @@ func (g *TokenGrant) finalizeToken(c *RequestContext) {
 
 		if accessToken == nil {
 			accessToken = g.store.CreateAccessToken(
-				c.AuthClient.GetClientID(),
-				c.AuthUser.GetUserID(),
+				s.AuthClient.GetClientID(),
+				s.AuthUser.GetUserID(),
 				utils.GenerateToken(),
 				now,
 				now.Add(g.config.DurationAccessToken),
 			)
 		}
-		c.AuthAccessToken = accessToken
+		s.AuthAccessToken = accessToken
 	}
 
 	// Generate refresh token if neccessary
-	if g.config.allowRefreshToken && c.AuthRefreshToken == nil {
-		refreshToken := g.store.FindRefreshTokenWithCredential(c.AuthClient.GetClientID(), c.AuthUser.GetUserID())
+	if g.config.allowRefreshToken && s.AuthRefreshToken == nil {
+		refreshToken := g.store.FindRefreshTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
 			g.store.DeleteRefreshToken(refreshToken)
 			refreshToken = nil
@@ -265,24 +266,24 @@ func (g *TokenGrant) finalizeToken(c *RequestContext) {
 
 		if refreshToken == nil {
 			refreshToken = g.store.CreateRefreshToken(
-				c.AuthClient.GetClientID(),
-				c.AuthUser.GetUserID(),
+				s.AuthClient.GetClientID(),
+				s.AuthUser.GetUserID(),
 				utils.GenerateToken(),
 				now,
 				now.Add(g.config.DurationRefreshToken),
 			)
 		}
-		c.AuthRefreshToken = refreshToken
+		s.AuthRefreshToken = refreshToken
 	}
 
 	tokenResponse := &TokenResponse{
 		TokenType:   "Bearer",
-		AccessToken: c.AuthAccessToken.GetToken(),
-		ExpiresIn:   c.AuthAccessToken.GetExpiredTime().Unix() - time.Now().Unix(),
+		AccessToken: s.AuthAccessToken.GetToken(),
+		ExpiresIn:   s.AuthAccessToken.GetExpiredTime().Unix() - time.Now().Unix(),
 	}
 
 	if g.config.allowRefreshToken {
-		tokenResponse.RefreshToken = c.AuthRefreshToken.GetToken()
+		tokenResponse.RefreshToken = s.AuthRefreshToken.GetToken()
 	}
 	c.OutputJSON(utils.Status200(), tokenResponse)
 }

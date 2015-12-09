@@ -2,7 +2,6 @@ package oauth2
 
 import (
 	"bytes"
-	"strings"
 
 	"github.com/phuc0302/go-oauth2/utils"
 )
@@ -83,23 +82,24 @@ func (s *Server) Unlink(urlPath string, handler interface{}) {
 
 // MARK: Struct's private functions
 func (s *Server) addRoute(method string, pattern string, handler interface{}) {
+	// Format pattern before assigned to route
 	if len(s.groups) > 0 {
 		var groupPattern bytes.Buffer
 
 		for _, g := range s.groups {
-			groupPattern.WriteString(g)
+			groupPattern.WriteString(utils.FormatPath(g))
 		}
+		groupPattern.WriteString(utils.FormatPath(pattern))
 		pattern = groupPattern.String()
+	} else {
+		pattern = utils.FormatPath(pattern)
 	}
-
-	// Format pattern before assigned to route
-	pattern = utils.FormatPath(pattern)
 
 	// Look for existing one before create new
 	for _, route := range s.routes {
 		if route.GetPattern() == pattern {
 			route.AddHandler(method, handler)
-			//			s.Logger.Printf("%-6s -> %s\n", strings.ToUpper(method), route.Pattern)
+			s.logger.Printf("%-6s -> %s\n", method, pattern)
 			return
 		}
 	}
@@ -110,5 +110,5 @@ func (s *Server) addRoute(method string, pattern string, handler interface{}) {
 
 	// Add to collection
 	s.routes = append(s.routes, newRoute)
-	s.logger.Printf("%-6s -> %s\n", strings.ToUpper(method), newRoute.Pattern)
+	s.logger.Printf("%-6s -> %s\n", method, pattern)
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
-
-	"github.com/phuc0302/go-cocktail-di"
 )
 
 type DefaultRoute struct {
@@ -15,16 +13,13 @@ type DefaultRoute struct {
 }
 
 // MARK: Struct's constructors
-func CreateDefaultRoute(pattern string) *DefaultRoute {
-	regex := regexp.MustCompile(`:[^/#?()\.\\]+`)
-
-	// Convert param to regular expression
-	regexPattern := regex.ReplaceAllStringFunc(pattern, func(m string) string {
+func CreateDefaultRoute(pattern string) Route {
+	regexPattern := pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
 	})
 	regexPattern += "/?"
 
-	route := DefaultRoute{pattern, regexp.MustCompile(regexPattern), make(map[string]interface{}, 4)}
+	route := DefaultRoute{pattern, regexp.MustCompile(regexPattern), make(map[string]interface{})}
 	return &route
 }
 
@@ -36,12 +31,12 @@ func (r *DefaultRoute) AddHandler(method string, handler interface{}) {
 	r.handlers[method] = handler
 }
 func (r *DefaultRoute) InvokeHandler(c *RequestContext) {
-	injector := di.Injector()
+	invoker := CreateInvoker()
 	handler := r.handlers[c.request.Method]
 
 	// Call handler
-	injector.Map(c)
-	_, err := injector.Invoke(handler)
+	invoker.Map(c)
+	_, err := invoker.Invoke(handler)
 
 	// Condition validation: Validate error
 	if err != nil {
