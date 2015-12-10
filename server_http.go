@@ -1,42 +1,17 @@
 package oauth2
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-//route := route{method, nil, handlers, pattern, ""}
-
-//	route.regex = regexp.MustCompile(pattern)
-
-// AddRole apply role to specific pattern
-func (s *Server) AddRoles(pattern string, roles string) {
-	pattern = utils.FormatPath(pattern)
-
-	pattern = pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
-		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
-	})
-	pattern = globsRegex.ReplaceAllStringFunc(pattern, func(m string) string {
-		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
-	})
-	pattern += `\/?`
-
-	userRoles := strings.Split(roles, ",")
-
-	if s.userRoles == nil {
-		s.userRoles = make(map[*regexp.Regexp][]string, 1)
-	}
-	s.userRoles[regexp.MustCompile(pattern)] = userRoles
-}
-
-// ServeHTTP handle HTTP request and HTTP response
+// ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	// Format reuest before process
 	request.URL.Path = utils.FormatPath(request.URL.Path)
 	request.Method = strings.ToUpper(request.Method)
 
@@ -73,7 +48,6 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 // MARK: Struct's private functions
 func (s *Server) serveRequest(context *RequestContext) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
-	isHandled := false
 
 	for _, route := range s.routes {
 		ok, pathQueries := route.Match(context.Method(), context.URLPath)
@@ -81,30 +55,29 @@ func (s *Server) serveRequest(context *RequestContext) {
 			continue
 		}
 
-		context.PathQueries = pathQueries
-
 		// Validate authentication & roles if neccessary
-		securityContext, status := CreateSecurityContextWithRequestContext(context, s.tokenStore)
-		for rule, _ := range s.userRoles {
-			if rule.MatchString(context.URLPath) {
-				if securityContext.AuthUser != nil {
+		var securityContext *SecurityContext = nil
+		if s.tokenStore != nil {
+			securityContext = CreateSecurityContextWithRequestContext(context, s.tokenStore)
+			for rule, _ := range s.userRoles {
+				if rule.MatchString(context.URLPath) {
+					if securityContext.AuthUser != nil {
 
-				} else {
-					context.OutputError(status)
-					return
+					} else {
+						//						context.OutputError(status)
+						return
+					}
+					break
 				}
-				break
 			}
 		}
 
+		context.PathQueries = pathQueries
 		route.InvokeHandler(context)
-		isHandled = true
-		break
+		return
 	}
 
-	if !isHandled {
-		context.OutputError(utils.Status503())
-	}
+	context.OutputError(utils.Status503())
 }
 
 func (s *Server) serveResource(context *RequestContext, request *http.Request, response http.ResponseWriter) {

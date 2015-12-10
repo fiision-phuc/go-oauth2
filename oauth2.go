@@ -2,20 +2,17 @@ package oauth2
 
 import "time"
 
-// AuthClient descripts an authenticated client.
+// AuthClient descripts a characteristic of an authenticated client.
 type AuthClient interface {
 	GetClientID() string
 	GetClientSecret() string
-
-	GetGrantType() string      // Client side only
-	GetRedirectURI() string    // Client side only
 	GetGrantTypes() []string   // Server side only
 	GetRedirectURIs() []string // Server side only
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// AuthUser descripts an authenticated user.
+// AuthUser descripts a characteristic of an authenticated user.
 type AuthUser interface {
 	GetUserID() string
 	GetUsername() string
@@ -24,9 +21,9 @@ type AuthUser interface {
 	GetUserRoles() []string
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Token descripts a token, it can be either access token or refresh token.
+// Token descripts a characteristic of a token, it can be either access token or refresh token.
 type Token interface {
 	GetTokenID() string
 
@@ -45,9 +42,9 @@ type Token interface {
 	SetExpiredTime(expiredTime time.Time)
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TokenStore descripts a token storage.
+// TokenStore descripts a characteristic of a token storage.
 type TokenStore interface {
 
 	// User
@@ -78,7 +75,7 @@ type TokenStore interface {
 	//	SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time)
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TokenResponse descripts a granted response that will be returned to client.
 type TokenResponse struct {

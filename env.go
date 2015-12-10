@@ -12,8 +12,61 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
+// Define keywords for HTTP methods.
+const (
+	COPY    = "COPY"
+	DELETE  = "DELETE"
+	GET     = "GET"
+	HEAD    = "HEAD"
+	LINK    = "LINK"
+	OPTIONS = "OPTIONS"
+	PATCH   = "PATCH"
+	POST    = "POST"
+	PURGE   = "PURGE"
+	PUT     = "PUT"
+	UNLINK  = "UNLINK"
+)
+
+// Define keywords for OAuth2.0 flows.
+const (
+	AuthorizationCodeGrant = "authorization_code" // For apps running on a web server
+	ClientCredentialsGrant = "client_credentials" // For application access
+	PasswordGrant          = "password"           // For logging in with a username and password
+	RefreshTokenGrant      = "refresh_token"      // Should allow refresh token or not
+
+	//	ImplicitGrant          = "implicit"           // For browser-based or mobile apps
+)
+
 // ConfigFile defines configuration file's name.
 const ConfigFile = "oauth2.cfg"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Config struct descripts a configuration  object  that  will  be  used  during application life time.
+type Config struct {
+	Development bool `json:"development,omitempty"`
+
+	Host          string            `json:"host,omitempty"`
+	Port          string            `json:"port,omitempty"`
+	TLSPort       string            `json:"tls_port,omitempty"`
+	HeaderSize    int               `json:"headers_size,omitempty"`  // In KB
+	TimeoutRead   time.Duration     `json:"timeout_read,omitempty"`  // In seconds
+	TimeoutWrite  time.Duration     `json:"timeout_write,omitempty"` // In seconds
+	AllowMethods  []string          `json:"allow_methods,omitempty"`
+	StaticFolders map[string]string `json:"static_folders,omitempty"`
+
+	Grant                     []string      `json:"grant_types,omitempty"`
+	DurationAccessToken       time.Duration `json:"duration_access_token,omitempty"`       // In seconds
+	DurationRefreshToken      time.Duration `json:"duration_refresh_token,omitempty"`      // In seconds
+	DurationAuthorizationCode time.Duration `json:"duration_authorization_code,omitempty"` // In seconds
+
+	allowRefreshToken bool           `json:"-"`
+	clientValidation  *regexp.Regexp `json:"-"`
+	grantsValidation  *regexp.Regexp `json:"-"`
+	methodsValidation *regexp.Regexp `json:"-"`
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // CreateConfigs generates a default configuration file.
 func CreateConfigs() {
@@ -56,7 +109,7 @@ func CreateConfigs() {
 	file.Close()
 }
 
-// LoadConfigs retrieve preset configuration file.
+// LoadConfigs retrieves previous configuration from file.
 func LoadConfigs() *Config {
 	if !utils.FileExisted(ConfigFile) {
 		CreateConfigs()
@@ -100,7 +153,9 @@ func LoadConfigs() *Config {
 	return &config
 }
 
-// GetEnv retrieve value from environment.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// GetEnv retrieves value from environment.
 func GetEnv(key string) string {
 	if len(key) == 0 {
 		return ""
@@ -108,7 +163,7 @@ func GetEnv(key string) string {
 	return os.Getenv(key)
 }
 
-// SetEnv persist key-value to environment.
+// SetEnv persists key-value to environment.
 func SetEnv(key string, value string) {
 	if len(key) == 0 || len(value) == 0 {
 		return

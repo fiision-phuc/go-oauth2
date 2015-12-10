@@ -1,5 +1,6 @@
 package oauth2
 
+// Route descripts a characteristic of routing components.
 type Route interface {
 	/** Add handler to route. */
 	AddHandler(method string, handler interface{})

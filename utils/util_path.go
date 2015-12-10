@@ -1,6 +1,6 @@
 package utils
 
-/** Format path. */
+// FormatPath will standardize the url path.
 func FormatPath(path string) string {
 	/* Condition validation: Turn empty string into "/" */
 	if len(path) == 0 {

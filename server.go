@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
+
+	"github.com/phuc0302/go-oauth2/utils"
 )
 
 var (
@@ -51,6 +54,31 @@ func DefaultServerWithTokenStore(tokenStore TokenStore) *Server {
 		server.Post("/token", tokenGrant.HandleForm)
 	}
 	return server
+}
+
+// AddRoles will define user's role validation for each url.
+func (s *Server) AddRoles(pattern string, roles string) {
+	/* Condition validation: Ignore role validation if there is no token store */
+	if s.tokenStore == nil {
+		return
+	}
+
+	pattern = utils.FormatPath(pattern)
+
+	pattern = pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
+		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
+	})
+	pattern = globsRegex.ReplaceAllStringFunc(pattern, func(m string) string {
+		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
+	})
+	pattern += `\/?`
+
+	userRoles := strings.Split(roles, ",")
+
+	if s.userRoles == nil {
+		s.userRoles = make(map[*regexp.Regexp][]string, 1)
+	}
+	s.userRoles[regexp.MustCompile(pattern)] = userRoles
 }
 
 // Run will start server on http port.
