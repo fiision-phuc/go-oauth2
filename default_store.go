@@ -104,6 +104,11 @@ type InMemoryTokenStore struct {
 
 // FindUserWithID returns user with user_id.
 func (s *InMemoryTokenStore) FindUserWithID(userID string) AuthUser {
+	/* Condition validation */
+	if len(userID) == 0 {
+		return nil
+	}
+
 	for _, user := range s.users {
 		if user.GetUserID() == userID {
 			return user
@@ -114,11 +119,21 @@ func (s *InMemoryTokenStore) FindUserWithID(userID string) AuthUser {
 
 // FindUserWithClient returns user associated with client_id and client_secret.
 func (s *InMemoryTokenStore) FindUserWithClient(clientID string, clientSecret string) AuthUser {
+	/* Condition validation */
+	if len(clientID) == 0 || len(clientSecret) == 0 {
+		return nil
+	}
+
 	return nil
 }
 
 // FindUserWithCredential returns user associated with username and password.
 func (s *InMemoryTokenStore) FindUserWithCredential(username string, password string) AuthUser {
+	/* Condition validation */
+	if len(username) == 0 || len(password) == 0 {
+		return nil
+	}
+
 	for _, user := range s.users {
 		if user.GetUsername() == username && user.GetPassword() == password {
 			return user
@@ -129,6 +144,16 @@ func (s *InMemoryTokenStore) FindUserWithCredential(username string, password st
 
 // FindClientWithID returns user associated with client_id.
 func (s *InMemoryTokenStore) FindClientWithID(clientID string) AuthClient {
+	/* Condition validation */
+	if len(clientID) == 0 {
+		return nil
+	}
+
+	for _, client := range s.clients {
+		if client.GetClientID() == clientID {
+			return client
+		}
+	}
 	return nil
 }
 
