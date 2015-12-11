@@ -5,8 +5,9 @@ import (
 	"strings"
 )
 
-var bearerRegex = regexp.MustCompile("^Bearer\\s(\\w+)$")
+var bearerRegex = regexp.MustCompile("^(B|b)earer\\s\\w+$")
 
+// SecurityContext descripts a user's security scope.
 type SecurityContext struct {
 	AuthUser         AuthUser
 	AuthClient       AuthClient
@@ -14,28 +15,29 @@ type SecurityContext struct {
 	AuthRefreshToken Token
 }
 
-func CreateSecurityContextWithRequestContext(requestContext *RequestContext, tokenStore TokenStore) *SecurityContext {
+func CreateSecurityContext(requestContext *RequestContext, tokenStore TokenStore) *SecurityContext {
 	headerToken := strings.Trim(requestContext.Header["authorization"], " ")
-	isMatched := bearerRegex.MatchString(headerToken)
+	isBearer := bearerRegex.MatchString(headerToken)
 
-	if !isMatched {
-		return nil //, utils.Status401WithDescription("Malformed auth header")
-	} else {
-		headerToken = headerToken[7:]
-		accessToken := tokenStore.FindAccessToken(headerToken)
-
-		if accessToken == nil || accessToken.IsExpired() {
-			return nil //, utils.Status401WithDescription("Malformed auth header")
-		} else {
-			client := tokenStore.FindClientWithID(accessToken.GetClientID())
-			user := tokenStore.FindUserWithID(accessToken.GetUserID())
-
-			securityContext := &SecurityContext{
-				AuthClient:      client,
-				AuthUser:        user,
-				AuthAccessToken: accessToken,
-			}
-			return securityContext //, nil
-		}
+	/* Condition validation: Validate existing of authorization header */
+	if !isBearer {
+		return nil
 	}
+
+	headerToken = headerToken[7:]
+	accessToken := tokenStore.FindAccessToken(headerToken)
+
+	/* Condition validation: Validate expiration time */
+	if accessToken == nil || accessToken.IsExpired() {
+		return nil
+	}
+
+	client := tokenStore.FindClientWithID(accessToken.GetClientID())
+	user := tokenStore.FindUserWithID(accessToken.GetUserID())
+	securityContext := &SecurityContext{
+		AuthClient:      client,
+		AuthUser:        user,
+		AuthAccessToken: accessToken,
+	}
+	return securityContext
 }

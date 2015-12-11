@@ -1,9 +1,11 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/phuc0302/go-oauth2/utils"
@@ -54,29 +56,32 @@ func (s *Server) serveRequest(context *RequestContext) {
 		if !ok {
 			continue
 		}
+		context.PathQueries = pathQueries
 
 		// Validate authentication & roles if neccessary
-		var securityContext *SecurityContext = nil
 		if s.tokenStore != nil {
-			securityContext = CreateSecurityContextWithRequestContext(context, s.tokenStore)
-			for rule, _ := range s.userRoles {
-				if rule.MatchString(context.URLPath) {
-					if securityContext.AuthUser != nil {
+			securityContext := CreateSecurityContext(context, s.tokenStore)
 
-					} else {
-						//						context.OutputError(status)
-						return
+			for rule, roles := range s.userRoles {
+				if rule.MatchString(context.URLPath) {
+					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+
+					if securityContext != nil && securityContext.AuthUser != nil {
+						for _, role := range securityContext.AuthUser.GetUserRoles() {
+							if regexRoles.MatchString(role) {
+								route.InvokeHandler(context, securityContext)
+								return
+							}
+						}
 					}
-					break
+					context.OutputError(utils.Status401())
+					return
 				}
 			}
 		}
-
-		context.PathQueries = pathQueries
-		route.InvokeHandler(context)
+		route.InvokeHandler(context, nil)
 		return
 	}
-
 	context.OutputError(utils.Status503())
 }
 

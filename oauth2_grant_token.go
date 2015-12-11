@@ -45,6 +45,11 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *SecurityContext) *utils.
 		return utils.Status400WithDescription("Invalid grant_type parameter.")
 	}
 
+	// If client_id and client_secret are not include, try to look at the authorization header
+	if len(clientID) == 0 && len(clientSecret) == 0 {
+		clientID, clientSecret, _ = c.BasicAuth()
+	}
+
 	/* Condition validation: Validate client_id */
 	if len(clientID) == 0 {
 		return utils.Status400WithDescription("Invalid client_id parameter.")

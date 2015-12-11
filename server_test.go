@@ -41,6 +41,7 @@ func createStore() *InMemoryTokenStore {
 				UserID:   userID,
 				Username: "admin",
 				Password: "admin",
+				Roles:    []string{"r_user", "r_admin"},
 			},
 			&AuthUserDefault{
 				UserID:   bson.NewObjectId(),

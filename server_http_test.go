@@ -1,6 +1,8 @@
 package oauth2
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -66,5 +68,69 @@ func Test_serveRequestWithOAuth2Disable(t *testing.T) {
 
 func Test_serveRequestWithOAuth2Enable(t *testing.T) {
 	defer os.Remove(ConfigFile)
-	//	server := DefaultServerWithTokenStore(createStore())
+	s := DefaultServerWithTokenStore(createStore())
+
+	s.Get("/user", func(c *RequestContext) {
+		data := map[string]string{"user": "r_user"}
+		c.OutputJSON(utils.Status200(), data)
+	})
+	s.Get("/admin", func(c *RequestContext) {
+		data := map[string]string{"user": "r_admin"}
+		c.OutputJSON(utils.Status200(), data)
+	})
+	s.Get("/manager", func(c *RequestContext) {
+		data := map[string]string{"user": "r_manager"}
+		c.OutputJSON(utils.Status200(), data)
+	})
+
+	s.AddRoles("/user", "r_user")
+	s.AddRoles("/admin", "r_admin")
+	s.AddRoles("/manager", "r_manager")
+
+	// Get token
+	request, _ := http.NewRequest("POST", "http://localhost:8080/token", strings.NewReader(fmt.Sprintf(
+		"grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
+		PasswordGrant,
+		clientID.Hex(),
+		clientSecret.Hex(),
+		username,
+		password,
+	)))
+	request.Header.Set("content-type", "application/x-www-form-urlencoded")
+	response := httptest.NewRecorder()
+	s.ServeHTTP(response, request)
+
+	if response.Code != 200 {
+		t.Errorf("Expected http status 200 but found %d", response.Code)
+	}
+
+	token := TokenResponse{}
+	json.Unmarshal(response.Body.Bytes(), &token)
+
+	// Test unauthorized access
+	request, _ = http.NewRequest("GET", "http://localhost:8080/user", nil)
+	response = httptest.NewRecorder()
+	s.ServeHTTP(response, request)
+	if response.Code != 401 {
+		t.Errorf("Expected http status 401 but found %d", response.Code)
+	}
+
+	// Test authorized access
+	request.Header.Set("authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
+	response = httptest.NewRecorder()
+	s.ServeHTTP(response, request)
+	if response.Code != 200 {
+		t.Errorf("Expected http status 200 but found %d", response.Code)
+	}
+	if string(response.Body.Bytes()) != "{\"user\":\"r_user\"}" {
+		t.Errorf("Expected \"%s\" but found \"%s\"", "{\"user\":\"r_user\"}", string(response.Body.Bytes()))
+	}
+
+	// Text invalid role
+	request, _ = http.NewRequest("GET", "http://localhost:8080/manager", nil)
+	response = httptest.NewRecorder()
+	s.ServeHTTP(response, request)
+	if response.Code != 401 {
+		t.Errorf("Expected http status 401 but found %d", response.Code)
+	}
 }
