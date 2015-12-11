@@ -14,29 +14,36 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// In Memory Store
+
 var userID = bson.NewObjectId()
+var username = "admin"
+var password = "admin"
+
 var clientID = bson.NewObjectId()
+var clientSecret = bson.NewObjectId()
+
 var createdTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 func createStore() *InMemoryTokenStore {
 	return &InMemoryTokenStore{
 		clients: []AuthClient{
 			&AuthClientDefault{
-				ClientID:     bson.NewObjectId(),
-				ClientSecret: bson.NewObjectId(),
+				ClientID:     clientID,
+				ClientSecret: clientSecret,
 				GrantTypes:   []string{PasswordGrant, RefreshTokenGrant},
 				RedirectURIs: []string{"http://sample01.com", "http://sample02.com"},
 			},
 		},
 		users: []AuthUser{
 			&AuthUserDefault{
-				UserID:   bson.NewObjectId(),
+				UserID:   userID,
 				Username: "admin",
 				Password: "admin",
 			},
 			&AuthUserDefault{
-				UserID:   userID,
+				UserID:   bson.NewObjectId(),
 				Username: "admin2",
 				Password: "admin2",
 			},
@@ -46,7 +53,6 @@ func createStore() *InMemoryTokenStore {
 				TokenID:     bson.NewObjectId(),
 				UserID:      userID,
 				ClientID:    clientID,
-				Token:       utils.GenerateToken(),
 				CreatedTime: createdTime,
 				ExpiredTime: createdTime.Add(3600 * time.Second),
 			},
@@ -56,7 +62,6 @@ func createStore() *InMemoryTokenStore {
 				TokenID:     bson.NewObjectId(),
 				UserID:      userID,
 				ClientID:    clientID,
-				Token:       utils.GenerateToken(),
 				CreatedTime: createdTime,
 				ExpiredTime: createdTime.Add(1209600 * time.Second),
 			},

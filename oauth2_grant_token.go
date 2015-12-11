@@ -212,23 +212,8 @@ func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext, s *SecurityContext) 
 		return utils.Status400WithDescription("refresh_token is expired.")
 	}
 
-	s.AuthAccessToken = g.store.FindAccessTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
 	s.AuthUser = g.store.FindUserWithID(recordToken.GetUserID())
 	s.AuthRefreshToken = recordToken
-	now := time.Now()
-
-	// Update access token
-	s.AuthAccessToken.SetToken(utils.GenerateToken())
-	s.AuthAccessToken.SetCreatedTime(now)
-	s.AuthAccessToken.SetExpiredTime(now.Add(g.config.DurationAccessToken))
-	g.store.SaveAccessToken(s.AuthAccessToken)
-
-	// Update refresh token
-	s.AuthRefreshToken.SetToken(utils.GenerateToken())
-	s.AuthRefreshToken.SetCreatedTime(now)
-	s.AuthRefreshToken.SetExpiredTime(now.Add(g.config.DurationRefreshToken))
-	g.store.SaveRefreshToken(s.AuthRefreshToken)
-
 	return nil
 }
 
@@ -240,7 +225,7 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 	if s.AuthAccessToken == nil {
 		accessToken := g.store.FindAccessTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
 		if accessToken != nil && accessToken.IsExpired() {
-			g.store.DeleteAccessToken(accessToken)
+			//			g.store.DeleteAccessToken(accessToken) // Note: Let the cron delete, it should be safer.
 			accessToken = nil
 		}
 
@@ -248,7 +233,6 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 			accessToken = g.store.CreateAccessToken(
 				s.AuthClient.GetClientID(),
 				s.AuthUser.GetUserID(),
-				utils.GenerateToken(),
 				now,
 				now.Add(g.config.DurationAccessToken),
 			)
@@ -260,7 +244,7 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 	if g.config.allowRefreshToken && s.AuthRefreshToken == nil {
 		refreshToken := g.store.FindRefreshTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
-			g.store.DeleteRefreshToken(refreshToken)
+			//			g.store.DeleteRefreshToken(refreshToken) // Note: Let the cron delete, it should be safer.
 			refreshToken = nil
 		}
 
@@ -268,7 +252,6 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 			refreshToken = g.store.CreateRefreshToken(
 				s.AuthClient.GetClientID(),
 				s.AuthUser.GetUserID(),
-				utils.GenerateToken(),
 				now,
 				now.Add(g.config.DurationRefreshToken),
 			)
@@ -276,12 +259,14 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 		s.AuthRefreshToken = refreshToken
 	}
 
+	// Generate response token
 	tokenResponse := &TokenResponse{
 		TokenType:   "Bearer",
 		AccessToken: s.AuthAccessToken.GetToken(),
 		ExpiresIn:   s.AuthAccessToken.GetExpiredTime().Unix() - time.Now().Unix(),
 	}
 
+	// Only add refresh_token if allowed
 	if g.config.allowRefreshToken {
 		tokenResponse.RefreshToken = s.AuthRefreshToken.GetToken()
 	}
