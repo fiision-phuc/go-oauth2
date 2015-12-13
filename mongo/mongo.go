@@ -1,40 +1,28 @@
 package mongo
 
 import (
-	"fmt"
 	"time"
 
 	"gopkg.in/mgo.v2"
 )
 
-type Config struct {
-	Host string
-	Port string
-
-	Database string
-	Username string
-	Password string
-}
-
 // Shared mongo session
-var config *Config = nil
+var config *MongoConfig = nil
 var session *mgo.Session = nil
 
-/** Create session. */
-func ConnectMongo(c Config) {
-	if len(c.Host) == 0 || len(c.Port) == 0 || len(c.Database) == 0 {
-		return
-	}
+// ConnectMongo creates session.
+func ConnectMongo() {
+	config = LoadMongoConfigs()
 
 	if session == nil {
 		var err error
 
 		dialInfo := &mgo.DialInfo{
-			Addrs:    []string{fmt.Sprintf("%s:%s", c.Host, c.Port)},
+			Addrs:    config.Addresses,
 			Timeout:  5 * time.Second,
-			Database: c.Database,
-			Username: c.Username,
-			Password: c.Password,
+			Database: config.Database,
+			Username: config.Username,
+			Password: config.Password,
 		}
 
 		// Create a session which maintains a pool of socket connections
@@ -42,9 +30,6 @@ func ConnectMongo(c Config) {
 		if err != nil {
 			panic(err)
 		}
-
-		// Keep config instance
-		config = &c
 	}
 }
 

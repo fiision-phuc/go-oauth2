@@ -3,6 +3,9 @@ package oauth2
 import (
 	"time"
 
+	"github.com/phuc0302/go-oauth2/mongo"
+	"github.com/phuc0302/go-oauth2/utils"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -48,7 +51,7 @@ func (a *AuthUserDefault) GetPassword() string { return a.Password }
 // GetUserRoles returns roles.
 func (a *AuthUserDefault) GetUserRoles() []string { return a.Roles }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TokenDefault descripts a mongodb Token document.
 type TokenDefault struct {
@@ -77,7 +80,7 @@ func (t *TokenDefault) GetCreatedTime() time.Time { return t.CreatedTime }
 // GetExpiredTime returns expired_time.
 func (t *TokenDefault) GetExpiredTime() time.Time { return t.ExpiredTime }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // InMemoryTokenStore descripts an in memory token store.
 type InMemoryTokenStore struct {
@@ -104,6 +107,10 @@ func (s *InMemoryTokenStore) FindUserWithID(userID string) AuthUser {
 
 // FindUserWithClient returns user associated with client_id and client_secret.
 func (s *InMemoryTokenStore) FindUserWithClient(clientID string, clientSecret string) AuthUser {
+	/* Condition validation */
+	if len(clientID) == 0 || len(clientSecret) == 0 {
+		return nil
+	}
 	return nil
 }
 
@@ -139,6 +146,11 @@ func (s *InMemoryTokenStore) FindClientWithID(clientID string) AuthClient {
 
 // FindClientWithCredential returns client with client_id and client_secret.
 func (s *InMemoryTokenStore) FindClientWithCredential(clientID string, clientSecret string) AuthClient {
+	/* Condition validation */
+	if len(clientID) == 0 || len(clientSecret) == 0 {
+		return nil
+	}
+
 	for _, client := range s.clients {
 		if client.GetClientID() == clientID && client.GetClientSecret() == clientSecret {
 			return client
@@ -238,4 +250,197 @@ func (s *InMemoryTokenStore) DeleteRefreshToken(token Token) {
 //func (s *InMemoryTokenStore) FindAuthorizationCode(authorizationCode string) {
 //}
 //func (s *InMemoryTokenStore) SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time) {
+//}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// MongoDBTokenStore descripts a mongodb token store.
+type MongoDBTokenStore struct {
+	Clients []AuthClient
+}
+
+// FindUserWithID returns user with user_id.
+func (m *MongoDBTokenStore) FindUserWithID(userID string) AuthUser {
+	/* Condition validation */
+	if len(userID) == 0 || !bson.IsObjectIdHex(userID) {
+		return nil
+	}
+	session, database := mongo.GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C("user")
+	user := AuthUserDefault{}
+
+	err := collection.FindId(bson.ObjectIdHex(userID)).One(&user)
+	if err != nil {
+		return nil
+	}
+	return &user
+}
+
+// FindUserWithClient returns user associated with client_id and client_secret.
+func (m *MongoDBTokenStore) FindUserWithClient(clientID string, clientSecret string) AuthUser {
+	/* Condition validation */
+	if len(clientID) == 0 || len(clientSecret) == 0 {
+		return nil
+	}
+	session, database := mongo.GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C("user")
+	user := AuthUserDefault{}
+
+	err := collection.FindId(bson.ObjectIdHex(clientID)).One(&user)
+	if err != nil {
+		return nil
+	}
+
+	if utils.ComparePassword(user.Password, clientSecret) {
+		return &user
+	}
+	return nil
+}
+
+// FindUserWithCredential returns user associated with username and password.
+func (m *MongoDBTokenStore) FindUserWithCredential(username string, password string) AuthUser {
+	/* Condition validation */
+	if len(username) == 0 || len(password) == 0 {
+		return nil
+	}
+	session, database := mongo.GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C("user")
+	user := AuthUserDefault{}
+
+	err := collection.FindId(bson.M{"username": username}).One(&user)
+	if err != nil {
+		return nil
+	}
+
+	if utils.ComparePassword(user.Password, password) {
+		return &user
+	}
+	return nil
+}
+
+// FindClientWithID returns user associated with client_id.
+func (m *MongoDBTokenStore) FindClientWithID(clientID string) AuthClient {
+	/* Condition validation */
+	if len(clientID) == 0 || !bson.IsObjectIdHex(clientID) {
+		return nil
+	}
+
+	for _, client := range m.Clients {
+		if client.GetClientID() == clientID {
+			return client
+		}
+	}
+	return nil
+}
+
+// FindClientWithCredential returns client with client_id and client_secret.
+func (m *MongoDBTokenStore) FindClientWithCredential(clientID string, clientSecret string) AuthClient {
+	/* Condition validation */
+	if len(clientID) == 0 || len(clientSecret) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(clientSecret) {
+		return nil
+	}
+
+	for _, client := range m.Clients {
+		if client.GetClientID() == clientID && client.GetClientSecret() == clientSecret {
+			return client
+		}
+	}
+	return nil
+}
+
+// FindAccessToken returns access_token.
+func (m *MongoDBTokenStore) FindAccessToken(token string) Token {
+	/* Condition validation */
+	if len(token) == 0 || !bson.IsObjectIdHex(token) {
+		return nil
+	}
+	return nil
+}
+
+// FindAccessTokenWithCredential returns access_token associated with client_id and user_id.
+func (m *MongoDBTokenStore) FindAccessTokenWithCredential(clientID string, userID string) Token {
+	/* Condition validation */
+	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
+		return nil
+	}
+	return nil
+}
+
+// CreateAccessToken returns new access_token.
+func (m *MongoDBTokenStore) CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) Token {
+	/* Condition validation */
+	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
+		return nil
+	}
+
+	newToken := &TokenDefault{
+		TokenID:     bson.NewObjectId(),
+		UserID:      bson.ObjectIdHex(userID),
+		ClientID:    bson.ObjectIdHex(clientID),
+		CreatedTime: createdTime,
+		ExpiredTime: expiredTime,
+	}
+	return newToken
+}
+
+// DeleteAccessToken deletes access_token.
+func (m *MongoDBTokenStore) DeleteAccessToken(token Token) {
+	/* Condition validation */
+	if token == nil {
+		return
+	}
+}
+
+// FindRefreshToken returns refresh_token.
+func (m *MongoDBTokenStore) FindRefreshToken(token string) Token {
+	/* Condition validation */
+	if len(token) == 0 || !bson.IsObjectIdHex(token) {
+		return nil
+	}
+	return nil
+}
+
+// FindRefreshTokenWithCredential returns refresh_token associated with client_id and user_id.
+func (m *MongoDBTokenStore) FindRefreshTokenWithCredential(clientID string, userID string) Token {
+	/* Condition validation */
+	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
+		return nil
+	}
+	return nil
+}
+
+// CreateRefreshToken returns new refresh_token.
+func (m *MongoDBTokenStore) CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) Token {
+	/* Condition validation */
+	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
+		return nil
+	}
+
+	newToken := &TokenDefault{
+		TokenID:     bson.NewObjectId(),
+		UserID:      bson.ObjectIdHex(userID),
+		ClientID:    bson.ObjectIdHex(clientID),
+		CreatedTime: createdTime,
+		ExpiredTime: expiredTime,
+	}
+	return newToken
+}
+
+// DeleteRefreshToken deletes refresh_token.
+func (m *MongoDBTokenStore) DeleteRefreshToken(token Token) {
+	/* Condition validation */
+	if token == nil {
+		return
+	}
+}
+
+//func (m *MongoDBTokenStore) FindAuthorizationCode(authorizationCode string) {
+//}
+//func (m *MongoDBTokenStore) SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time) {
 //}

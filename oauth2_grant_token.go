@@ -24,6 +24,9 @@ func CreateTokenGrant(config *Config, store TokenStore) *TokenGrant {
 }
 
 // MARK: Struct's public functions
+func (g *TokenGrant) HandleGet(c *RequestContext) {
+	c.OutputHTML("github.com/phuc0302/go-oauth2/templates/login.html", nil)
+}
 func (g *TokenGrant) HandleForm(c *RequestContext) {
 	securityContext := &SecurityContext{}
 	err := g.validateForm(c, securityContext)

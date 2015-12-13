@@ -1,18 +1,18 @@
 package mongo
 
 import (
+	"os"
 	"testing"
 
 	"gopkg.in/mgo.v2"
 )
 
-func TestCreateSession(t *testing.T) {
-	ConnectMongo(Config{Host: "", Port: "", Database: "", Username: "", Password: ""})
-	ConnectMongo(Config{Host: "localhost", Port: "27017", Database: "concept"})
-	ConnectMongo(Config{Host: "localhost", Port: "27017", Database: "concept", Username: "", Password: ""})
+func Test_CreateSession(t *testing.T) {
+	defer os.Remove(ConfigFile)
+	ConnectMongo()
 }
 
-func TestGetEventualSession(t *testing.T) {
+func Test_GetEventualSession(t *testing.T) {
 	session, database := GetEventualSession()
 
 	if session.Mode() != mgo.Eventual {

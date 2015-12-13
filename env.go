@@ -42,7 +42,7 @@ const ConfigFile = "oauth2.cfg"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Config struct descripts a configuration  object  that  will  be  used  during application life time.
+// Config descripts a configuration  object  that  will  be  used  during application life time.
 type Config struct {
 	Development bool `json:"development,omitempty"`
 
@@ -87,14 +87,18 @@ func CreateConfigs() {
 	config := Config{
 		Development: true,
 
-		Host:          host,
-		Port:          port,
-		TLSPort:       "8443",
-		HeaderSize:    5,
-		TimeoutRead:   10,
-		TimeoutWrite:  10,
-		AllowMethods:  []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
-		StaticFolders: map[string]string{"/resources": "resources"},
+		Host:         host,
+		Port:         port,
+		TLSPort:      "8443",
+		HeaderSize:   5,
+		TimeoutRead:  10,
+		TimeoutWrite: 10,
+		AllowMethods: []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
+
+		StaticFolders: map[string]string{
+			"/oauth2/resources": "github.com/phuc0302/go-oauth2/resources",
+			"/oauth2/templates": "github.com/phuc0302/go-oauth2/templates",
+		},
 
 		Grant:                     []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
 		DurationAccessToken:       3600,
