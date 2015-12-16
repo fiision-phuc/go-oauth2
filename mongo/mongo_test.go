@@ -19,7 +19,7 @@ func Test_GetEventualSession(t *testing.T) {
 		t.Error("Not Eventual Session.")
 	}
 
-	if database.Name != "concept" {
+	if database.Name != "mongo" {
 		t.Error("Invalid database name.")
 	}
 }

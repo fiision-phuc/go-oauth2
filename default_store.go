@@ -354,7 +354,7 @@ func (m *MongoDBTokenStore) FindClientWithCredential(clientID string, clientSecr
 	collection := database.C("client")
 	client := AuthClientDefault{}
 
-	err := collection.Find(bson.M{"client_id": bson.ObjectIdHex(clientID), "client_secret": bson.ObjectIdHex(clientSecret)}).One(&client)
+	err := collection.Find(bson.M{"_id": bson.ObjectIdHex(clientID), "client_secret": bson.ObjectIdHex(clientSecret)}).One(&client)
 	if err != nil {
 		return nil
 	}

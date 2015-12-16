@@ -41,7 +41,7 @@ func CreateMongoConfigs() {
 	// Create default config
 	config := MongoConfig{
 		Addresses: []string{fmt.Sprintf("%s:%s", host, port)},
-		Database:  "",
+		Database:  "mongo",
 		Username:  "",
 		Password:  "",
 	}
