@@ -1,7 +1,9 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/phuc0302/go-oauth2/utils"
@@ -25,7 +27,15 @@ func CreateTokenGrant(config *Config, store TokenStore) *TokenGrant {
 
 // MARK: Struct's public functions
 func (g *TokenGrant) HandleGet(c *RequestContext) {
-	c.OutputHTML("github.com/phuc0302/go-oauth2/templates/login.html", nil)
+	prefix := ""
+	for path, folder := range g.config.StaticFolders {
+		if strings.HasSuffix(path, "/templates") {
+			prefix = folder
+			break
+		}
+	}
+
+	c.OutputHTML(fmt.Sprintf("%s/login.html", prefix), nil)
 }
 func (g *TokenGrant) HandleForm(c *RequestContext) {
 	securityContext := &SecurityContext{}

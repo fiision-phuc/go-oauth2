@@ -36,6 +36,7 @@ func (r *DefaultRoute) InvokeHandler(c *RequestContext, s *SecurityContext) {
 
 	// Call handler
 	invoker.Map(c)
+	invoker.Map(s)
 	_, err := invoker.Invoke(handler)
 
 	// Condition validation: Validate error

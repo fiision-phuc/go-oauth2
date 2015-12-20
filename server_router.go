@@ -89,7 +89,10 @@ func (s *Server) addRoute(method string, pattern string, handler interface{}) {
 		for _, g := range s.groups {
 			groupPattern.WriteString(utils.FormatPath(g))
 		}
-		groupPattern.WriteString(utils.FormatPath(pattern))
+
+		if len(pattern) > 0 {
+			groupPattern.WriteString(utils.FormatPath(pattern))
+		}
 		pattern = groupPattern.String()
 	} else {
 		pattern = utils.FormatPath(pattern)
