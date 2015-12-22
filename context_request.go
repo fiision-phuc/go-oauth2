@@ -142,3 +142,10 @@ func (c *RequestContext) OutputHTML(filePath string, model interface{}) {
 		tmpl.Execute(c.response, model)
 	}
 }
+
+// OutputText returns a string.
+func (c *RequestContext) OutputText(status *utils.Status, data string) {
+	c.response.Header().Set("Content-Type", "text/plain")
+	c.response.WriteHeader(status.Code)
+	c.response.Write([]byte(data))
+}

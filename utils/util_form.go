@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -9,7 +11,7 @@ import (
 	"strings"
 )
 
-/** Bind data into form object. */
+// BindForm binds data into given form object.
 func BindForm(values url.Values, inputForm interface{}) error {
 	/* Condition validation */
 	if values == nil || inputForm == nil {
@@ -85,7 +87,7 @@ func BindForm(values url.Values, inputForm interface{}) error {
 	return nil
 }
 
-/** Extract urlencode form. */
+// ParseForm parses url-encode form into map.
 func ParseForm(request *http.Request) url.Values {
 	err := request.ParseForm()
 	if err != nil {
@@ -94,7 +96,7 @@ func ParseForm(request *http.Request) url.Values {
 	return request.Form
 }
 
-/** Extract multipart form. */
+// ParseMultipartForm parses multipart form into map.
 func ParseMultipartForm(request *http.Request) url.Values {
 	err := request.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
@@ -105,4 +107,15 @@ func ParseMultipartForm(request *http.Request) url.Values {
 	//		params[k] = v
 	//	}
 	return params
+}
+
+// ParseStatus parses data into status object.
+func ParseStatus(response *http.Response) *Status {
+	data, _ := ioutil.ReadAll(response.Body)
+	response.Body.Close()
+
+	status := Status{}
+	json.Unmarshal(data, &status)
+
+	return &status
 }
