@@ -37,6 +37,14 @@ const (
 	//	ImplicitGrant          = "implicit"           // For browser-based or mobile apps
 )
 
+// Define table names.
+const (
+	TableAccessToken  = "access_token"
+	TableClient       = "client"
+	TableRefreshToken = "refresh_token"
+	TableUser         = "user"
+)
+
 // ConfigFile defines configuration file's name.
 const ConfigFile = "oauth2.cfg"
 
