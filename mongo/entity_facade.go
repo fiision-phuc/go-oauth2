@@ -9,6 +9,12 @@ import (
 
 // EntityWithID finds entity with ID.
 func EntityWithID(tableName string, entityID bson.ObjectId, entity interface{}) error {
+	/* Condition validation */
+	if len(tableName) == 0 {
+		return fmt.Errorf("Invalid table name.")
+	} else if entity == nil {
+		return fmt.Errorf("Invalid entity object.")
+	}
 	session, database := GetMonotonicSession()
 	defer session.Close()
 
@@ -20,6 +26,14 @@ func EntityWithID(tableName string, entityID bson.ObjectId, entity interface{}) 
 
 // EntityWithCriteria finds entity with creteria.
 func EntityWithCriteria(tableName string, criterion map[string]interface{}, entity interface{}) error {
+	/* Condition validation */
+	if len(tableName) == 0 {
+		return fmt.Errorf("Invalid table name.")
+	} else if criterion == nil || len(criterion) == 0 {
+		return fmt.Errorf("Invalid criterion object.")
+	} else if entity == nil {
+		return fmt.Errorf("Invalid entity object.")
+	}
 	session, database := GetMonotonicSession()
 	defer session.Close()
 
@@ -31,22 +45,33 @@ func EntityWithCriteria(tableName string, criterion map[string]interface{}, enti
 
 // SaveEntity inserts/updates an entity.
 func SaveEntity(tableName string, entityID bson.ObjectId, entity interface{}) error {
+	/* Condition validation */
+	if len(tableName) == 0 {
+		return fmt.Errorf("Invalid table name.")
+	} else if entity == nil {
+		return fmt.Errorf("Invalid entity object.")
+	}
 	session, database := GetMonotonicSession()
 	defer session.Close()
 
 	session.SetSafe(&mgo.Safe{})
 	collection := database.C(tableName)
 
-	info, err := collection.UpsertId(entityID, entity)
-	fmt.Println(info)
+	_, err := collection.UpsertId(entityID, entity)
 	return err
 }
 
 // DeleteEntity deletes a record from collection.
-func DeleteEntity(tableName string, entityID bson.ObjectId) {
+func DeleteEntity(tableName string, entityID bson.ObjectId) error {
+	/* Condition validation */
+	if len(tableName) == 0 {
+		return fmt.Errorf("Invalid table name.")
+	}
 	session, database := GetMonotonicSession()
 	defer session.Close()
 
 	collection := database.C(tableName)
-	collection.RemoveId(entityID)
+	err := collection.RemoveId(entityID)
+
+	return err
 }
