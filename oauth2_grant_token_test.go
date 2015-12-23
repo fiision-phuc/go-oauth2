@@ -182,17 +182,17 @@ func Test_PasswordGrantFlow(t *testing.T) {
 		password,
 	)))
 	token3 := parseResult(response)
-	if token3.AccessToken == store.accessTokens[0].GetToken() {
-		t.Errorf("Expected %s but found %s", store.accessTokens[2].GetToken(), token3.AccessToken)
+	if len(store.accessTokens) != 2 {
+		t.Errorf("Expected %d but found %d", 2, len(store.accessTokens))
 	}
-	if token3.RefreshToken == store.refreshTokens[0].GetToken() {
-		t.Errorf("Expected %s but found %s", store.refreshTokens[2].GetToken(), token1.RefreshToken)
+	if len(store.refreshTokens) != 2 {
+		t.Errorf("Expected %d but found %d", 2, len(store.refreshTokens))
 	}
-	if token3.AccessToken != store.accessTokens[2].GetToken() {
-		t.Errorf("Expected %s but found %s", store.accessTokens[2].GetToken(), token3.AccessToken)
+	if token3.AccessToken != store.accessTokens[1].GetToken() {
+		t.Errorf("Expected \"%s\" but found \"%s\".", store.accessTokens[1].GetToken(), token3.AccessToken)
 	}
-	if token3.RefreshToken != store.refreshTokens[2].GetToken() {
-		t.Errorf("Expected %s but found %s", store.refreshTokens[2].GetToken(), token1.RefreshToken)
+	if token3.RefreshToken != store.refreshTokens[1].GetToken() {
+		t.Errorf("Expected \"%s\" but found \"%s\".", store.refreshTokens[1].GetToken(), token1.RefreshToken)
 	}
 }
 
@@ -238,7 +238,10 @@ func Test_RefreshGrantFlow(t *testing.T) {
 	)))
 	token2 := parseResult(response)
 	if token2.AccessToken == token1.AccessToken {
-		t.Errorf("Expect new access token but found %s", token1.AccessToken)
+		t.Errorf("Expected new access token but found %s", token1.AccessToken)
+	}
+	if len(store.accessTokens) != 1 {
+		t.Errorf("Expected %d but found %d", 1, len(store.accessTokens))
 	}
 }
 func Test_RefreshGrantFlowWithExpiredRefreshToken(t *testing.T) {
