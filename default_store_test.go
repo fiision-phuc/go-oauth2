@@ -9,18 +9,6 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-//	// Access Token
-//	FindAccessToken(token string) Token
-//	FindAccessTokenWithCredential(clientID string, userID string) Token
-//	CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) Token
-//	DeleteAccessToken(token Token)
-
-//	// Refresh Token
-//	FindRefreshToken(token string) Token
-//	FindRefreshTokenWithCredential(clientID string, userID string) Token
-//	CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) Token
-//	DeleteRefreshToken(token Token)
-
 func Test_MongoDBTokenStore(t *testing.T) {
 	defer os.Remove(mongo.ConfigFile)
 	mongo.ConnectMongo()
