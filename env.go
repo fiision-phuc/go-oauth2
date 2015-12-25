@@ -68,7 +68,7 @@ type Config struct {
 	DurationRefreshToken      time.Duration `json:"duration_refresh_token,omitempty"`      // In seconds
 	DurationAuthorizationCode time.Duration `json:"duration_authorization_code,omitempty"` // In seconds
 
-	allowRefreshToken bool           `json:"-"`
+	AllowRefreshToken bool           `json:"-"`
 	clientValidation  *regexp.Regexp `json:"-"`
 	grantsValidation  *regexp.Regexp `json:"-"`
 	methodsValidation *regexp.Regexp `json:"-"`
@@ -158,7 +158,7 @@ func LoadConfigs() *Config {
 
 	for _, grant := range config.Grant {
 		if grant == RefreshTokenGrant {
-			config.allowRefreshToken = true
+			config.AllowRefreshToken = true
 			break
 		}
 	}

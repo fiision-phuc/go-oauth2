@@ -68,7 +68,7 @@ func Test_TokenGrantNotAllowRefreshToken(t *testing.T) {
 		ClientCredentialsGrant,
 		PasswordGrant,
 	}
-	config.allowRefreshToken = false
+	config.AllowRefreshToken = false
 	config.grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.Grant, "|")))
 
 	controller := CreateTokenGrant(config, store)

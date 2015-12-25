@@ -264,7 +264,7 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 	}
 
 	// Generate refresh token if neccessary
-	if g.config.allowRefreshToken && s.AuthRefreshToken == nil {
+	if g.config.AllowRefreshToken && s.AuthRefreshToken == nil {
 		refreshToken := g.store.FindRefreshTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
 			g.store.DeleteRefreshToken(refreshToken) // Note: Let the cron delete, it should be safer.
@@ -290,7 +290,7 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 	}
 
 	// Only add refresh_token if allowed
-	if g.config.allowRefreshToken {
+	if g.config.AllowRefreshToken {
 		tokenResponse.RefreshToken = s.AuthRefreshToken.GetToken()
 	}
 	c.OutputJSON(utils.Status200(), tokenResponse)
