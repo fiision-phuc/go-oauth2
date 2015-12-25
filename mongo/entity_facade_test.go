@@ -14,6 +14,103 @@ type user struct {
 	Roles    []string      `bson:"roles,omitempty"`
 }
 
+func Test_AllEntities(t *testing.T) {
+	defer os.Remove(ConfigFile)
+	ConnectMongo()
+
+	// Reset database
+	session, database := GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C("Test")
+	defer collection.DropCollection()
+
+	collection.Insert(
+		&user{
+			UserID:   bson.NewObjectId(),
+			Username: "test1",
+			Password: "test1",
+			Roles:    []string{"r_user"},
+		},
+		&user{
+			UserID:   bson.NewObjectId(),
+			Username: "test2",
+			Password: "test2",
+			Roles:    []string{"r_user"},
+		},
+	)
+
+	var list []user
+	err := AllEntities("", &list)
+	if err.Error() != "Invalid table name." {
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid table name.", err.Error())
+	}
+
+	err = AllEntities("Test", nil)
+	if err.Error() != "Invalid list object." {
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid list object.", err.Error())
+	}
+
+	err = AllEntities("Test", &list)
+	if len(list) != 2 {
+		t.Errorf("Expected %d but found %d.", 2, err.Error())
+	}
+}
+
+func Test_AllEntitiesWithCriteria(t *testing.T) {
+	defer os.Remove(ConfigFile)
+	ConnectMongo()
+
+	// Reset database
+	session, database := GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C("Test")
+	defer collection.DropCollection()
+
+	collection.Insert(
+		&user{
+			UserID:   bson.NewObjectId(),
+			Username: "test1",
+			Password: "test1",
+			Roles:    []string{"r_user"},
+		},
+		&user{
+			UserID:   bson.NewObjectId(),
+			Username: "test1",
+			Password: "test1",
+			Roles:    []string{"r_user"},
+		},
+		&user{
+			UserID:   bson.NewObjectId(),
+			Username: "test2",
+			Password: "test2",
+			Roles:    []string{"r_user"},
+		},
+	)
+
+	var list []user
+	err := AllEntitiesWithCriteria("", nil, nil)
+	if err.Error() != "Invalid table name." {
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid table name.", err.Error())
+	}
+
+	err = AllEntitiesWithCriteria("Test", nil, nil)
+	if err.Error() != "Invalid criterion object." {
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid criterion object.", err.Error())
+	}
+
+	err = AllEntitiesWithCriteria("Test", map[string]interface{}{"username": "test1"}, nil)
+	if err.Error() != "Invalid list object." {
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid list object.", err.Error())
+	}
+
+	err = AllEntitiesWithCriteria("Test", map[string]interface{}{"username": "test1"}, &list)
+	if len(list) != 2 {
+		t.Errorf("Expected %d but found %d.", 2, err.Error())
+	}
+}
+
 func Test_EntityWithID(t *testing.T) {
 	defer os.Remove(ConfigFile)
 	ConnectMongo()
@@ -31,7 +128,7 @@ func Test_EntityWithID(t *testing.T) {
 
 	err = EntityWithID("Test", bson.NewObjectId(), nil)
 	if err.Error() != "Invalid entity object." {
-		t.Errorf("Expected \"%s\"  but found \"%s\"", "Invalid entity object.", err.Error())
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid entity object.", err.Error())
 	}
 
 	u := &user{}
@@ -58,12 +155,12 @@ func Test_EntityWithCriteria(t *testing.T) {
 
 	err = EntityWithCriteria("Test", nil, nil)
 	if err.Error() != "Invalid criterion object." {
-		t.Errorf("Expected \"%s\"  but found \"%s\"", "Invalid criterion object.", err.Error())
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid criterion object.", err.Error())
 	}
 
 	err = EntityWithCriteria("Test", bson.M{"_id": bson.NewObjectId()}, nil)
 	if err.Error() != "Invalid entity object." {
-		t.Errorf("Expected \"%s\"  but found \"%s\"", "Invalid entity object.", err.Error())
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid entity object.", err.Error())
 	}
 
 	u := &user{}
@@ -93,7 +190,7 @@ func Test_SaveEntity(t *testing.T) {
 	// [Case insert] we can skip the entityID
 	err = SaveEntity("Test", bson.NewObjectId(), nil)
 	if err.Error() != "Invalid entity object." {
-		t.Errorf("Expected \"%s\"  but found \"%s\"", "Invalid entity object.", err.Error())
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid entity object.", err.Error())
 	}
 
 	u := &user{
