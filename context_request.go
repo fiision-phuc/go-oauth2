@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -101,6 +102,11 @@ func (c *RequestContext) BindJSON(jsonObject interface{}) error {
 // MultipartFile returns an uploaded file by name.
 func (c *RequestContext) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
 	return c.request.FormFile(name)
+}
+
+// RawData returns a raw body.
+func (c *RequestContext) RawData() ([]byte, error) {
+	return ioutil.ReadAll(c.request.Body)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
