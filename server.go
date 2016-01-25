@@ -51,7 +51,6 @@ func DefaultServerWithTokenStore(tokenStore TokenStore) *Server {
 		tokenGrant := CreateTokenGrant(config, tokenStore)
 
 		//	server.Get("/authorize", grantAuthorization.HandleForm)
-		server.Get("/token", tokenGrant.HandleGet)
 		server.Post("/token", tokenGrant.HandleForm)
 	}
 	return server
