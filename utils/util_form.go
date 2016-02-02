@@ -91,7 +91,7 @@ func BindForm(values url.Values, inputForm interface{}) error {
 func ParseForm(request *http.Request) url.Values {
 	err := request.ParseForm()
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	return request.Form
 }
