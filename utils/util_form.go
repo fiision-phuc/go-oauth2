@@ -45,7 +45,7 @@ func BindForm(values url.Values, inputForm interface{}) error {
 				continue
 			}
 
-			if dataType == propertyType {
+			if dataType == propertyType && dataType.Kind() != reflect.String {
 				property.Set(value)
 
 			} else if dataType.Kind() == reflect.String {
@@ -71,6 +71,12 @@ func BindForm(values url.Values, inputForm interface{}) error {
 					integer, err := strconv.ParseInt(input, 10, 64)
 					if err == nil {
 						property.Set(reflect.ValueOf(integer))
+					}
+					break
+
+				case reflect.String:
+					if len(value.String()) > 0 {
+						property.Set(value)
 					}
 					break
 
