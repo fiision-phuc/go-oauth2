@@ -2,13 +2,19 @@ package oauth2
 
 import (
 	"encoding/json"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
 	"strings"
 	"text/template"
 
+	"github.com/nfnt/resize"
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
@@ -102,6 +108,37 @@ func (c *RequestContext) BindJSON(jsonObject interface{}) error {
 // MultipartFile returns an uploaded file by name.
 func (c *RequestContext) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
 	return c.request.FormFile(name)
+}
+
+// MoveImage moves a multipart image to destination and resize if neccessary.
+func (c *RequestContext) MoveImage(name string, destinationPath string, width uint, height uint) error {
+	input, imageInfo, err := c.MultipartFile(name)
+	if err != nil {
+		return err
+	}
+	defer input.Close()
+
+	// Decode image
+	var decodedImage image.Image = nil
+	if path.Ext(imageInfo.Filename) == ".jpg" {
+		decodedImage, err = jpeg.Decode(input)
+	} else if path.Ext(imageInfo.Filename) == ".png" {
+		decodedImage, err = png.Decode(input)
+	}
+
+	/* Condition validation: Validate decode image process */
+	if err != nil {
+		return err
+	}
+
+	// Create output file
+	output, _ := os.Create(destinationPath)
+	defer output.Close()
+
+	// Continue if image can be decoded.
+	resizedImage := resize.Resize(width, height, decodedImage, resize.Bicubic)
+	jpeg.Encode(output, resizedImage, nil)
+	return nil
 }
 
 // RawData returns a raw body.
