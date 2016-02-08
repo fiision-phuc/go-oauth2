@@ -22,6 +22,7 @@ const (
 	TemplateError        = "Invalid %s parameter."
 	TemplateErrorCode    = "Expected error code %d but found %d."
 	TemplateErrorMessage = "Expected \"Invalid %s parameter.\" but found \"%s\"."
+	TemplateErrorStatus  = "Expected \"%d\" but found \"%d\"."
 	TemplateErrorValue   = "Expected \"%s\" but found \"%s\"."
 )
 
