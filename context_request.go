@@ -136,7 +136,7 @@ func (c *RequestContext) MoveImage(name string, destinationPath string, width ui
 	defer output.Close()
 
 	// Continue if image can be decoded.
-	resizedImage := resize.Resize(width, height, decodedImage, resize.Bicubic)
+	resizedImage := resize.Resize(width, height, decodedImage, resize.NearestNeighbor)
 	jpeg.Encode(output, resizedImage, nil)
 	return nil
 }
