@@ -264,3 +264,41 @@ func Test_DeleteEntity(t *testing.T) {
 		t.Errorf("Expected 0 but found %d.", len(results))
 	}
 }
+
+func Test_DeleteEntityWithCriteria(t *testing.T) {
+	defer os.Remove(ConfigFile)
+	ConnectMongo()
+
+	// Reset database
+	session, database := GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C("Test")
+	collection.DropCollection()
+
+	u := &user{
+		UserID:   bson.NewObjectId(),
+		Username: "admin",
+		Password: "admin",
+		Roles:    []string{"r_user", "r_admin"},
+	}
+	SaveEntity("Test", u.UserID, u)
+
+	// Testing process
+	err := DeleteEntityWithCriteria("", map[string]interface{}{"username": "admin"})
+	if err.Error() != "Invalid table name." {
+		t.Errorf("Expected \"%s\"  but found \"%s\".", "Invalid table name.", err.Error())
+	}
+
+	err = DeleteEntityWithCriteria("Test", map[string]interface{}{"username": "admin"})
+	if err != nil {
+		t.Errorf("Expected no error but found none \"%s\".", err.Error())
+	}
+
+	var results []user
+	err = collection.Find(nil).All(&results)
+
+	if len(results) != 0 {
+		t.Errorf("Expected 0 but found %d.", len(results))
+	}
+}

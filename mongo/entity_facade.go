@@ -111,3 +111,20 @@ func DeleteEntity(tableName string, entityID bson.ObjectId) error {
 
 	return err
 }
+
+// DeleteEntityWithCriteria deletes a record from collection with creteria.
+func DeleteEntityWithCriteria(tableName string, criterion map[string]interface{}) error {
+	/* Condition validation */
+	if len(tableName) == 0 {
+		return fmt.Errorf("Invalid table name.")
+	} else if criterion == nil || len(criterion) == 0 {
+		return fmt.Errorf("Invalid criterion object.")
+	}
+	session, database := GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C(tableName)
+	_, err := collection.RemoveAll(criterion)
+
+	return err
+}
