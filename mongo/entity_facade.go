@@ -9,6 +9,12 @@ import (
 
 // AllEntities returns an entity collection sort by id.
 func AllEntities(tableName string, list interface{}) error {
+	err := AllEntitiesWithSortDescriptions(tableName, []string{"_id"}, list)
+	return err
+}
+
+// AllEntitiesWithSortDescriptions returns an entity collection sort by defined.
+func AllEntitiesWithSortDescriptions(tableName string, sortDescriptions []string, list interface{}) error {
 	/* Condition validation */
 	if len(tableName) == 0 {
 		return fmt.Errorf("Invalid table name.")
@@ -19,13 +25,19 @@ func AllEntities(tableName string, list interface{}) error {
 	defer session.Close()
 
 	collection := database.C(tableName)
-	err := collection.Find(nil).Sort("_id").All(list)
+	err := collection.Find(nil).Sort(sortDescriptions...).All(list)
 
 	return err
 }
 
 // AllEntities returns an entity collection base on criterion sort by id.
 func AllEntitiesWithCriteria(tableName string, criterion map[string]interface{}, list interface{}) error {
+	err := AllEntitiesWithCriteriaAndSortDescriptions(tableName, criterion, []string{"_id"}, list)
+	return err
+}
+
+// AllEntities returns an entity collection base on criterion sort by id.
+func AllEntitiesWithCriteriaAndSortDescriptions(tableName string, criterion map[string]interface{}, sortDescriptions []string, list interface{}) error {
 	/* Condition validation */
 	if len(tableName) == 0 {
 		return fmt.Errorf("Invalid table name.")
@@ -38,7 +50,7 @@ func AllEntitiesWithCriteria(tableName string, criterion map[string]interface{},
 	defer session.Close()
 
 	collection := database.C(tableName)
-	err := collection.Find(criterion).Sort("_id").All(list)
+	err := collection.Find(criterion).Sort(sortDescriptions...).All(list)
 
 	return err
 }

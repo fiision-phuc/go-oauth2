@@ -55,6 +55,9 @@ func Test_AllEntities(t *testing.T) {
 	if len(list) != 2 {
 		t.Errorf("Expected %d but found %d.", 2, err.Error())
 	}
+	if list[0].Username != "test1" {
+		t.Errorf("Expected \"%s\" but found \"%s\".", "test1", list[0].Username)
+	}
 }
 
 func Test_AllEntitiesWithCriteria(t *testing.T) {

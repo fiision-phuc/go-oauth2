@@ -17,6 +17,11 @@ import (
 
 // Template error message
 const (
+	ExpectedInvalidParameter   = "Expected \"Invalid %s parameter.\" but found \"%s\"."
+	ExpectedNil                = "Expected nil but found not nil."
+	ExpectedNotNil             = "Expected not nil but found nil."
+	ExpectedValueButFoundValue = "Expected \"%s\" but found \"%s\"."
+
 	TemplateNil          = "Expected nil but found not nil."
 	TemplateNotNil       = "Expected not nil but found nil."
 	TemplateError        = "Invalid %s parameter."
