@@ -72,4 +72,6 @@ type TokenResponse struct {
 	AccessToken  string `json:"access_token,omitempty"`
 	ExpiresIn    int64  `json:"expires_in,omitempty"`
 	RefreshToken string `json:"refresh_token,omitempty"`
+
+	Roles []string `json:"roles,omitempty"`
 }
