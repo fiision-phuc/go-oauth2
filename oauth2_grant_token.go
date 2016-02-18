@@ -274,6 +274,7 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 		TokenType:   "Bearer",
 		AccessToken: s.AuthAccessToken.GetToken(),
 		ExpiresIn:   s.AuthAccessToken.GetExpiredTime().Unix() - time.Now().Unix(),
+		Roles:       s.AuthUser.GetUserRoles(),
 	}
 
 	// Only add refresh_token if allowed
