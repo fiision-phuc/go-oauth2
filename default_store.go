@@ -33,10 +33,12 @@ func (a *AuthClientDefault) GetRedirectURIs() []string { return a.RedirectURIs }
 
 // AuthUserDefault descripts a mongodb AuthUser document.
 type AuthUserDefault struct {
-	UserID   bson.ObjectId `bson:"_id,omitempty"`
-	Username string        `bson:"username,omitempty"`
-	Password string        `bson:"password,omitempty"`
-	Roles    []string      `bson:"roles,omitempty"`
+	UserID     bson.ObjectId `bson:"_id,omitempty"`
+	FacebookID string        `bson:"facebook_id,omitempty"`
+
+	Username string   `bson:"username,omitempty"`
+	Password string   `bson:"password,omitempty"`
+	Roles    []string `bson:"roles,omitempty"`
 }
 
 // GetUserID returns user_id.
