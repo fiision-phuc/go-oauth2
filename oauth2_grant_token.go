@@ -101,7 +101,6 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *SecurityContext) *utils.
 
 	case RefreshTokenGrant:
 		return g.useRefreshTokenFlow(c, s)
-		break
 	}
 	return nil
 }

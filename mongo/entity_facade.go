@@ -30,13 +30,13 @@ func AllEntitiesWithSortDescriptions(tableName string, sortDescriptions []string
 	return err
 }
 
-// AllEntities returns an entity collection base on criterion sort by id.
+// AllEntitiesWithCriteria returns an entity collection base on criterion sort by id.
 func AllEntitiesWithCriteria(tableName string, criterion map[string]interface{}, list interface{}) error {
 	err := AllEntitiesWithCriteriaAndSortDescriptions(tableName, criterion, []string{"_id"}, list)
 	return err
 }
 
-// AllEntities returns an entity collection base on criterion sort by id.
+// AllEntitiesWithCriteriaAndSortDescriptions returns an entity collection base on criterion sort by id.
 func AllEntitiesWithCriteriaAndSortDescriptions(tableName string, criterion map[string]interface{}, sortDescriptions []string, list interface{}) error {
 	/* Condition validation */
 	if len(tableName) == 0 {

@@ -114,42 +114,41 @@ func (i *Invoker) Get(t reflect.Type) reflect.Value {
 	if val.IsValid() {
 		return val
 
-	} else {
-		// switch t.Kind() {
+	}
+	// switch t.Kind() {
 
-		// case reflect.Complex64, reflect.Complex128, reflect.Float32, reflect.Float64, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		// 	val = reflect.ValueOf(0)
-		// 	break
+	// case reflect.Complex64, reflect.Complex128, reflect.Float32, reflect.Float64, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	// 	val = reflect.ValueOf(0)
+	// 	break
 
-		// case reflect.Bool:
-		// 	val = reflect.ValueOf(false)
-		// 	break
+	// case reflect.Bool:
+	// 	val = reflect.ValueOf(false)
+	// 	break
 
-		// case reflect.String:
-		// 	val = reflect.ValueOf("")
-		// 	break
-		// }
+	// case reflect.String:
+	// 	val = reflect.ValueOf("")
+	// 	break
+	// }
 
-		if t.Kind() == reflect.Bool {
-			val = reflect.ValueOf(false)
-		} else if t.Kind() == reflect.Complex64 || t.Kind() == reflect.Complex128 || t.Kind() == reflect.Float32 || t.Kind() == reflect.Float64 || t.Kind() == reflect.Int || t.Kind() == reflect.Int8 || t.Kind() == reflect.Int16 || t.Kind() == reflect.Int32 || t.Kind() == reflect.Int64 || t.Kind() == reflect.Uint || t.Kind() == reflect.Uint8 || t.Kind() == reflect.Uint16 || t.Kind() == reflect.Uint32 || t.Kind() == reflect.Uint64 {
-			val = reflect.ValueOf(0)
-		} else if t.Kind() == reflect.String {
-			val = reflect.ValueOf("")
-		} else if t.Kind() == reflect.Array {
-			val = reflect.MakeSlice(t, 0, 0)
-		} else if t.Kind() == reflect.Map {
-			val = reflect.MakeMap(t)
-		} else if t.Kind() == reflect.Interface {
-			for k, v := range i.values {
-				if k.Implements(t) {
-					val = v
-					break
-				}
+	if t.Kind() == reflect.Bool {
+		val = reflect.ValueOf(false)
+	} else if t.Kind() == reflect.Complex64 || t.Kind() == reflect.Complex128 || t.Kind() == reflect.Float32 || t.Kind() == reflect.Float64 || t.Kind() == reflect.Int || t.Kind() == reflect.Int8 || t.Kind() == reflect.Int16 || t.Kind() == reflect.Int32 || t.Kind() == reflect.Int64 || t.Kind() == reflect.Uint || t.Kind() == reflect.Uint8 || t.Kind() == reflect.Uint16 || t.Kind() == reflect.Uint32 || t.Kind() == reflect.Uint64 {
+		val = reflect.ValueOf(0)
+	} else if t.Kind() == reflect.String {
+		val = reflect.ValueOf("")
+	} else if t.Kind() == reflect.Array {
+		val = reflect.MakeSlice(t, 0, 0)
+	} else if t.Kind() == reflect.Map {
+		val = reflect.MakeMap(t)
+	} else if t.Kind() == reflect.Interface {
+		for k, v := range i.values {
+			if k.Implements(t) {
+				val = v
+				break
 			}
-		} else {
-			val = reflect.ValueOf(nil)
 		}
+	} else {
+		val = reflect.ValueOf(nil)
 	}
 	return val
 }

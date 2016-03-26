@@ -7,12 +7,12 @@ import (
 )
 
 // Shared mongo session
-var config *MongoConfig = nil
-var session *mgo.Session = nil
+var config *Config
+var session *mgo.Session
 
 // ConnectMongo creates session.
 func ConnectMongo() {
-	config = LoadMongoConfigs()
+	config = LoadConfigs()
 
 	if session == nil {
 		var err error
@@ -33,40 +33,41 @@ func ConnectMongo() {
 	}
 }
 
-/** Clone session with eventual mode. */
+// GetEventualSession clones session with eventual mode.
 func GetEventualSession() (*mgo.Session, *mgo.Database) {
 	/* Condition validation */
 	if session == nil {
 		return nil, nil
-	} else {
-		// Apply mode (http://godoc.org/labix.org/v2/mgo#Session.SetMode)
-		clone := session.Clone()
-		clone.SetMode(mgo.Eventual, true)
-		return clone, clone.DB(config.Database)
 	}
+
+	// Apply mode (http://godoc.org/labix.org/v2/mgo#Session.SetMode)
+	clone := session.Clone()
+	clone.SetMode(mgo.Eventual, true)
+	return clone, clone.DB(config.Database)
 }
 
-/** Clone session with monotonic mode. */
+// GetMonotonicSession clones session with monotonic mode.
 func GetMonotonicSession() (*mgo.Session, *mgo.Database) {
 	/* Condition validation */
 	if session == nil {
 		return nil, nil
-	} else {
-		// Apply mode (http://godoc.org/labix.org/v2/mgo#Session.SetMode)
-		clone := session.Clone()
-		clone.SetMode(mgo.Monotonic, true)
-		return clone, clone.DB(config.Database)
 	}
+
+	// Apply mode (http://godoc.org/labix.org/v2/mgo#Session.SetMode)
+	clone := session.Clone()
+	clone.SetMode(mgo.Monotonic, true)
+	return clone, clone.DB(config.Database)
 }
 
-/** Clone session with strong mode. */
+// GetStrongSession clones session with strong mode.
 func GetStrongSession() (*mgo.Session, *mgo.Database) {
 	/* Condition validation */
 	if session == nil {
 		return nil, nil
-	} else {
-		clone := session.Clone()
-		clone.SetMode(mgo.Strong, true)
-		return clone, clone.DB(config.Database)
 	}
+
+	// Apply mode (http://godoc.org/labix.org/v2/mgo#Session.SetMode)
+	clone := session.Clone()
+	clone.SetMode(mgo.Strong, true)
+	return clone, clone.DB(config.Database)
 }

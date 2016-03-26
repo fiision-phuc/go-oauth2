@@ -56,7 +56,7 @@ func RecoveryRequest(c *RequestContext, isDevelopment bool) {
 	if err := recover(); err != nil {
 		log := log_message{
 			Uri:         c.URLPath,
-			Method:      fmt.Sprintf("%s | %s", c.Protocol, c.Method),
+			Method:      fmt.Sprintf("%s|%s", c.Protocol, c.Method),
 			RequestTime: time.Now().UTC().Format(time.RFC822),
 
 			Trace: callStack(3),

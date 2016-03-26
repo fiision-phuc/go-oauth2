@@ -6,13 +6,14 @@ import (
 	"regexp"
 )
 
+// DefaultRoute describes default implementation for route.
 type DefaultRoute struct {
 	Pattern  string
 	regex    *regexp.Regexp
 	handlers map[string]interface{}
 }
 
-// MARK: Struct's constructors
+// CreateDefaultRoute returns a default route object.
 func CreateDefaultRoute(pattern string) Route {
 	regexPattern := pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])

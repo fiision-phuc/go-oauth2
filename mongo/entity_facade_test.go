@@ -53,7 +53,7 @@ func Test_AllEntities(t *testing.T) {
 
 	err = AllEntities("Test", &list)
 	if len(list) != 2 {
-		t.Errorf("Expected %d but found %d.", 2, err.Error())
+		t.Errorf("Expected %d but found %d.", 2, len(list))
 	}
 	if list[0].Username != "test1" {
 		t.Errorf("Expected \"%s\" but found \"%s\".", "test1", list[0].Username)
@@ -110,7 +110,7 @@ func Test_AllEntitiesWithCriteria(t *testing.T) {
 
 	err = AllEntitiesWithCriteria("Test", map[string]interface{}{"username": "test1"}, &list)
 	if len(list) != 2 {
-		t.Errorf("Expected %d but found %d.", 2, err.Error())
+		t.Errorf("Expected %d but found %d.", 2, len(list))
 	}
 }
 
@@ -167,9 +167,16 @@ func Test_EntityWithCriteria(t *testing.T) {
 	}
 
 	u := &user{}
-	err = EntityWithID("Test", bson.NewObjectId(), u)
+	id := bson.NewObjectId()
+	err = EntityWithID("Test", id, u)
 	if err == nil {
 		t.Errorf("Expected \"%s\"  but found \"%s\".", "not found", err.Error())
+	}
+
+	recordUser := &user{}
+	err = EntityWithCriteria("Test", bson.M{"_id": id}, recordUser)
+	if recordUser.UserID != id {
+		t.Errorf("Expected \"%s\" but found \"%s\".", id.Hex(), recordUser.UserID.Hex())
 	}
 }
 

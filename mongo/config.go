@@ -14,17 +14,17 @@ const ConfigFile = "mongodb.cfg"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// MongoConfig descripts a configuration  object  that  will  be  used  during application life time.
-type MongoConfig struct {
+// Config descripts a configuration  object  that  will  be  used  during application life time.
+type Config struct {
 	Addresses []string `json:"addresses"`
-
-	Database string `json:"database"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Database  string   `json:"database"`
+	Username  string   `json:"username"`
+	Password  string   `json:"password"`
 }
 
 // CreateConfigs generates a default configuration file.
-func CreateMongoConfigs() {
+func CreateConfigs() {
+	/* Condition validation */
 	if utils.FileExisted(ConfigFile) {
 		os.Remove(ConfigFile)
 	}
@@ -39,7 +39,7 @@ func CreateMongoConfigs() {
 	}
 
 	// Create default config
-	config := MongoConfig{
+	config := Config{
 		Addresses: []string{fmt.Sprintf("%s:%s", host, port)},
 		Database:  "mongo",
 		Username:  "",
@@ -54,9 +54,10 @@ func CreateMongoConfigs() {
 }
 
 // LoadConfigs retrieves previous configuration from file.
-func LoadMongoConfigs() *MongoConfig {
+func LoadConfigs() *Config {
+	/* Condition validation */
 	if !utils.FileExisted(ConfigFile) {
-		CreateMongoConfigs()
+		CreateConfigs()
 	}
 
 	file, err := os.Open(ConfigFile)
@@ -69,7 +70,7 @@ func LoadMongoConfigs() *MongoConfig {
 		return nil
 	}
 
-	config := MongoConfig{}
+	config := Config{}
 	json.Unmarshal(bytes, &config)
 
 	return &config

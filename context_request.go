@@ -119,7 +119,7 @@ func (c *RequestContext) MoveImage(name string, destinationPath string, width ui
 	defer input.Close()
 
 	// Decode image
-	var decodedImage image.Image = nil
+	var decodedImage image.Image
 	if path.Ext(imageInfo.Filename) == ".jpg" {
 		decodedImage, err = jpeg.Decode(input)
 	} else if path.Ext(imageInfo.Filename) == ".png" {

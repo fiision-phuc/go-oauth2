@@ -68,10 +68,10 @@ type Config struct {
 	DurationRefreshToken      time.Duration `json:"duration_refresh_token,omitempty"`      // In seconds
 	DurationAuthorizationCode time.Duration `json:"duration_authorization_code,omitempty"` // In seconds
 
-	AllowRefreshToken bool           `json:"-"`
-	clientValidation  *regexp.Regexp `json:"-"`
-	grantsValidation  *regexp.Regexp `json:"-"`
-	methodsValidation *regexp.Regexp `json:"-"`
+	AllowRefreshToken bool `json:"-"`
+	clientValidation  *regexp.Regexp
+	grantsValidation  *regexp.Regexp
+	methodsValidation *regexp.Regexp
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

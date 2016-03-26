@@ -9,7 +9,7 @@ import (
 )
 
 func Test_CreateMongoConfigs(t *testing.T) {
-	CreateMongoConfigs()
+	CreateConfigs()
 	defer os.Remove(ConfigFile)
 
 	if !utils.FileExisted(ConfigFile) {
@@ -19,7 +19,7 @@ func Test_CreateMongoConfigs(t *testing.T) {
 
 func Test_LoadMongoConfigs(t *testing.T) {
 	defer os.Remove(ConfigFile)
-	config := LoadMongoConfigs()
+	config := LoadConfigs()
 
 	if config == nil {
 		t.Errorf("Expected not nil when %s is not available.", ConfigFile)
