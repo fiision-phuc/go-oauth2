@@ -18,7 +18,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	request.Method = strings.ToUpper(request.Method)
 
 	// Create context
-	context := CreateRequestContext(request, response)
+	context := CreateRequest(request, response)
 	defer RecoveryRequest(context, s.Development)
 
 	// Validate http request methods
@@ -48,7 +48,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 }
 
 // MARK: Struct's private functions
-func (s *Server) serveRequest(context *RequestContext) {
+func (s *Server) serveRequest(context *Request) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 
 	for _, route := range s.routes {
@@ -85,7 +85,7 @@ func (s *Server) serveRequest(context *RequestContext) {
 	context.OutputError(utils.Status503())
 }
 
-func (s *Server) serveResource(context *RequestContext, request *http.Request, response http.ResponseWriter) {
+func (s *Server) serveResource(context *Request, request *http.Request, response http.ResponseWriter) {
 	resourcePath := request.URL.Path
 
 	/* Condition validation: Check if file exist or not */

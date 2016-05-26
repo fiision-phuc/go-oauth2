@@ -39,7 +39,7 @@ func Test_serveRequestWithOAuth2Disable(t *testing.T) {
 	defer os.Remove(ConfigFile)
 	server := DefaultServer()
 
-	server.Get("/sample", func(c *RequestContext) {
+	server.Get("/sample", func(c *Request) {
 		data := map[string]string{"apple": "apple"}
 		c.OutputJSON(utils.Status200(), data)
 	})
@@ -70,15 +70,15 @@ func Test_serveRequestWithOAuth2Enable(t *testing.T) {
 	defer os.Remove(ConfigFile)
 	s := DefaultServerWithTokenStore(createStore())
 
-	s.Get("/user", func(c *RequestContext) {
+	s.Get("/user", func(c *Request) {
 		data := map[string]string{"user": "r_user"}
 		c.OutputJSON(utils.Status200(), data)
 	})
-	s.Get("/admin", func(c *RequestContext) {
+	s.Get("/admin", func(c *Request) {
 		data := map[string]string{"user": "r_admin"}
 		c.OutputJSON(utils.Status200(), data)
 	})
-	s.Get("/manager", func(c *RequestContext) {
+	s.Get("/manager", func(c *Request) {
 		data := map[string]string{"user": "r_manager"}
 		c.OutputJSON(utils.Status200(), data)
 	})

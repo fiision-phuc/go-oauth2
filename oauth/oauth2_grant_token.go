@@ -24,7 +24,7 @@ func CreateTokenGrant(config *Config, store TokenStore) *TokenGrant {
 }
 
 // MARK: Struct's public functions
-func (g *TokenGrant) HandleForm(c *RequestContext) {
+func (g *TokenGrant) HandleForm(c *Request) {
 	securityContext := &SecurityContext{}
 	err := g.validateForm(c, securityContext)
 	if err != nil {
@@ -35,7 +35,7 @@ func (g *TokenGrant) HandleForm(c *RequestContext) {
 }
 
 // MARK: Struct's private functions
-func (g *TokenGrant) validateForm(c *RequestContext, s *SecurityContext) *utils.Status {
+func (g *TokenGrant) validateForm(c *Request, s *SecurityContext) *utils.Status {
 	grantType := c.Queries.Get("grant_type")
 	clientID := c.Queries.Get("client_id")
 	clientSecret := c.Queries.Get("client_secret")
@@ -105,7 +105,7 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *SecurityContext) *utils.
 	return nil
 }
 
-func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, values url.Values, client *AuthClientDefault) {
+func (t *TokenGrant) handleAuthorizationCodeGrant(c *Request, values url.Values, client *AuthClientDefault) {
 	//	/* Condition validation: Validate redirect_uri */
 	//	if len(queryClient.RedirectURI) == 0 {
 	//		err := utils.Status400WithDescription("Missing redirect_uri parameter.")
@@ -179,7 +179,7 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 }
 
 // usePasswordFlow handle password flow.
-func (g *TokenGrant) usePasswordFlow(c *RequestContext, s *SecurityContext) *utils.Status {
+func (g *TokenGrant) usePasswordFlow(c *Request, s *SecurityContext) *utils.Status {
 	username := c.Queries.Get("username")
 	password := c.Queries.Get("password")
 
@@ -199,7 +199,7 @@ func (g *TokenGrant) usePasswordFlow(c *RequestContext, s *SecurityContext) *uti
 }
 
 // useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext, s *SecurityContext) *utils.Status {
+func (g *TokenGrant) useRefreshTokenFlow(c *Request, s *SecurityContext) *utils.Status {
 	queryToken := c.Queries.Get("refresh_token")
 
 	/* Condition validation: Validate refresh_token parameter */
@@ -227,7 +227,7 @@ func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext, s *SecurityContext) 
 }
 
 // finalizeToken summary and return result to client.
-func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
+func (g *TokenGrant) finalizeToken(c *Request, s *SecurityContext) {
 	now := time.Now()
 
 	// Generate access token if neccessary

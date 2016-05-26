@@ -1,4 +1,4 @@
-package oauth2
+package context
 
 import (
 	"encoding/json"
@@ -18,21 +18,20 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-// RequestContext descripts a HTTP URL request scope.
-type RequestContext struct {
-	Header map[string]string
-
+// Request descripts a HTTP URL request scope.
+type Request struct {
 	URLPath     string
 	Queries     url.Values
+	Header      map[string]string
 	PathQueries map[string]string
 
 	request  *http.Request
 	response http.ResponseWriter
 }
 
-// CreateRequestContext return a default context.
-func CreateRequestContext(request *http.Request, response http.ResponseWriter) *RequestContext {
-	context := &RequestContext{
+// CreateRequest return a default request context.
+func CreateRequest(request *http.Request, response http.ResponseWriter) *Request {
+	context := &Request{
 		URLPath:  request.URL.Path,
 		request:  request,
 		response: response,
@@ -80,38 +79,38 @@ func CreateRequestContext(request *http.Request, response http.ResponseWriter) *
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // BasicAuth returns basic authentication info.
-func (c *RequestContext) BasicAuth() (username string, password string, ok bool) {
+func (c *Request) BasicAuth() (username string, password string, ok bool) {
 	return c.request.BasicAuth()
 }
 
 // Method returns HTTP method.
-func (c *RequestContext) Method() string {
+func (c *Request) Method() string {
 	return c.request.Method
 }
 
 // Protocol returns HTTP protocol
-func (c *RequestContext) Protocol() string {
+func (c *Request) Protocol() string {
 	return c.request.Proto
 }
 
 // BindForm converts urlencode/multipart form to object.
-func (c *RequestContext) BindForm(inputForm interface{}) error {
+func (c *Request) BindForm(inputForm interface{}) error {
 	return utils.BindForm(c.Queries, inputForm)
 }
 
 // BindJSON converts json data to object.
-func (c *RequestContext) BindJSON(jsonObject interface{}) error {
+func (c *Request) BindJSON(jsonObject interface{}) error {
 	//	return c.request.FormFile(name)
 	return nil
 }
 
 // MultipartFile returns an uploaded file by name.
-func (c *RequestContext) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
+func (c *Request) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
 	return c.request.FormFile(name)
 }
 
 // MoveImage moves a multipart image to destination and resize if neccessary.
-func (c *RequestContext) MoveImage(name string, destinationPath string, width uint, height uint) error {
+func (c *Request) MoveImage(name string, destinationPath string, width uint, height uint) error {
 	input, imageInfo, err := c.MultipartFile(name)
 	if err != nil {
 		return err
@@ -142,19 +141,19 @@ func (c *RequestContext) MoveImage(name string, destinationPath string, width ui
 }
 
 // RawData returns a raw body.
-func (c *RequestContext) RawData() ([]byte, error) {
+func (c *Request) RawData() ([]byte, error) {
 	return ioutil.ReadAll(c.request.Body)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // OutputHeader returns an additional header.
-func (c *RequestContext) OutputHeader(headerName string, headerValue string) {
+func (c *Request) OutputHeader(headerName string, headerValue string) {
 	c.response.Header().Set(headerName, headerValue)
 }
 
 // OutputError returns an error JSON.
-func (c *RequestContext) OutputError(status *utils.Status) {
+func (c *Request) OutputError(status *utils.Status) {
 	c.response.Header().Set("Content-Type", "application/problem+json")
 	c.response.WriteHeader(status.Code)
 
@@ -163,12 +162,12 @@ func (c *RequestContext) OutputError(status *utils.Status) {
 }
 
 // OutputRedirect returns a redirect instruction.
-func (c *RequestContext) OutputRedirect(status *utils.Status, url string) {
+func (c *Request) OutputRedirect(status *utils.Status, url string) {
 	http.Redirect(c.response, c.request, url, status.Code)
 }
 
 // OutputJSON returns a JSON.
-func (c *RequestContext) OutputJSON(status *utils.Status, model interface{}) {
+func (c *Request) OutputJSON(status *utils.Status, model interface{}) {
 	c.response.Header().Set("Content-Type", "application/json")
 	c.response.WriteHeader(status.Code)
 
@@ -177,7 +176,7 @@ func (c *RequestContext) OutputJSON(status *utils.Status, model interface{}) {
 }
 
 // OutputHTML will render a HTML page.
-func (c *RequestContext) OutputHTML(filePath string, model interface{}) {
+func (c *Request) OutputHTML(filePath string, model interface{}) {
 	tmpl, error := template.ParseFiles(filePath)
 	if error != nil {
 		c.OutputError(utils.Status404())
@@ -187,7 +186,7 @@ func (c *RequestContext) OutputHTML(filePath string, model interface{}) {
 }
 
 // OutputText returns a string.
-func (c *RequestContext) OutputText(status *utils.Status, data string) {
+func (c *Request) OutputText(status *utils.Status, data string) {
 	c.response.Header().Set("Content-Type", "text/plain")
 	c.response.WriteHeader(status.Code)
 	c.response.Write([]byte(data))

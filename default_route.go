@@ -31,7 +31,7 @@ func (r *DefaultRoute) AddHandler(method string, handler interface{}) {
 	}
 	r.handlers[method] = handler
 }
-func (r *DefaultRoute) InvokeHandler(c *RequestContext, s *SecurityContext) {
+func (r *DefaultRoute) InvokeHandler(c *Request, s *SecurityContext) {
 	invoker := CreateInvoker()
 	handler := r.handlers[c.request.Method]
 

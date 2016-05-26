@@ -1,4 +1,4 @@
-package oauth2
+package context
 
 import (
 	"regexp"
@@ -15,7 +15,7 @@ type SecurityContext struct {
 	AuthRefreshToken Token
 }
 
-func CreateSecurityContext(requestContext *RequestContext, tokenStore TokenStore) *SecurityContext {
+func CreateSecurityContext(requestContext *Request, tokenStore TokenStore) *SecurityContext {
 	headerToken := strings.Trim(requestContext.Header["authorization"], " ")
 	isBearer := bearerRegex.MatchString(headerToken)
 

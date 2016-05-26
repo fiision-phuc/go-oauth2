@@ -24,7 +24,7 @@ func Test_TokenGrantGeneralValidation(t *testing.T) {
 
 	controller := CreateTokenGrant(config, store)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := CreateRequestContext(r, w)
+		context := CreateRequest(r, w)
 		controller.HandleForm(context)
 	}))
 	defer ts.Close()
@@ -73,7 +73,7 @@ func Test_TokenGrantNotAllowRefreshToken(t *testing.T) {
 
 	controller := CreateTokenGrant(config, store)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := CreateRequestContext(r, w)
+		context := CreateRequest(r, w)
 		controller.HandleForm(context)
 	}))
 	defer ts.Close()
@@ -109,7 +109,7 @@ func Test_PasswordGrantFlow(t *testing.T) {
 
 	controller := CreateTokenGrant(config, store)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := CreateRequestContext(r, w)
+		context := CreateRequest(r, w)
 		controller.HandleForm(context)
 	}))
 	defer ts.Close()
@@ -203,7 +203,7 @@ func Test_RefreshGrantFlow(t *testing.T) {
 
 	controller := CreateTokenGrant(config, store)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := CreateRequestContext(r, w)
+		context := CreateRequest(r, w)
 		controller.HandleForm(context)
 	}))
 	defer ts.Close()
@@ -251,7 +251,7 @@ func Test_RefreshGrantFlowWithExpiredRefreshToken(t *testing.T) {
 
 	controller := CreateTokenGrant(config, store)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := CreateRequestContext(r, w)
+		context := CreateRequest(r, w)
 		controller.HandleForm(context)
 	}))
 	defer ts.Close()
