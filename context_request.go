@@ -1,4 +1,4 @@
-package context
+package oauth2
 
 import (
 	"encoding/json"
@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"strings"
 	"text/template"
 
 	"github.com/nfnt/resize"
@@ -29,54 +28,7 @@ type Request struct {
 	response http.ResponseWriter
 }
 
-// CreateRequest return a default request context.
-func CreateRequest(request *http.Request, response http.ResponseWriter) *Request {
-	context := &Request{
-		URLPath:  request.URL.Path,
-		request:  request,
-		response: response,
-	}
-
-	// Format request headers
-	context.Header = make(map[string]string, len(request.Header))
-	for k, v := range request.Header {
-		context.Header[strings.ToLower(k)] = strings.ToLower(v[0])
-	}
-
-	// Parse body context if neccessary
-	switch context.Method() {
-
-	case GET:
-		params := request.URL.Query()
-		if len(params) > 0 {
-			context.Queries = params
-		}
-		break
-
-	case POST, PATCH:
-		contentType := request.Header.Get("content-type")
-
-		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-			params := utils.ParseForm(request)
-			if len(params) > 0 {
-				context.Queries = params
-			}
-		} else if strings.Contains(contentType, "multipart/form-data") {
-			params := utils.ParseMultipartForm(request)
-
-			if len(params) > 0 {
-				context.Queries = params
-			}
-		}
-		break
-
-	default:
-		break
-	}
-	return context
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // BasicAuth returns basic authentication info.
 func (c *Request) BasicAuth() (username string, password string, ok bool) {

@@ -1,14 +1,15 @@
-package oauth2
+package oauth
 
 import (
 	"net/url"
-	"time"
 
+	"github.com/phuc0302/go-oauth2/config"
+	"github.com/phuc0302/go-oauth2/context"
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
 type TokenGrant struct {
-	config *Config
+	config *config.Config
 	store  TokenStore
 
 	values    url.Values
@@ -16,7 +17,7 @@ type TokenGrant struct {
 }
 
 // MARK: Struct's constructors
-func CreateTokenGrant(config *Config, store TokenStore) *TokenGrant {
+func CreateTokenGrant(config *config.Config, store TokenStore) *TokenGrant {
 	return &TokenGrant{
 		config: config,
 		store:  store,
@@ -24,88 +25,88 @@ func CreateTokenGrant(config *Config, store TokenStore) *TokenGrant {
 }
 
 // MARK: Struct's public functions
-func (g *TokenGrant) HandleForm(c *Request) {
-	securityContext := &SecurityContext{}
-	err := g.validateForm(c, securityContext)
+func (g *TokenGrant) HandleForm(c *context.Request) {
+	security := &context.Security{}
+	err := g.validateForm(c, security)
 	if err != nil {
 		c.OutputError(err)
 	} else {
-		g.finalizeToken(c, securityContext)
+		g.finalizeToken(c, security)
 	}
 }
 
 // MARK: Struct's private functions
-func (g *TokenGrant) validateForm(c *Request, s *SecurityContext) *utils.Status {
-	grantType := c.Queries.Get("grant_type")
-	clientID := c.Queries.Get("client_id")
-	clientSecret := c.Queries.Get("client_secret")
+func (g *TokenGrant) validateForm(c *context.Request, s *context.Security) *utils.Status {
+	//	grantType := c.Queries.Get("grant_type")
+	//	clientID := c.Queries.Get("client_id")
+	//	clientSecret := c.Queries.Get("client_secret")
 
-	/* Condition validation: Validate grant_type */
-	if !(len(grantType) >= 0 && g.config.grantsValidation.MatchString(grantType)) {
-		return utils.Status400WithDescription("Invalid grant_type parameter.")
-	}
+	//	/* Condition validation: Validate grant_type */
+	//	if !(len(grantType) >= 0 && g.config.grantsValidation.MatchString(grantType)) {
+	//		return utils.Status400WithDescription("Invalid grant_type parameter.")
+	//	}
 
-	// If client_id and client_secret are not include, try to look at the authorization header
-	if len(clientID) == 0 && len(clientSecret) == 0 {
-		clientID, clientSecret, _ = c.BasicAuth()
-	}
+	//	// If client_id and client_secret are not include, try to look at the authorization header
+	//	if len(clientID) == 0 && len(clientSecret) == 0 {
+	//		clientID, clientSecret, _ = c.BasicAuth()
+	//	}
 
-	/* Condition validation: Validate client_id */
-	if len(clientID) == 0 {
-		return utils.Status400WithDescription("Invalid client_id parameter.")
-	}
+	//	/* Condition validation: Validate client_id */
+	//	if len(clientID) == 0 {
+	//		return utils.Status400WithDescription("Invalid client_id parameter.")
+	//	}
 
-	/* Condition validation: Validate client_secret */
-	if len(clientSecret) == 0 {
-		return utils.Status400WithDescription("Invalid client_secret parameter.")
-	}
+	//	/* Condition validation: Validate client_secret */
+	//	if len(clientSecret) == 0 {
+	//		return utils.Status400WithDescription("Invalid client_secret parameter.")
+	//	}
 
-	/* Condition validation: Check the store */
-	recordClient := g.store.FindClientWithCredential(clientID, clientSecret)
-	if recordClient == nil {
-		return utils.Status400WithDescription("Invalid client_id or client_secret parameter.")
-	}
+	//	/* Condition validation: Check the store */
+	//	recordClient := g.store.FindClientWithCredential(clientID, clientSecret)
+	//	if recordClient == nil {
+	//		return utils.Status400WithDescription("Invalid client_id or client_secret parameter.")
+	//	}
 
-	/* Condition validation: Check grant_type for client */
-	isGranted := false
-	for _, recordGrant := range recordClient.GetGrantTypes() {
-		if recordGrant == grantType {
-			isGranted = true
-			break
-		}
-	}
-	if !isGranted {
-		return utils.Status400WithDescription("The grant_type is unauthorised for this client_id.")
-	}
-	s.AuthClient = recordClient
+	//	/* Condition validation: Check grant_type for client */
+	//	isGranted := false
+	//	for _, recordGrant := range recordClient.GetGrantTypes() {
+	//		if recordGrant == grantType {
+	//			isGranted = true
+	//			break
+	//		}
+	//	}
+	//	if !isGranted {
+	//		return utils.Status400WithDescription("The grant_type is unauthorised for this client_id.")
+	//	}
+	//	s.AuthClient = recordClient
 
-	// Choose authentication flow
-	switch grantType {
+	//	// Choose authentication flow
+	//	switch grantType {
 
-	case AuthorizationCodeGrant:
-		// FIX FIX FIX: Going to do soon
-		//		g.handleAuthorizationCodeGrant(c, values, queryClient)
-		break
+	//	case AuthorizationCodeGrant:
+	//		// FIX FIX FIX: Going to do soon
+	//		//		g.handleAuthorizationCodeGrant(c, values, queryClient)
+	//		break
 
-		//	case ImplicitGrant:
-		//		// FIX FIX FIX: Going to do soon
-		//		break
+	//		//	case ImplicitGrant:
+	//		//		// FIX FIX FIX: Going to do soon
+	//		//		break
 
-	case ClientCredentialsGrant:
-		// FIX FIX FIX: Going to do soon
-		//		g.handleClientCredentialsGrant()
-		break
+	//	case ClientCredentialsGrant:
+	//		// FIX FIX FIX: Going to do soon
+	//		//		g.handleClientCredentialsGrant()
+	//		break
 
-	case PasswordGrant:
-		return g.usePasswordFlow(c, s)
+	//	case PasswordGrant:
+	//		return g.usePasswordFlow(c, s)
 
-	case RefreshTokenGrant:
-		return g.useRefreshTokenFlow(c, s)
-	}
+	//	case RefreshTokenGrant:
+	//		return g.useRefreshTokenFlow(c, s)
+	//	}
 	return nil
 }
 
-func (t *TokenGrant) handleAuthorizationCodeGrant(c *Request, values url.Values, client *AuthClientDefault) {
+func (t *TokenGrant) handleAuthorizationCodeGrant(c *context.Request, values url.Values, client AuthClient) {
 	//	/* Condition validation: Validate redirect_uri */
 	//	if len(queryClient.RedirectURI) == 0 {
 	//		err := utils.Status400WithDescription("Missing redirect_uri parameter.")
@@ -179,7 +180,7 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 }
 
 // usePasswordFlow handle password flow.
-func (g *TokenGrant) usePasswordFlow(c *Request, s *SecurityContext) *utils.Status {
+func (g *TokenGrant) usePasswordFlow(c *context.Request, s *context.Security) *utils.Status {
 	username := c.Queries.Get("username")
 	password := c.Queries.Get("password")
 
@@ -194,91 +195,91 @@ func (g *TokenGrant) usePasswordFlow(c *Request, s *SecurityContext) *utils.Stat
 		return utils.Status400WithDescription("Invalid username or password parameter.")
 	}
 
-	s.AuthUser = recordUser
+	//	s.AuthUser = recordUser
 	return nil
 }
 
 // useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) useRefreshTokenFlow(c *Request, s *SecurityContext) *utils.Status {
-	queryToken := c.Queries.Get("refresh_token")
+func (g *TokenGrant) useRefreshTokenFlow(c *context.Request, s *context.Security) *utils.Status {
+	//	queryToken := c.Queries.Get("refresh_token")
 
-	/* Condition validation: Validate refresh_token parameter */
-	if len(queryToken) == 0 {
-		return utils.Status400WithDescription("Invalid refresh_token parameter.")
-	}
+	//	/* Condition validation: Validate refresh_token parameter */
+	//	if len(queryToken) == 0 {
+	//		return utils.Status400WithDescription("Invalid refresh_token parameter.")
+	//	}
 
-	/* Condition validation: Validate refresh_token */
-	recordToken := g.store.FindRefreshToken(queryToken)
-	if recordToken == nil || recordToken.GetClientID() != s.AuthClient.GetClientID() {
-		return utils.Status400WithDescription("Invalid refresh_token parameter.")
+	//	/* Condition validation: Validate refresh_token */
+	//	recordToken := g.store.FindRefreshToken(queryToken)
+	//	if recordToken == nil || recordToken.GetClientID() != s.AuthClient.GetClientID() {
+	//		return utils.Status400WithDescription("Invalid refresh_token parameter.")
 
-	} else if recordToken.IsExpired() {
-		return utils.Status400WithDescription("refresh_token is expired.")
-	}
+	//	} else if recordToken.IsExpired() {
+	//		return utils.Status400WithDescription("refresh_token is expired.")
+	//	}
 
-	s.AuthUser = g.store.FindUserWithID(recordToken.GetUserID())
-	s.AuthRefreshToken = recordToken
+	//	s.AuthUser = g.store.FindUserWithID(recordToken.GetUserID())
+	//	s.AuthRefreshToken = recordToken
 
-	// Delete current access token
-	accessToken := g.store.FindAccessTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
-	g.store.DeleteAccessToken(accessToken)
+	//	// Delete current access token
+	//	accessToken := g.store.FindAccessTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
+	//	g.store.DeleteAccessToken(accessToken)
 
 	return nil
 }
 
 // finalizeToken summary and return result to client.
-func (g *TokenGrant) finalizeToken(c *Request, s *SecurityContext) {
-	now := time.Now()
+func (g *TokenGrant) finalizeToken(c *context.Request, s *context.Security) {
+	//	now := time.Now()
 
-	// Generate access token if neccessary
-	if s.AuthAccessToken == nil {
-		accessToken := g.store.FindAccessTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
-		if accessToken != nil && accessToken.IsExpired() {
-			g.store.DeleteAccessToken(accessToken) // Note: Let the cron delete, it should be safer.
-			accessToken = nil
-		}
+	//	// Generate access token if neccessary
+	//	if s.AuthAccessToken == nil {
+	//		accessToken := g.store.FindAccessTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
+	//		if accessToken != nil && accessToken.IsExpired() {
+	//			g.store.DeleteAccessToken(accessToken) // Note: Let the cron delete, it should be safer.
+	//			accessToken = nil
+	//		}
 
-		if accessToken == nil {
-			accessToken = g.store.CreateAccessToken(
-				s.AuthClient.GetClientID(),
-				s.AuthUser.GetUserID(),
-				now,
-				now.Add(g.config.DurationAccessToken),
-			)
-		}
-		s.AuthAccessToken = accessToken
-	}
+	//		if accessToken == nil {
+	//			accessToken = g.store.CreateAccessToken(
+	//				s.AuthClient.GetClientID(),
+	//				s.AuthUser.GetUserID(),
+	//				now,
+	//				now.Add(g.config.DurationAccessToken),
+	//			)
+	//		}
+	//		s.AuthAccessToken = accessToken
+	//	}
 
-	// Generate refresh token if neccessary
-	if g.config.AllowRefreshToken && s.AuthRefreshToken == nil {
-		refreshToken := g.store.FindRefreshTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
-		if refreshToken != nil && refreshToken.IsExpired() {
-			g.store.DeleteRefreshToken(refreshToken) // Note: Let the cron delete, it should be safer.
-			refreshToken = nil
-		}
+	//	// Generate refresh token if neccessary
+	//	if g.config.AllowRefreshToken && s.AuthRefreshToken == nil {
+	//		refreshToken := g.store.FindRefreshTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
+	//		if refreshToken != nil && refreshToken.IsExpired() {
+	//			g.store.DeleteRefreshToken(refreshToken) // Note: Let the cron delete, it should be safer.
+	//			refreshToken = nil
+	//		}
 
-		if refreshToken == nil {
-			refreshToken = g.store.CreateRefreshToken(
-				s.AuthClient.GetClientID(),
-				s.AuthUser.GetUserID(),
-				now,
-				now.Add(g.config.DurationRefreshToken),
-			)
-		}
-		s.AuthRefreshToken = refreshToken
-	}
+	//		if refreshToken == nil {
+	//			refreshToken = g.store.CreateRefreshToken(
+	//				s.AuthClient.GetClientID(),
+	//				s.AuthUser.GetUserID(),
+	//				now,
+	//				now.Add(g.config.DurationRefreshToken),
+	//			)
+	//		}
+	//		s.AuthRefreshToken = refreshToken
+	//	}
 
-	// Generate response token
-	tokenResponse := &TokenResponse{
-		TokenType:   "Bearer",
-		AccessToken: s.AuthAccessToken.GetToken(),
-		ExpiresIn:   s.AuthAccessToken.GetExpiredTime().Unix() - time.Now().Unix(),
-		Roles:       s.AuthUser.GetUserRoles(),
-	}
+	//	// Generate response token
+	//	tokenResponse := &TokenResponse{
+	//		TokenType:   "Bearer",
+	//		AccessToken: s.AuthAccessToken.GetToken(),
+	//		ExpiresIn:   s.AuthAccessToken.GetExpiredTime().Unix() - time.Now().Unix(),
+	//		Roles:       s.AuthUser.GetUserRoles(),
+	//	}
 
-	// Only add refresh_token if allowed
-	if g.config.AllowRefreshToken {
-		tokenResponse.RefreshToken = s.AuthRefreshToken.GetToken()
-	}
-	c.OutputJSON(utils.Status200(), tokenResponse)
+	//	// Only add refresh_token if allowed
+	//	if g.config.AllowRefreshToken {
+	//		tokenResponse.RefreshToken = s.AuthRefreshToken.GetToken()
+	//	}
+	//	c.OutputJSON(utils.Status200(), tokenResponse)
 }

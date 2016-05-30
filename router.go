@@ -1,117 +1,73 @@
 package oauth2
 
-import (
-	"bytes"
+import "github.com/phuc0302/go-oauth2/config"
 
-	"github.com/phuc0302/go-oauth2/utils"
-)
+//// GroupRole binds user's roles to all url with same prefix.
+//func (s *Server) GroupRole(groupPath string, roles string) {
+//	s.router.GroupRole(s, groupPath, roles)
+//}
 
-// Group all url with same prefix.
-func (s *Server) Group(urlGroup string, function func(s *Server)) {
-	s.groups = append(s.groups, urlGroup)
-	function(s)
+//// Bind an url pattern with user's roles.
+//func (s *Server) BindRole(httpMethod string, urlPattern string, roles string) {
+//	s.router.BindRole(httpMethod, urlPattern, roles)
+//}
 
-	s.groups = s.groups[:len(s.groups)-1]
+//// GroupRoute routes all url with same prefix.
+//func (s *Server) GroupRoute(urlGroup string, function func(s *Server)) {
+//	s.router.GroupRoute(s, urlGroup, function)
+//}
+
+// Copy routes copy request to registered handler.
+func (s *Server) Copy(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.COPY, urlPattern, handler)
 }
 
-// Copy method.
-func (s *Server) Copy(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(COPY, urlPath, handler)
+// Delete routes delete request to registered handler.
+func (s *Server) Delete(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.DELETE, urlPattern, handler)
 }
 
-// Delete method.
-func (s *Server) Delete(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(DELETE, urlPath, handler)
+// Get routes get request to registered handler.
+func (s *Server) Get(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.GET, urlPattern, handler)
 }
 
-// Get method.
-func (s *Server) Get(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(GET, urlPath, handler)
+// Head routes head request to registered handler.
+func (s *Server) Head(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.HEAD, urlPattern, handler)
 }
 
-// Head method.
-func (s *Server) Head(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(HEAD, urlPath, handler)
+// Link routes link request to registered handler.
+func (s *Server) Link(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.LINK, urlPattern, handler)
 }
 
-// Link method.
-func (s *Server) Link(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(LINK, urlPath, handler)
+// Options routes options request to registered handler.
+func (s *Server) Options(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.OPTIONS, urlPattern, handler)
 }
 
-// Options method.
-func (s *Server) Options(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(OPTIONS, urlPath, handler)
+// Patch routes patch request to registered handler.
+func (s *Server) Patch(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.PATCH, urlPattern, handler)
 }
 
-// Patch method.
-func (s *Server) Patch(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(PATCH, urlPath, handler)
+// Post routes post request to registered handler.
+func (s *Server) Post(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.POST, urlPattern, handler)
 }
 
-// Post method.
-func (s *Server) Post(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(POST, urlPath, handler)
+// Purge routes purge request to registered handler.
+func (s *Server) Purge(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.PURGE, urlPattern, handler)
 }
 
-// Purge method.
-func (s *Server) Purge(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(PURGE, urlPath, handler)
+// Put routes put request to registered handler.
+func (s *Server) Put(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.PUT, urlPattern, handler)
 }
 
-// Put method.
-func (s *Server) Put(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(PUT, urlPath, handler)
-}
-
-// Unlink method.
-func (s *Server) Unlink(urlPath string, handler interface{}) {
-	defer RecoveryInternal(s.logger)
-	s.addRoute(UNLINK, urlPath, handler)
-}
-
-// MARK: Struct's private functions
-func (s *Server) addRoute(method string, pattern string, handler interface{}) {
-	// Format pattern before assigned to route
-	if len(s.groups) > 0 {
-		var groupPattern bytes.Buffer
-
-		for _, g := range s.groups {
-			groupPattern.WriteString(utils.FormatPath(g))
-		}
-
-		if len(pattern) > 0 {
-			groupPattern.WriteString(utils.FormatPath(pattern))
-		}
-		pattern = groupPattern.String()
-	} else {
-		pattern = utils.FormatPath(pattern)
-	}
-
-	// Look for existing one before create new
-	for _, route := range s.routes {
-		if route.GetPattern() == pattern {
-			route.AddHandler(method, handler)
-			s.logger.Printf("%-6s -> %s\n", method, pattern)
-			return
-		}
-	}
-
-	// Create new route
-	newRoute := CreateDefaultRoute(pattern)
-	newRoute.AddHandler(method, handler)
-
-	// Add to collection
-	s.routes = append(s.routes, newRoute)
-	s.logger.Printf("%-6s -> %s\n", method, pattern)
+// Unlink routes unlink request to registered handler.
+func (s *Server) Unlink(urlPattern string, handler interface{}) {
+	s.router.BindRoute(config.UNLINK, urlPattern, handler)
 }
