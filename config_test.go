@@ -1,4 +1,4 @@
-package config
+package oauth2
 
 import (
 	"os"
@@ -9,21 +9,21 @@ import (
 )
 
 func Test_CreateConfig(t *testing.T) {
-	CreateConfigs(Debug)
-	defer os.Remove(Debug)
+	createConfig(debug)
+	defer os.Remove(debug)
 
-	if !utils.FileExisted(Debug) {
-		t.Errorf("Expected %s file had been created but found nil.", Debug)
+	if !utils.FileExisted(debug) {
+		t.Errorf("Expected %s file had been created but found nil.", debug)
 	}
 }
 
 func Test_LoadConfig(t *testing.T) {
-	defer os.Remove(Debug)
-	defer os.Remove(Release)
-	config := LoadConfigs(Debug)
+	defer os.Remove(debug)
+	defer os.Remove(release)
+	config := loadConfig(debug)
 
 	if config == nil {
-		t.Errorf("%s could not be loaded.", Debug)
+		t.Errorf("%s could not be loaded.", debug)
 	}
 
 	allowMethods := []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK}

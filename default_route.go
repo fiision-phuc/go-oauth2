@@ -1,10 +1,9 @@
 package oauth2
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
-
-	"github.com/phuc0302/go-oauth2/context"
 )
 
 // DefaultRoute describes default implementation for route.
@@ -14,16 +13,16 @@ type DefaultRoute struct {
 	handlers   map[string]interface{}
 }
 
-//// CreateDefaultRoute returns a default route object.
-//func CreateDefaultRoute(pattern string) IRoute {
-//	regexPattern := pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
-//		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
-//	})
-//	regexPattern += "/?"
+// CreateDefaultRoute returns a default route object.
+func CreateDefaultRoute(pattern string) IRoute {
+	regexPattern := pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
+		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
+	})
+	regexPattern += "/?"
 
-//	route := DefaultRoute{pattern, regexp.MustCompile(regexPattern), make(map[string]interface{})}
-//	return &route
-//}
+	route := DefaultRoute{pattern, regexp.MustCompile(regexPattern), make(map[string]interface{})}
+	return &route
+}
 
 // MARK: Route's members
 func (r *DefaultRoute) BindHandler(method string, handler interface{}) {
@@ -32,19 +31,19 @@ func (r *DefaultRoute) BindHandler(method string, handler interface{}) {
 	}
 	r.handlers[method] = handler
 }
-func (r *DefaultRoute) InvokeHandler(c *context.Request, s *context.Security) {
-	//	invoker := CreateInvoker()
-	//	handler := r.handlers[c.Method()]
+func (r *DefaultRoute) InvokeHandler(c *Request, s *Security) {
+	invoker := CreateInvoker()
+	handler := r.handlers[c.Method()]
 
-	//	// Call handler
-	//	invoker.Map(c)
-	//	invoker.Map(s)
-	//	_, err := invoker.Invoke(handler)
+	// Call handler
+	invoker.Map(c)
+	invoker.Map(s)
+	_, err := invoker.Invoke(handler)
 
-	//	// Condition validation: Validate error
-	//	if err != nil {
-	//		panic(err)
-	//	}
+	// Condition validation: Validate error
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (r *DefaultRoute) URLPattern() string {

@@ -1,23 +1,27 @@
 package oauth2
 
-import "github.com/phuc0302/go-oauth2/i"
+import (
+	"bytes"
+
+	"github.com/phuc0302/go-oauth2/utils"
+)
 
 // defaultRouter object description.
-type defaultRouter struct {
-	routes  []i.IRoute
+type DefaultRouter struct {
+	routes  []IRoute
 	groups  []string
-	factory i.IFactory
+	factory IFactory
 }
 
 // MARK: IRouter's members
-func (r *defaultRouter) BindFactory(factory i.IFactory) {
+func (r *DefaultRouter) BindFactory(factory IFactory) {
 	r.factory = factory
 }
 
-//func (r *defaultRouter) GroupRole(s *Server, groupPath string, roles string) {
-//}
+func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles string) {
+}
 
-func (r *defaultRouter) BindRole(httpMethod string, urlPattern string, roles string) {
+func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles string) {
 	//	/* Condition validation: Ignore role validation if there is no token store */
 	//	if s.tokenStore == nil {
 	//		return
@@ -41,30 +45,30 @@ func (r *defaultRouter) BindRole(httpMethod string, urlPattern string, roles str
 	//	s.userRoles[regexp.MustCompile(pattern)] = userRoles
 }
 
-//func (r *defaultRouter) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
-//	r.groups = append(r.groups, groupPath)
-//	function(s)
-//	r.groups = r.groups[:len(r.groups)-1]
-//}
+func (r *DefaultRouter) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
+	r.groups = append(r.groups, groupPath)
+	function(s)
+	r.groups = r.groups[:len(r.groups)-1]
+}
 
-func (r *defaultRouter) BindRoute(httpMethod string, urlPattern string, handler interface{}) {
+func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler interface{}) {
 	//	defer RecoveryInternal(s.logger)
 
-	//	// Format url pattern before assigned to route
-	//	if len(r.groups) > 0 {
-	//		var groupPattern bytes.Buffer
+	// Format url pattern before assigned to route
+	if len(r.groups) > 0 {
+		var groupPattern bytes.Buffer
 
-	//		for _, g := range r.groups {
-	//			groupPattern.WriteString(utils.FormatPath(g))
-	//		}
+		for _, g := range r.groups {
+			groupPattern.WriteString(utils.FormatPath(g))
+		}
 
-	//		if len(urlPattern) > 0 {
-	//			groupPattern.WriteString(utils.FormatPath(urlPattern))
-	//		}
-	//		urlPattern = groupPattern.String()
-	//	} else {
-	//		urlPattern = utils.FormatPath(urlPattern)
-	//	}
+		if len(urlPattern) > 0 {
+			groupPattern.WriteString(utils.FormatPath(urlPattern))
+		}
+		urlPattern = groupPattern.String()
+	} else {
+		urlPattern = utils.FormatPath(urlPattern)
+	}
 
 	// Look for existing one before create new
 	for _, route := range r.routes {
@@ -75,11 +79,11 @@ func (r *defaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 		}
 	}
 
-	//	// Create new route
-	//	newRoute := CreateDefaultRoute(urlPattern)
-	//	newRoute.BindHandler(httpMethod, handler)
+	// Create new route
+	newRoute := CreateDefaultRoute(urlPattern)
+	newRoute.BindHandler(httpMethod, handler)
 
 	// Add to collection
-	//	r.routes = append(r.routes, newRoute)
+	r.routes = append(r.routes, newRoute)
 	//	s.logger.Printf("%-6s -> %s\n", method, urlPattern)
 }

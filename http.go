@@ -1,13 +1,13 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
-	"github.com/phuc0302/go-oauth2/config"
-	"github.com/phuc0302/go-oauth2/context"
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
@@ -17,7 +17,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	request.URL.Path = utils.FormatPath(request.URL.Path)
 
 	// Create context
-	context := context.CreateRequest(request, response)
+	context := CreateRequest(request, response)
 	//	defer context.RecoveryRequest(context, s.Development)
 
 	// Validate http request methods
@@ -28,7 +28,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 	// Should redirect request to static folder or not?
 	isStaticRequest := false
-	if request.Method == config.GET && len(s.StaticFolders) > 0 {
+	if request.Method == GET && len(s.StaticFolders) > 0 {
 		for prefix, folder := range s.StaticFolders {
 			if strings.HasPrefix(request.URL.Path, prefix) {
 				newPath := strings.Replace(request.URL.Path, prefix, folder, 1)
@@ -47,44 +47,44 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 }
 
 // MARK: Struct's private functions
-func (s *Server) serveRequest(context *context.Request) {
+func (s *Server) serveRequest(context *Request) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 
-	//	for _, route := range s.routes {
-	//		ok, pathQueries := route.Match(context.Method(), context.URLPath)
-	//		if !ok {
-	//			continue
-	//		}
-	//		context.PathQueries = pathQueries
+	for _, route := range s.routes {
+		ok, pathQueries := route.Match(context.Method(), context.URLPath)
+		if !ok {
+			continue
+		}
+		context.PathQueries = pathQueries
 
-	//		//		// Validate authentication & roles if neccessary
-	//		//		if s.tokenStore != nil {
-	//		//			securityContext := context.CreateSecurity(context, s.tokenStore)
+		// Validate authentication & roles if neccessary
+		if s.tokenStore != nil {
+			securityContext := CreateSecurityContext(context, s.tokenStore)
 
-	//		//			for rule, roles := range s.userRoles {
-	//		//				if rule.MatchString(context.URLPath) {
-	//		//					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+			for rule, roles := range s.userRoles {
+				if rule.MatchString(context.URLPath) {
+					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 
-	//		//					if securityContext != nil && securityContext.AuthUser != nil {
-	//		//						for _, role := range securityContext.AuthUser.GetUserRoles() {
-	//		//							if regexRoles.MatchString(role) {
-	//		//								route.InvokeHandler(context, securityContext)
-	//		//								return
-	//		//							}
-	//		//						}
-	//		//					}
-	//		//					context.OutputError(utils.Status401())
-	//		//					return
-	//		//				}
-	//		//			}
-	//		//		}
-	//		route.InvokeHandler(context, nil)
-	//		return
-	//	}
-	//	context.OutputError(utils.Status503())
+					if securityContext != nil && securityContext.AuthUser != nil {
+						for _, role := range securityContext.AuthUser.GetUserRoles() {
+							if regexRoles.MatchString(role) {
+								route.InvokeHandler(context, securityContext)
+								return
+							}
+						}
+					}
+					context.OutputError(utils.Status401())
+					return
+				}
+			}
+		}
+		route.InvokeHandler(context, nil)
+		return
+	}
+	context.OutputError(utils.Status503())
 }
 
-func (s *Server) serveResource(context *context.Request, request *http.Request, response http.ResponseWriter) {
+func (s *Server) serveResource(context *Request, request *http.Request, response http.ResponseWriter) {
 	resourcePath := request.URL.Path
 
 	/* Condition validation: Check if file exist or not */

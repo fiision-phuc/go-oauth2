@@ -7,23 +7,18 @@ import (
 	"os"
 	"regexp"
 	"time"
-
-	"github.com/phuc0302/go-oauth2/config"
-	"github.com/phuc0302/go-oauth2/d"
-	"github.com/phuc0302/go-oauth2/i"
-	"github.com/phuc0302/go-oauth2/oauth"
 )
 
 // Server object description.
 type Server struct {
-	*config.Config
+	*config
 
-	router  i.IRouter
-	factory i.IFactory
+	router  IRouter
+	factory IFactory
 
 	logger *log.Logger
 
-	tokenStore oauth.TokenStore
+	tokenStore IStore
 	userRoles  map[*regexp.Regexp][]string
 }
 
@@ -31,7 +26,7 @@ type Server struct {
 func DefaultServer() *Server {
 	factory := &d.DefaultFactory{}
 	server := &Server{
-		Config: config.LoadConfigs(config.Debug),
+		Config: loadConfig(debug),
 
 		factory: factory,
 		router:  factory.CreateRouter(),
@@ -41,7 +36,7 @@ func DefaultServer() *Server {
 
 // DefaultServerWithTokenStore create a server object with preset config and oauth2.0 enabled.
 func DefaultServerWithTokenStore(tokenStore oauth.TokenStore) *Server {
-	cfg := config.LoadConfigs(config.Debug)
+	cfg := loadConfig(debug)
 
 	server := &Server{
 		Config: cfg,

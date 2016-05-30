@@ -1,8 +1,7 @@
-package config
+package oauth2
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -28,12 +27,30 @@ const (
 
 // Define configuration file's name.
 const (
-	Debug   = "server.debug.cfg"
-	Release = "server.release.cfg"
+	debug   = "oauth2.debug.cfg"
+	release = "oauth2.release.cfg"
 )
 
-// Config descripts a configuration  object  that  will  be  used  during application life time.
-type Config struct {
+// Define OAuth2 flows.
+const (
+	AuthorizationCodeGrant = "authorization_code" // For apps running on a web server
+	ClientCredentialsGrant = "client_credentials" // For application access
+	ImplicitGrant          = "implicit"           // For browser-based or mobile apps
+	PasswordGrant          = "password"           // For logging in with a username and password
+	RefreshTokenGrant      = "refresh_token"      // Should allow refresh token or not
+
+)
+
+// Define OAuth2 tables.
+const (
+	TableRefreshToken = "oauth_refresh_token"
+	TableAccessToken  = "oauth_access_token"
+	TableClient       = "oauth_client"
+	TableUser         = "oauth_user"
+)
+
+// config descripts a configuration  object  that  will  be  used  during application life time.
+type config struct {
 	Host         string        `json:"host,omitempty"`
 	Port         string        `json:"port,omitempty"`
 	TLSPort      string        `json:"tls_port,omitempty"`
@@ -41,9 +58,9 @@ type Config struct {
 	ReadTimeout  time.Duration `json:"timeout_read,omitempty"`  // In seconds
 	WriteTimeout time.Duration `json:"timeout_write,omitempty"` // In seconds
 
-	AllowMethods  []string          `json:"allow_methods,omitempty"`
-	RedirectPaths map[string]int    `json:"redirect_paths,omitempty"`
-	StaticFolders map[string]string `json:"static_folders,omitempty"`
+	AllowMethods         []string          `json:"allow_methods,omitempty"`
+	StaticFolders        map[string]string `json:"static_folders,omitempty"`
+	ReverseRedirectPaths map[string]int    `json:"redirect_paths,omitempty"`
 
 	//	GrantTypes                []string      `json:"grant_types,omitempty"`
 	//	AllowRefreshToken         bool          `json:"allow_refresh_token,omitempty"`
@@ -52,19 +69,20 @@ type Config struct {
 	//	AuthorizationCodeDuration time.Duration `json:"authorization_code_duration,omitempty"` // In seconds
 
 	// Validation
+	RedirectPaths     map[int]string `json:"-"`
 	ClientValidation  *regexp.Regexp `json:"-"`
 	GrantsValidation  *regexp.Regexp `json:"-"`
 	MethodsValidation *regexp.Regexp `json:"-"`
 }
 
-// CreateConfigs generates a default configuration file.
-func CreateConfigs(configFile string) {
+// createConfig generates a default configuration file.
+func createConfig(configFile string) {
 	if utils.FileExisted(configFile) {
 		os.Remove(configFile)
 	}
 
 	// Create default config
-	config := Config{
+	config := config{
 		Host:         "localhost",
 		Port:         "8080",
 		TLSPort:      "8443",
@@ -73,7 +91,7 @@ func CreateConfigs(configFile string) {
 		WriteTimeout: 15,
 
 		AllowMethods: []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
-		RedirectPaths: map[string]int{
+		ReverseRedirectPaths: map[string]int{
 			"/login": 401,
 		},
 		StaticFolders: map[string]string{
@@ -94,16 +112,11 @@ func CreateConfigs(configFile string) {
 	file.Close()
 }
 
-// LoadConfigs retrieves previous configuration from file.
-func LoadConfigs(configFile string) *Config {
+// loadConfig retrieves previous configuration from file.
+func loadConfig(configFile string) *config {
 	// Generate config file if neccessary
-	if !utils.FileExisted(Debug) {
-		CreateConfigs(Debug)
-		fmt.Println(Debug)
-	}
-	if !utils.FileExisted(Release) {
-		CreateConfigs(Release)
-		fmt.Println(Debug)
+	if !utils.FileExisted(configFile) {
+		createConfig(configFile)
 	}
 
 	file, err := os.Open(configFile)
@@ -116,7 +129,7 @@ func LoadConfigs(configFile string) *Config {
 		return nil
 	}
 
-	config := Config{}
+	config := config{}
 	json.Unmarshal(bytes, &config)
 
 	folders := make(map[string]string)

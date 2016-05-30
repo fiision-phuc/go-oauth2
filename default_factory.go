@@ -6,9 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/phuc0302/go-oauth2/config"
-	"github.com/phuc0302/go-oauth2/context"
-	"github.com/phuc0302/go-oauth2/i"
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
@@ -22,11 +19,11 @@ type DefaultFactory struct {
 }
 
 // CreateRequestContext creates new request context.
-func (d *DefaultFactory) CreateRequestContext(request *http.Request, response http.ResponseWriter) *context.Request {
-	context := &context.Request{
-		URLPath: request.URL.Path,
-		//		request:  request,
-		//		response: response,
+func (d *DefaultFactory) CreateRequestContext(request *http.Request, response http.ResponseWriter) *Request {
+	context := &Request{
+		URLPath:  request.URL.Path,
+		request:  request,
+		response: response,
 	}
 
 	// Format request headers
@@ -38,14 +35,14 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 	// Parse body context if neccessary
 	switch context.Method() {
 
-	case config.GET:
+	case GET:
 		params := request.URL.Query()
 		if len(params) > 0 {
 			context.Queries = params
 		}
 		break
 
-	case config.POST, config.PATCH:
+	case POST, PATCH:
 		contentType := request.Header.Get("content-type")
 
 		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
@@ -69,26 +66,26 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 }
 
 // CreateSecurityContext creates new security context.
-func (d *DefaultFactory) CreateSecurityContext() *context.Security {
+func (d *DefaultFactory) CreateSecurityContext() *Security {
 	return nil
 }
 
 // CreateRoute creates new route component.
-func (d *DefaultFactory) CreateRoute(urlPattern string) i.IRoute {
+func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 	regexPattern := pathParamRegex.ReplaceAllStringFunc(urlPattern, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
 	})
 	regexPattern += "/?"
 
 	route := DefaultRoute{
-		pattern:  urlPattern,
-		handlers: make(map[string]interface{}),
-		regex:    regexp.MustCompile(regexPattern),
+		urlPattern: urlPattern,
+		handlers:   make(map[string]interface{}),
+		regex:      regexp.MustCompile(regexPattern),
 	}
 	return &route
 }
 
 // CreateRouter creates new router component.
-func (d *DefaultFactory) CreateRouter() i.IRouter {
+func (d *DefaultFactory) CreateRouter() IRouter {
 	return nil
 }

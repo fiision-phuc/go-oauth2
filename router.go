@@ -1,21 +1,19 @@
 package oauth2
 
-import "github.com/phuc0302/go-oauth2/config"
+// GroupRole binds user's roles to all url with same prefix.
+func (s *Server) GroupRole(groupPath string, roles string) {
+	s.router.GroupRole(s, groupPath, roles)
+}
 
-//// GroupRole binds user's roles to all url with same prefix.
-//func (s *Server) GroupRole(groupPath string, roles string) {
-//	s.router.GroupRole(s, groupPath, roles)
-//}
+// Bind an url pattern with user's roles.
+func (s *Server) BindRole(httpMethod string, urlPattern string, roles string) {
+	s.router.BindRole(httpMethod, urlPattern, roles)
+}
 
-//// Bind an url pattern with user's roles.
-//func (s *Server) BindRole(httpMethod string, urlPattern string, roles string) {
-//	s.router.BindRole(httpMethod, urlPattern, roles)
-//}
-
-//// GroupRoute routes all url with same prefix.
-//func (s *Server) GroupRoute(urlGroup string, function func(s *Server)) {
-//	s.router.GroupRoute(s, urlGroup, function)
-//}
+// GroupRoute routes all url with same prefix.
+func (s *Server) GroupRoute(urlGroup string, function func(s *Server)) {
+	s.router.GroupRoute(s, urlGroup, function)
+}
 
 // Copy routes copy request to registered handler.
 func (s *Server) Copy(urlPattern string, handler interface{}) {
