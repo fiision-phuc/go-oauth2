@@ -22,7 +22,7 @@ func (s *DefaultInMemoryStore) FindUserWithID(userID string) IUser {
 	}
 
 	for _, user := range s.users {
-		if user.GetUserID() == userID {
+		if user.UserID() == userID {
 			return user
 		}
 	}
@@ -46,7 +46,7 @@ func (s *DefaultInMemoryStore) FindUserWithCredential(username string, password 
 	}
 
 	for _, user := range s.users {
-		if user.GetUsername() == username && user.GetPassword() == password {
+		if user.Username() == username && user.Password() == password {
 			return user
 		}
 	}
@@ -61,7 +61,7 @@ func (s *DefaultInMemoryStore) FindClientWithID(clientID string) IClient {
 	}
 
 	for _, client := range s.clients {
-		if client.GetClientID() == clientID {
+		if client.ClientID() == clientID {
 			return client
 		}
 	}
@@ -76,7 +76,7 @@ func (s *DefaultInMemoryStore) FindClientWithCredential(clientID string, clientS
 	}
 
 	for _, client := range s.clients {
-		if client.GetClientID() == clientID && client.GetClientSecret() == clientSecret {
+		if client.ClientID() == clientID && client.ClientSecret() == clientSecret {
 			return client
 		}
 	}
@@ -86,7 +86,7 @@ func (s *DefaultInMemoryStore) FindClientWithCredential(clientID string, clientS
 // FindAccessToken returns access_token.
 func (s *DefaultInMemoryStore) FindAccessToken(token string) IToken {
 	for _, recordToken := range s.accessTokens {
-		if recordToken.GetToken() == token {
+		if recordToken.Token() == token {
 			return recordToken
 		}
 	}
@@ -96,7 +96,7 @@ func (s *DefaultInMemoryStore) FindAccessToken(token string) IToken {
 // FindAccessTokenWithCredential returns access_token associated with client_id and user_id.
 func (s *DefaultInMemoryStore) FindAccessTokenWithCredential(clientID string, userID string) IToken {
 	for _, recordToken := range s.accessTokens {
-		if recordToken.GetUserID() == userID && recordToken.GetClientID() == clientID {
+		if recordToken.UserID() == userID && recordToken.ClientID() == clientID {
 			return recordToken
 		}
 	}
@@ -106,11 +106,11 @@ func (s *DefaultInMemoryStore) FindAccessTokenWithCredential(clientID string, us
 // CreateAccessToken returns new access_token.
 func (s *DefaultInMemoryStore) CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
 	newToken := &DefaultToken{
-		TokenID:     bson.NewObjectId(),
-		UserID:      bson.ObjectIdHex(userID),
-		ClientID:    bson.ObjectIdHex(clientID),
-		CreatedTime: createdTime,
-		ExpiredTime: expiredTime,
+		ID:     bson.NewObjectId(),
+		User:      bson.ObjectIdHex(userID),
+		Client:    bson.ObjectIdHex(clientID),
+		Created: createdTime,
+		Expired: expiredTime,
 	}
 
 	s.accessTokens = append(s.accessTokens, newToken)
@@ -130,7 +130,7 @@ func (s *DefaultInMemoryStore) DeleteAccessToken(token IToken) {
 // FindRefreshToken returns refresh_token.
 func (s *DefaultInMemoryStore) FindRefreshToken(token string) IToken {
 	for _, recordToken := range s.refreshTokens {
-		if recordToken.GetToken() == token {
+		if recordToken.Token() == token {
 			return recordToken
 		}
 	}
@@ -140,7 +140,7 @@ func (s *DefaultInMemoryStore) FindRefreshToken(token string) IToken {
 // FindRefreshTokenWithCredential returns refresh_token associated with client_id and user_id.
 func (s *DefaultInMemoryStore) FindRefreshTokenWithCredential(clientID string, userID string) IToken {
 	for _, recordToken := range s.refreshTokens {
-		if recordToken.GetUserID() == userID && recordToken.GetClientID() == clientID {
+		if recordToken.UserID() == userID && recordToken.ClientID() == clientID {
 			return recordToken
 		}
 	}
@@ -150,11 +150,11 @@ func (s *DefaultInMemoryStore) FindRefreshTokenWithCredential(clientID string, u
 // CreateRefreshToken returns new refresh_token.
 func (s *DefaultInMemoryStore) CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
 	newToken := &DefaultToken{
-		TokenID:     bson.NewObjectId(),
-		UserID:      bson.ObjectIdHex(userID),
-		ClientID:    bson.ObjectIdHex(clientID),
-		CreatedTime: createdTime,
-		ExpiredTime: expiredTime,
+		ID:     bson.NewObjectId(),
+		User:      bson.ObjectIdHex(userID),
+		Client:    bson.ObjectIdHex(clientID),
+		Created: createdTime,
+		Expired: expiredTime,
 	}
 
 	s.refreshTokens = append(s.refreshTokens, newToken)

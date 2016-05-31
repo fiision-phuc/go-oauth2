@@ -30,41 +30,41 @@ func createStore() *DefaultInMemoryStore {
 	return &DefaultInMemoryStore{
 		clients: []IClient{
 			&DefaultClient{
-				ClientID:     clientID,
-				ClientSecret: clientSecret,
-				GrantTypes:   []string{PasswordGrant, RefreshTokenGrant},
-				RedirectURIs: []string{"http://sample01.com", "http://sample02.com"},
+				ID:     clientID,
+				Secret: clientSecret,
+				Grants:   []string{PasswordGrant, RefreshTokenGrant},
+				Redirects: []string{"http://sample01.com", "http://sample02.com"},
 			},
 		},
 		users: []IUser{
 			&DefaultUser{
-				UserID:   userID,
-				Username: "admin",
-				Password: "admin",
+				ID:   userID,
+				User: "admin",
+				Pass: "admin",
 				Roles:    []string{"r_user", "r_admin"},
 			},
 			&DefaultUser{
-				UserID:   bson.NewObjectId(),
-				Username: "admin2",
-				Password: "admin2",
+				ID:   bson.NewObjectId(),
+				User: "admin2",
+				Pass: "admin2",
 			},
 		},
 		accessTokens: []IToken{
 			&DefaultToken{
-				TokenID:     bson.NewObjectId(),
-				UserID:      userID,
-				ClientID:    clientID,
-				CreatedTime: createdTime,
-				ExpiredTime: createdTime.Add(3600 * time.Second),
+				ID:     bson.NewObjectId(),
+				User:      userID,
+				Client:    clientID,
+				Created: createdTime,
+				Expired: createdTime.Add(3600 * time.Second),
 			},
 		},
 		refreshTokens: []IToken{
 			&DefaultToken{
-				TokenID:     bson.NewObjectId(),
-				UserID:      userID,
-				ClientID:    clientID,
-				CreatedTime: createdTime,
-				ExpiredTime: createdTime.Add(1209600 * time.Second),
+				ID:     bson.NewObjectId(),
+				User:      userID,
+				Client:    clientID,
+				Created: createdTime,
+				Expired: createdTime.Add(1209600 * time.Second),
 			},
 		},
 	}

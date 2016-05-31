@@ -8,27 +8,27 @@ import (
 
 // DefaultToken descripts a mongodb Token.
 type DefaultToken struct {
-	TokenID     bson.ObjectId `bson:"_id,omitempty"`
-	UserID      bson.ObjectId `bson:"user_id,omitempty"`
-	ClientID    bson.ObjectId `bson:"client_id,omitempty"`
-	CreatedTime time.Time     `bson:"created_time,omitempty"`
-	ExpiredTime time.Time     `bson:"expired_time,omitempty"`
+	ID      bson.ObjectId `bson:"_id"`
+	User    bson.ObjectId `bson:"user_id,omitempty"`
+	Client  bson.ObjectId `bson:"client_id,omitempty"`
+	Created time.Time     `bson:"created_time,omitempty"`
+	Expired time.Time     `bson:"expired_time,omitempty"`
 }
 
-// GetClientID returns client_id.
-func (t *DefaultToken) GetClientID() string { return t.ClientID.Hex() }
+// ClientID returns client_id.
+func (t *DefaultToken) ClientID() string { return t.Client.Hex() }
 
-// GetUserID returns user_id.
-func (t *DefaultToken) GetUserID() string { return t.UserID.Hex() }
+// UserID returns user_id.
+func (t *DefaultToken) UserID() string { return t.User.Hex() }
 
-// GetToken returns token.
-func (t *DefaultToken) GetToken() string { return t.TokenID.Hex() }
+// Token returns token.
+func (t *DefaultToken) Token() string { return t.ID.Hex() }
 
 // IsExpired validate if this token is expired or not.
-func (t *DefaultToken) IsExpired() bool { return time.Now().Unix() >= t.ExpiredTime.Unix() }
+func (t *DefaultToken) IsExpired() bool { return time.Now().Unix() >= t.Expired.Unix() }
 
-// GetCreatedTime returns created_time.
-func (t *DefaultToken) GetCreatedTime() time.Time { return t.CreatedTime }
+// CreatedTime returns created_time.
+func (t *DefaultToken) CreatedTime() time.Time { return t.Created }
 
-// GetExpiredTime returns expired_time.
-func (t *DefaultToken) GetExpiredTime() time.Time { return t.ExpiredTime }
+// ExpiredTime returns expired_time.
+func (t *DefaultToken) ExpiredTime() time.Time { return t.Expired }

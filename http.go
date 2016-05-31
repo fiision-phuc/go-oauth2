@@ -66,7 +66,7 @@ func (s *Server) serveRequest(context *Request) {
 					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 
 					if securityContext != nil && securityContext.AuthUser != nil {
-						for _, role := range securityContext.AuthUser.GetUserRoles() {
+						for _, role := range securityContext.AuthUser.UserRoles() {
 							if regexRoles.MatchString(role) {
 								route.InvokeHandler(context, securityContext)
 								return

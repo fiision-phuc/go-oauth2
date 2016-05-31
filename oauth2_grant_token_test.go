@@ -150,11 +150,11 @@ func Test_PasswordGrantFlow(t *testing.T) {
 	if token1 == nil {
 		t.Error("Expected not nil but found nil.")
 	}
-	if token1.AccessToken != store.accessTokens[1].GetToken() {
-		t.Errorf("Expected %s but found %s", store.accessTokens[1].GetToken(), token1.AccessToken)
+	if token1.AccessToken != store.accessTokens[1].Token() {
+		t.Errorf("Expected %s but found %s", store.accessTokens[1].Token(), token1.AccessToken)
 	}
-	if token1.RefreshToken != store.refreshTokens[1].GetToken() {
-		t.Errorf("Expected %s but found %s", store.refreshTokens[1].GetToken(), token1.RefreshToken)
+	if token1.RefreshToken != store.refreshTokens[1].Token() {
+		t.Errorf("Expected %s but found %s", store.refreshTokens[1].Token(), token1.RefreshToken)
 	}
 
 	// Test request second token should be the same as the first one
@@ -188,11 +188,11 @@ func Test_PasswordGrantFlow(t *testing.T) {
 	if len(store.refreshTokens) != 2 {
 		t.Errorf("Expected %d but found %d", 2, len(store.refreshTokens))
 	}
-	if token3.AccessToken != store.accessTokens[1].GetToken() {
-		t.Errorf("Expected \"%s\" but found \"%s\".", store.accessTokens[1].GetToken(), token3.AccessToken)
+	if token3.AccessToken != store.accessTokens[1].Token() {
+		t.Errorf("Expected \"%s\" but found \"%s\".", store.accessTokens[1].Token(), token3.AccessToken)
 	}
-	if token3.RefreshToken != store.refreshTokens[1].GetToken() {
-		t.Errorf("Expected \"%s\" but found \"%s\".", store.refreshTokens[1].GetToken(), token1.RefreshToken)
+	if token3.RefreshToken != store.refreshTokens[1].Token() {
+		t.Errorf("Expected \"%s\" but found \"%s\".", store.refreshTokens[1].Token(), token1.RefreshToken)
 	}
 }
 
@@ -261,7 +261,7 @@ func Test_RefreshGrantFlowWithExpiredRefreshToken(t *testing.T) {
 		RefreshTokenGrant,
 		clientID.Hex(),
 		clientSecret.Hex(),
-		store.refreshTokens[0].GetToken(),
+		store.refreshTokens[0].Token(),
 	)))
 	status := parseError(response)
 	if status.Description != fmt.Sprintf("%s is expired.", "refresh_token") {

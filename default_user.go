@@ -4,22 +4,22 @@ import "gopkg.in/mgo.v2/bson"
 
 // DefaultUser descripts a mongodb user.
 type DefaultUser struct {
-	UserID     bson.ObjectId `bson:"_id,omitempty"`
-	FacebookID string        `bson:"facebook_id,omitempty"`
+	ID    bson.ObjectId `bson:"_id"`
+	User  string        `bson:"username,omitempty"`
+	Pass  string        `bson:"password,omitempty"`
+	Roles []string      `bson:"roles,omitempty"`
 
-	Username string   `bson:"username,omitempty"`
-	Password string   `bson:"password,omitempty"`
-	Roles    []string `bson:"roles,omitempty"`
+	FacebookID string `bson:"facebook_id,omitempty"`
 }
 
-// GetUserID returns user_id.
-func (a *DefaultUser) GetUserID() string { return a.UserID.Hex() }
+// UserID returns user_id.
+func (a *DefaultUser) UserID() string { return a.ID.Hex() }
 
-// GetUsername returns username.
-func (a *DefaultUser) GetUsername() string { return a.Username }
+// Username returns user's username.
+func (a *DefaultUser) Username() string { return a.User }
 
-// GetPassword returns password.
-func (a *DefaultUser) GetPassword() string { return a.Password }
+// Password returns password.
+func (a *DefaultUser) Password() string { return a.Pass }
 
-// GetUserRoles returns roles.
-func (a *DefaultUser) GetUserRoles() []string { return a.Roles }
+// UserRoles returns user's roles.
+func (a *DefaultUser) UserRoles() []string { return a.Roles }

@@ -32,8 +32,8 @@ func CreateSecurityContext(requestContext *Request, tokenStore IStore) *Security
 		return nil
 	}
 
-	client := tokenStore.FindClientWithID(accessToken.GetClientID())
-	user := tokenStore.FindUserWithID(accessToken.GetUserID())
+	client := tokenStore.FindClientWithID(accessToken.ClientID())
+	user := tokenStore.FindUserWithID(accessToken.UserID())
 	securityContext := &Security{
 		AuthClient:      client,
 		AuthUser:        user,

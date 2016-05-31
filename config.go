@@ -2,9 +2,11 @@ package oauth2
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/phuc0302/go-oauth2/utils"
@@ -31,22 +33,11 @@ const (
 	release = "oauth2.release.cfg"
 )
 
-// Define OAuth2 flows.
-const (
-	AuthorizationCodeGrant = "authorization_code" // For apps running on a web server
-	ClientCredentialsGrant = "client_credentials" // For application access
-	ImplicitGrant          = "implicit"           // For browser-based or mobile apps
-	PasswordGrant          = "password"           // For logging in with a username and password
-	RefreshTokenGrant      = "refresh_token"      // Should allow refresh token or not
-
-)
-
-// Define OAuth2 tables.
-const (
-	TableRefreshToken = "oauth_refresh_token"
-	TableAccessToken  = "oauth_access_token"
-	TableClient       = "oauth_client"
-	TableUser         = "oauth_user"
+var (
+	redirectPaths map[int]string
+	//	clientValidation  *regexp.Regexp
+	grantsValidation  *regexp.Regexp
+	methodsValidation *regexp.Regexp
 )
 
 // config descripts a configuration  object  that  will  be  used  during application life time.
@@ -58,21 +49,15 @@ type config struct {
 	ReadTimeout  time.Duration `json:"timeout_read,omitempty"`  // In seconds
 	WriteTimeout time.Duration `json:"timeout_write,omitempty"` // In seconds
 
-	AllowMethods         []string          `json:"allow_methods,omitempty"`
-	StaticFolders        map[string]string `json:"static_folders,omitempty"`
-	ReverseRedirectPaths map[string]int    `json:"redirect_paths,omitempty"`
+	AllowMethods  []string          `json:"allow_methods,omitempty"`
+	RedirectPaths map[string]int    `json:"redirect_paths,omitempty"`
+	StaticFolders map[string]string `json:"static_folders,omitempty"`
 
-	//	GrantTypes                []string      `json:"grant_types,omitempty"`
-	//	AllowRefreshToken         bool          `json:"allow_refresh_token,omitempty"`
-	//	AccessTokenDuration       time.Duration `json:"access_token_duration,omitempty"`       // In seconds
-	//	RefreshTokenDuration      time.Duration `json:"refresh_token_duration,omitempty"`      // In seconds
-	//	AuthorizationCodeDuration time.Duration `json:"authorization_code_duration,omitempty"` // In seconds
-
-	// Validation
-	RedirectPaths     map[int]string `json:"-"`
-	ClientValidation  *regexp.Regexp `json:"-"`
-	GrantsValidation  *regexp.Regexp `json:"-"`
-	MethodsValidation *regexp.Regexp `json:"-"`
+	GrantTypes                []string      `json:"grant_types,omitempty"`
+	AllowRefreshToken         bool          `json:"allow_refresh_token,omitempty"`
+	AccessTokenDuration       time.Duration `json:"access_token_duration,omitempty"`       // In seconds
+	RefreshTokenDuration      time.Duration `json:"refresh_token_duration,omitempty"`      // In seconds
+	AuthorizationCodeDuration time.Duration `json:"authorization_code_duration,omitempty"` // In seconds
 }
 
 // createConfig generates a default configuration file.
@@ -91,7 +76,7 @@ func createConfig(configFile string) {
 		WriteTimeout: 15,
 
 		AllowMethods: []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
-		ReverseRedirectPaths: map[string]int{
+		RedirectPaths: map[string]int{
 			"/login": 401,
 		},
 		StaticFolders: map[string]string{
@@ -99,10 +84,11 @@ func createConfig(configFile string) {
 			"/resources": "resources",
 		},
 
-		//		GrantTypes:                []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
-		//		AccessTokenDuration:       3600,
-		//		RefreshTokenDuration:      1209600,
-		//		AuthorizationCodeDuration: 30,
+		GrantTypes:                []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
+		AllowRefreshToken:         true,
+		AccessTokenDuration:       259200,
+		RefreshTokenDuration:      7776000,
+		AuthorizationCodeDuration: 300,
 	}
 
 	// Create new file
@@ -138,15 +124,15 @@ func loadConfig(configFile string) *config {
 	}
 	config.StaticFolders = folders
 
-	//	// Convert duration to seconds
-	//	config.AccessTokenDuration = config.AccessTokenDuration * time.Second
-	//	config.RefreshTokenDuration = config.RefreshTokenDuration * time.Second
-	//	config.AuthorizationCodeDuration = config.AuthorizationCodeDuration * time.Second
+	// Convert duration to seconds
+	config.AccessTokenDuration = config.AccessTokenDuration * time.Second
+	config.RefreshTokenDuration = config.RefreshTokenDuration * time.Second
+	config.AuthorizationCodeDuration = config.AuthorizationCodeDuration * time.Second
 
-	//	// Define regular expressions
-	//	//	regexp.MustCompile(`:[^/#?()\.\\]+`)
-	//	config.grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
-	//	config.methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.AllowMethods, "|")))
+	// Define regular expressions
+	//	regexp.MustCompile(`:[^/#?()\.\\]+`)
+	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
+	methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.AllowMethods, "|")))
 
 	//	for _, grant := range config.GrantTypes {
 	//		if grant == RefreshTokenGrant {

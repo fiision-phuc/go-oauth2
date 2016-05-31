@@ -2,22 +2,22 @@ package oauth2
 
 import "gopkg.in/mgo.v2/bson"
 
-// defaultClient descripts a mongodb client.
+// DefaultClient descripts a mongodb client.
 type DefaultClient struct {
-	ClientID     bson.ObjectId `bson:"_id,omitempty"`
-	ClientSecret bson.ObjectId `bson:"client_secret,omitempty"`
-	GrantTypes   []string      `bson:"grant_types,omitempty"`
-	RedirectURIs []string      `bson:"redirect_uris,omitempty"`
+	ID        bson.ObjectId `bson:"_id"`
+	Secret    bson.ObjectId `bson:"client_secret"`
+	Grants    []string      `bson:"grant_types,omitempty"`
+	Redirects []string      `bson:"redirect_uris,omitempty"`
 }
 
-// GetClientID returns client_id.
-func (a *DefaultClient) GetClientID() string { return a.ClientID.Hex() }
+// ClientID returns client_id.
+func (a *DefaultClient) ClientID() string { return a.ID.Hex() }
 
-// GetClientSecret returns client_secret.
-func (a *DefaultClient) GetClientSecret() string { return a.ClientSecret.Hex() }
+// ClientSecret returns client_secret.
+func (a *DefaultClient) ClientSecret() string { return a.Secret.Hex() }
 
-// GetGrantTypes returns grant_types.
-func (a *DefaultClient) GetGrantTypes() []string { return a.GrantTypes }
+// GrantTypes returns grant_types.
+func (a *DefaultClient) GrantTypes() []string { return a.Grants }
 
-// GetRedirectURIs returns redirect_uris.
-func (a *DefaultClient) GetRedirectURIs() []string { return a.RedirectURIs }
+// RedirectURIs returns redirect_uris.
+func (a *DefaultClient) RedirectURIs() []string { return a.Redirects }
