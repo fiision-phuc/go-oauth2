@@ -41,7 +41,7 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
 	clientSecret := c.Queries.Get("client_secret")
 
 	/* Condition validation: Validate grant_type */
-	if !(len(grantType) >= 0 && g.config.grantsValidation.MatchString(grantType)) {
+	if !(len(grantType) >= 0 && grantsValidation.MatchString(grantType)) {
 		return utils.Status400WithDescription("Invalid grant_type parameter.")
 	}
 
@@ -261,7 +261,7 @@ func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
 				s.AuthClient.ClientID(),
 				s.AuthUser.UserID(),
 				now,
-				now.Add(g.config.DurationRefreshToken),
+				now.Add(g.config.RefreshTokenDuration),
 			)
 		}
 		s.AuthRefreshToken = refreshToken

@@ -14,7 +14,7 @@ type IFactory interface {
 	CreateSecurityContext() *Security
 
 	// Create new route component.
-	CreateRoute() IRoute
+	CreateRoute(urlPattern string) IRoute
 
 	// Create new router component.
 	CreateRouter() IRouter

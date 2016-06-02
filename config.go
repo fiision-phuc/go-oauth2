@@ -34,17 +34,18 @@ const (
 )
 
 var (
-	redirectPaths map[int]string
+	redirectPaths map[int]string = nil
 	//	clientValidation  *regexp.Regexp
-	grantsValidation  *regexp.Regexp
-	methodsValidation *regexp.Regexp
+	grantsValidation  *regexp.Regexp = nil
+	methodsValidation *regexp.Regexp = nil
 )
 
 // config descripts a configuration  object  that  will  be  used  during application life time.
 type config struct {
-	Host         string        `json:"host,omitempty"`
-	Port         string        `json:"port,omitempty"`
-	TLSPort      string        `json:"tls_port,omitempty"`
+	Host    string `json:"host,omitempty"`
+	Port    int    `json:"port,omitempty"`
+	TLSPort int    `json:"tls_port,omitempty"`
+
 	HeaderSize   int           `json:"headers_size,omitempty"`  // In KB
 	ReadTimeout  time.Duration `json:"timeout_read,omitempty"`  // In seconds
 	WriteTimeout time.Duration `json:"timeout_write,omitempty"` // In seconds
@@ -68,9 +69,10 @@ func createConfig(configFile string) {
 
 	// Create default config
 	config := config{
-		Host:         "localhost",
-		Port:         "8080",
-		TLSPort:      "8443",
+		Host:    "localhost",
+		Port:    8080,
+		TLSPort: 8443,
+
 		HeaderSize:   5,
 		ReadTimeout:  15,
 		WriteTimeout: 15,
@@ -105,11 +107,11 @@ func loadConfig(configFile string) *config {
 		createConfig(configFile)
 	}
 
+	// Load config file
 	file, err := os.Open(configFile)
 	if err != nil {
 		return nil
 	}
-
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		return nil
@@ -125,20 +127,17 @@ func loadConfig(configFile string) *config {
 	config.StaticFolders = folders
 
 	// Convert duration to seconds
-	config.AccessTokenDuration = config.AccessTokenDuration * time.Second
-	config.RefreshTokenDuration = config.RefreshTokenDuration * time.Second
-	config.AuthorizationCodeDuration = config.AuthorizationCodeDuration * time.Second
+	config.HeaderSize <<= 10
+	config.ReadTimeout *= time.Second
+	config.WriteTimeout *= time.Second
+	config.AccessTokenDuration *= time.Second
+	config.RefreshTokenDuration *= time.Second
+	config.AuthorizationCodeDuration *= time.Second
 
 	// Define regular expressions
 	//	regexp.MustCompile(`:[^/#?()\.\\]+`)
 	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
 	methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.AllowMethods, "|")))
 
-	//	for _, grant := range config.GrantTypes {
-	//		if grant == RefreshTokenGrant {
-	//			config.AllowRefreshToken = true
-	//			break
-	//		}
-	//	}
 	return &config
 }

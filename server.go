@@ -24,9 +24,9 @@ type Server struct {
 
 // DefaultServer create a server object with preset config.
 func DefaultServer() *Server {
-	factory := &d.DefaultFactory{}
+	factory := &DefaultFactory{}
 	server := &Server{
-		Config: loadConfig(debug),
+		config: loadConfig(debug),
 
 		factory: factory,
 		router:  factory.CreateRouter(),
@@ -35,11 +35,11 @@ func DefaultServer() *Server {
 }
 
 // DefaultServerWithTokenStore create a server object with preset config and oauth2.0 enabled.
-func DefaultServerWithTokenStore(tokenStore oauth.TokenStore) *Server {
+func DefaultServerWithTokenStore(tokenStore IStore) *Server {
 	cfg := loadConfig(debug)
 
 	server := &Server{
-		Config: cfg,
+		config: cfg,
 		logger: log.New(os.Stdout, "[OAuth2.0] ", 0),
 	}
 
@@ -48,7 +48,7 @@ func DefaultServerWithTokenStore(tokenStore oauth.TokenStore) *Server {
 
 		// Pre-define oauth2 urls
 		//	grantAuthorization := new(AuthorizationGrant)
-		tokenGrant := oauth.CreateTokenGrant(cfg, tokenStore)
+		tokenGrant := CreateTokenGrant(cfg, tokenStore)
 
 		//	server.Get("/authorize", grantAuthorization.HandleForm)
 		server.Post("/token", tokenGrant.HandleForm)
