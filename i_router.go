@@ -3,9 +3,6 @@ package oauth2
 // IRouter descripts a router component's characteristic.
 type IRouter interface {
 
-	// Bind a factory to a router.
-	BindFactory(factory IFactory)
-
 	// Group all same url's prefix with user's roles.
 	GroupRole(s *Server, groupPath string, roles string)
 

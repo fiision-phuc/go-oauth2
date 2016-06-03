@@ -6,64 +6,67 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"time"
+)
+
+var (
+	cfg     *config
+	factory IFactory
+	store   IStore
 )
 
 // Server object description.
 type Server struct {
-	*config
-
+	sandbox bool
 	router  IRouter
-	factory IFactory
 
-	logger *log.Logger
-
-	tokenStore IStore
-	userRoles  map[*regexp.Regexp][]string
+	logger    *log.Logger
+	userRoles map[*regexp.Regexp][]string
 }
 
-// DefaultServer create a server object with preset config.
-func DefaultServer() *Server {
+// DefaultServer returns a server with build in components.
+func DefaultServer(isSandbox bool) *Server {
 	factory := &DefaultFactory{}
-	server := &Server{
-		config: loadConfig(debug),
-
-		factory: factory,
-		router:  factory.CreateRouter(),
-	}
-	return server
+	return CreateServer(factory, isSandbox)
 }
 
-// DefaultServerWithTokenStore create a server object with preset config and oauth2.0 enabled.
-func DefaultServerWithTokenStore(tokenStore IStore) *Server {
-	cfg := loadConfig(debug)
+// CreateServer create a server object with preset config and oauth2.0 enabled.
+func CreateServer(instance IFactory, isSandbox bool) *Server {
+	// Load config file
+	if isSandbox {
+		cfg = loadConfig(debug)
+	} else {
+		cfg = loadConfig(release)
+	}
 
-	server := &Server{
-		config: cfg,
+	// Register components
+	factory = instance
+	store = factory.CreateStore()
+
+	// Create server
+	server := Server{
+		router: factory.CreateRouter(),
 		logger: log.New(os.Stdout, "[OAuth2.0] ", 0),
 	}
 
-	if tokenStore != nil {
-		server.tokenStore = tokenStore
-
-		// Pre-define oauth2 urls
+	// Pre-define oauth2 urls
+	if store != nil {
 		//	grantAuthorization := new(AuthorizationGrant)
-		tokenGrant := CreateTokenGrant(cfg, tokenStore)
+		tokenGrant := CreateTokenGrant(cfg, store)
 
 		//	server.Get("/authorize", grantAuthorization.HandleForm)
 		server.Post("/token", tokenGrant.HandleForm)
 	}
-	return server
+	return &server
 }
 
 // Run will start server on http port.
 func (s *Server) Run() {
-	address := fmt.Sprintf("%s:%s", s.Host, s.Port)
+	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    s.ReadTimeout * time.Second,
-		WriteTimeout:   s.WriteTimeout * time.Second,
-		MaxHeaderBytes: s.HeaderSize << 10,
+		ReadTimeout:    cfg.ReadTimeout,
+		WriteTimeout:   cfg.WriteTimeout,
+		MaxHeaderBytes: cfg.HeaderSize,
 		Handler:        s,
 	}
 
@@ -73,12 +76,12 @@ func (s *Server) Run() {
 
 // RunTLS will start server on https port.
 func (s *Server) RunTLS(certFile string, keyFile string) {
-	address := fmt.Sprintf("%s:%s", s.Host, s.TLSPort)
+	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.TLSPort)
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    s.ReadTimeout * time.Second,
-		WriteTimeout:   s.WriteTimeout * time.Second,
-		MaxHeaderBytes: s.HeaderSize << 10,
+		ReadTimeout:    cfg.ReadTimeout,
+		WriteTimeout:   cfg.WriteTimeout,
+		MaxHeaderBytes: cfg.HeaderSize,
 		Handler:        s,
 	}
 

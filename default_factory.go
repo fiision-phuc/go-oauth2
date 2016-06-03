@@ -89,3 +89,8 @@ func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 func (d *DefaultFactory) CreateRouter() IRouter {
 	return nil
 }
+
+// CreateStore creates new store component.
+func (d *DefaultFactory) CreateStore() IStore {
+	return nil
+}

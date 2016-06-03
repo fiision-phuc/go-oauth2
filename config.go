@@ -120,12 +120,6 @@ func loadConfig(configFile string) *config {
 	config := config{}
 	json.Unmarshal(bytes, &config)
 
-	folders := make(map[string]string)
-	for path, folder := range config.StaticFolders {
-		folders[utils.FormatPath(path)] = folder
-	}
-	config.StaticFolders = folders
-
 	// Convert duration to seconds
 	config.HeaderSize <<= 10
 	config.ReadTimeout *= time.Second
@@ -133,6 +127,12 @@ func loadConfig(configFile string) *config {
 	config.AccessTokenDuration *= time.Second
 	config.RefreshTokenDuration *= time.Second
 	config.AuthorizationCodeDuration *= time.Second
+
+	// Define redirectPaths
+	redirectPaths = make(map[int]string, len(config.RedirectPaths))
+	for path, status := range config.RedirectPaths {
+		redirectPaths[status] = path
+	}
 
 	// Define regular expressions
 	//	regexp.MustCompile(`:[^/#?()\.\\]+`)

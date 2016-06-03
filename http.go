@@ -15,33 +15,28 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	request.URL.Path = utils.FormatPath(request.URL.Path)
 
 	// Create context
-	context := s.factory.CreateRequestContext(request, response)
-	//	defer context.RecoveryRequest(context, s.Development)
+	context := factory.CreateRequestContext(request, response)
+	defer RecoveryRequest(context, s.sandbox)
 
-	// Validate http request methods
+	/* Condition validation: validate request methods */
 	if !methodsValidation.MatchString(request.Method) {
 		context.OutputError(utils.Status405())
 		return
 	}
 
 	// Should redirect request to static folder or not?
-	isStaticRequest := false
-	if request.Method == GET && len(s.StaticFolders) > 0 {
-		for prefix, folder := range s.StaticFolders {
+	if request.Method == GET && len(cfg.StaticFolders) > 0 {
+		for prefix, folder := range cfg.StaticFolders {
 			if strings.HasPrefix(request.URL.Path, prefix) {
 				newPath := strings.Replace(request.URL.Path, prefix, folder, 1)
 				request.URL, _ = url.Parse(newPath)
-				isStaticRequest = true
-				break
+
+				s.serveResource(context, request, response)
+				return
 			}
 		}
 	}
-
-	if !isStaticRequest {
-		s.serveRequest(context)
-	} else {
-		s.serveResource(context, request, response)
-	}
+	s.serveRequest(context)
 }
 
 // MARK: Struct's private functions

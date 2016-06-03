@@ -18,4 +18,7 @@ type IFactory interface {
 
 	// Create new router component.
 	CreateRouter() IRouter
+
+	// Create new store component.
+	CreateStore() IStore
 }

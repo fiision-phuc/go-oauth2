@@ -8,16 +8,11 @@ import (
 
 // defaultRouter object description.
 type DefaultRouter struct {
-	routes  []IRoute
-	groups  []string
-	factory IFactory
+	routes []IRoute
+	groups []string
 }
 
 // MARK: IRouter's members
-func (r *DefaultRouter) BindFactory(factory IFactory) {
-	r.factory = factory
-}
-
 func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles string) {
 }
 
