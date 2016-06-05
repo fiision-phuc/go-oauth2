@@ -2,7 +2,7 @@ package oauth2
 
 import "time"
 
-// IStore descripts a token storage's characteristic.
+// IStore describes a token storage's characteristic.
 type IStore interface {
 
 	// User

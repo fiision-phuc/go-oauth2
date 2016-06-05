@@ -1,27 +1,52 @@
 package oauth2
 
-import "testing"
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"regexp"
+	"strings"
+	"testing"
+
+	"github.com/phuc0302/go-oauth2/test"
+)
 
 func Test_ServeHTTP(t *testing.T) {
-	//	defer os.Remove(ConfigFile)
+	defer os.Remove(debug)
+	server := DefaultServer(true)
 
-	//	store := createStore()
-	//	server := DefaultServerWithTokenStore(store)
+	// Update allow methods
+	cfg.AllowMethods = []string{GET, POST, PATCH, DELETE}
+	methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(cfg.AllowMethods, "|")))
 
-	//	request, _ := http.NewRequest("POST", "http://localhost:8080/token", strings.NewReader(""))
-	//	request.Header.Set("content-type", "application/x-www-form-urlencoded")
-	//	response := httptest.NewRecorder()
-	//	server.ServeHTTP(response, request)
-	//	if response.Code != 400 {
-	//		t.Errorf("Expected http status 400 but found %d", response.Code)
-	//	}
+	// [Test 1] Handle invalid HTTP method
+	request, _ := http.NewRequest("LINK", "http://localhost:8080/token", nil)
 
-	//	request, _ = http.NewRequest("GET", "http://localhost:8080/oauth2/resources/README", nil)
-	//	response = httptest.NewRecorder()
-	//	server.ServeHTTP(response, request)
-	//	if response.Code != 200 {
-	//		t.Errorf("Expected http status 200 but found %d", response.Code)
-	//	}
+	response := httptest.NewRecorder()
+	server.ServeHTTP(response, request)
+	if response.Code != 405 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 405, response.Code)
+	}
+
+	// [Test 1] Handle data request
+	request, _ = http.NewRequest("POST", "http://localhost:8080/token", strings.NewReader(""))
+	request.Header.Set("content-type", "application/x-www-form-urlencoded")
+
+	response = httptest.NewRecorder()
+	server.ServeHTTP(response, request)
+	if response.Code != 503 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 503, response.Code)
+	}
+
+	// [Test 2] Handle resource request
+	request, _ = http.NewRequest("GET", "http://localhost:8080/resources/README", nil)
+
+	response = httptest.NewRecorder()
+	server.ServeHTTP(response, request)
+	if response.Code != 404 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 404, response.Code)
+	}
 }
 
 func Test_serveRequestWithOAuth2Disable(t *testing.T) {

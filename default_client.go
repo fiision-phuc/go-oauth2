@@ -2,7 +2,7 @@ package oauth2
 
 import "gopkg.in/mgo.v2/bson"
 
-// DefaultClient descripts a mongodb client.
+// DefaultClient describes a mongodb client.
 type DefaultClient struct {
 	ID        bson.ObjectId `bson:"_id"`
 	Secret    bson.ObjectId `bson:"client_secret"`

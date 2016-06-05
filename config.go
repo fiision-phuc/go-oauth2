@@ -33,27 +33,32 @@ const (
 	release = "oauth2.release.cfg"
 )
 
-var (
-	redirectPaths map[int]string = nil
-	//	clientValidation  *regexp.Regexp
-	grantsValidation  *regexp.Regexp = nil
-	methodsValidation *regexp.Regexp = nil
-)
-
-// config descripts a configuration  object  that  will  be  used  during application life time.
+// config describes a configuration  object  that  will  be  used  during application life time.
 type config struct {
+
+	// Server
 	Host    string `json:"host,omitempty"`
 	Port    int    `json:"port,omitempty"`
 	TLSPort int    `json:"tls_port,omitempty"`
 
+	// Header
 	HeaderSize   int           `json:"headers_size,omitempty"`  // In KB
 	ReadTimeout  time.Duration `json:"timeout_read,omitempty"`  // In seconds
 	WriteTimeout time.Duration `json:"timeout_write,omitempty"` // In seconds
 
+	// HTTP Method
 	AllowMethods  []string          `json:"allow_methods,omitempty"`
 	RedirectPaths map[string]int    `json:"redirect_paths,omitempty"`
 	StaticFolders map[string]string `json:"static_folders,omitempty"`
 
+	// Log
+	LogLevel     string `json:"log_level,omitempty"`
+	SlackURL     string `json:"slack_url,omitempty"`
+	SlackIcon    string `json:"slack_icon,omitempty"`
+	SlackUser    string `json:"slack_user,omitempty"`
+	SlackChannel string `json:"slack_channel,omitempty"`
+
+	// OAuth2.0
 	GrantTypes                []string      `json:"grant_types,omitempty"`
 	AllowRefreshToken         bool          `json:"allow_refresh_token,omitempty"`
 	AccessTokenDuration       time.Duration `json:"access_token_duration,omitempty"`       // In seconds
@@ -85,6 +90,12 @@ func createConfig(configFile string) {
 			"/assets":    "assets",
 			"/resources": "resources",
 		},
+
+		LogLevel:     "debug",
+		SlackURL:     "https://hooks.slack.com/services/",
+		SlackIcon:    ":ghost:",
+		SlackUser:    "OAuth2",
+		SlackChannel: "#channel",
 
 		GrantTypes:                []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
 		AllowRefreshToken:         true,

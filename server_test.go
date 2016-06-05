@@ -2,11 +2,15 @@ package oauth2
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/phuc0302/go-oauth2/test"
 	"github.com/phuc0302/go-oauth2/utils"
 
 	"gopkg.in/mgo.v2/bson"
@@ -93,76 +97,45 @@ func parseResult(response *http.Response) *TokenResponse {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 func Test_DefaultServer(t *testing.T) {
-	//	defer os.Remove(ConfigFile)
-	//	server := DefaultServer()
+	defer os.Remove(debug)
+	server := DefaultServer(true)
 
-	//	if server.Config == nil {
-	//		t.Errorf("Expected config file should be loaded at creation time but found nil.")
-	//	}
-
-	//	if server.routes != nil {
-	//		t.Error("Expected routes nil but found not nil.")
-	//	}
-
-	//	if server.groups != nil {
-	//		t.Error("Expected groups will be nil but found not nil.")
-	//	}
-
-	//	if server.logger == nil {
-	//		t.Error("Expected logger not nil but found nil.")
-	//	}
+	if cfg == nil {
+		t.Error(test.ExpectedNotNil)
+	}
+	if objectFactory == nil {
+		t.Error(test.ExpectedNotNil)
+	}
+	if server.router == nil {
+		t.Error(test.ExpectedNotNil)
+	}
 }
 
-func Test_DefaultServerWithTokenStore(t *testing.T) {
-	//	defer os.Remove(ConfigFile)
-	//	server := DefaultServerWithTokenStore(createStore())
+func Test_Run(t *testing.T) {
+	defer os.Remove(debug)
 
-	//	if server.Config == nil {
-	//		t.Errorf("Expected config file should be loaded at creation time but found nil.")
-	//	}
+	server := DefaultServer(true)
+	go server.Run()
 
-	//	if server.routes == nil {
-	//		t.Error("Expected routes not nil but found nil.")
-	//	}
+	response, err := http.PostForm("http://localhost:8080/token", url.Values{
+		"grant_type":    []string{PasswordGrant},
+		"client_id":     []string{bson.NewObjectId().Hex()},
+		"client_secret": []string{bson.NewObjectId().Hex()},
+		"username":      []string{"admin"},
+		"password":      []string{"admin"},
+	})
+	//	status := parseError(response)
 
-	//	if server.groups != nil {
-	//		t.Error("Expected groups will be nil but found not nil.")
-	//	}
+	if response == nil {
+		fmt.Println(err)
+		t.Error(test.ExpectedNotNil)
+	} else {
+		if response.StatusCode != 405 {
+			t.Errorf(test.ExpectedNumberButFoundNumber, 405, response.StatusCode)
+		}
+	}
 
-	//	if server.logger == nil {
-	//		t.Error("Expected logger not nil but found nil.")
-	//	}
 }
-
-//func Test_Run(t *testing.T) {
-//	defer os.Remove(ConfigFile)
-
-//	config := LoadConfigs()
-//	config.AllowMethods = []string{GET}
-
-//	configJSON, _ := json.MarshalIndent(config, "", "  ")
-//	file, _ := os.Create(ConfigFile)
-//	file.Write(configJSON)
-//	file.Close()
-
-//	config = LoadConfigs()
-
-//	server := DefaultServerWithTokenStore(createStore())
-//	go server.Run()
-
-//	response, _ := http.PostForm("http://localhost:8080/token", url.Values{
-//		"grant_type":    []string{PasswordGrant},
-//		"client_id":     []string{bson.NewObjectId().Hex()},
-//		"client_secret": []string{bson.NewObjectId().Hex()},
-//		"username":      []string{"admin"},
-//		"password":      []string{"admin"},
-//	})
-//	status := parseError(response)
-
-//	if status.Code != 405 {
-//		t.Errorf("Expect http status 405 but found %d", status.Code)
-//	}
-//}
 
 func Test_AddRolesWillBeDisabled(t *testing.T) {
 	//	defer os.Remove(ConfigFile)

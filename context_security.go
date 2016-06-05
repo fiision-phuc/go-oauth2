@@ -7,7 +7,7 @@ import (
 
 var bearerRegex = regexp.MustCompile("^(B|b)earer\\s\\w+$")
 
-// Security descripts a user's security scope.
+// Security describes a user's security scope.
 type Security struct {
 	AuthUser         IUser
 	AuthClient       IClient

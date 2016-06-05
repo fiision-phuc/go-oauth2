@@ -11,6 +11,22 @@ import (
 )
 
 func Test_CreateConfig(t *testing.T) {
+	//	logrus.SetFormatter(&logrus.JSONFormatter{})
+	//	logrus.SetFormatter(&logrus.TextFormatter{})
+	//	logrus.SetOutput(os.Stderr)
+
+	//	logrus.SetLevel(logrus.DebugLevel)
+	//	logrus.AddHook(&slackrus.SlackrusHook{
+	//		HookURL:        "https://hooks.slack.com/services/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",
+	//		AcceptedLevels: slackrus.LevelThreshold(logrus.DebugLevel),
+	//		Channel:        "#keywords",
+	//		Username:       "Server",
+	//		IconEmoji:      ":ghost:",
+	//	})
+	//	logrus.Warn("warn")
+	//	logrus.Info("info")
+	//	logrus.Debug("debug")
+
 	createConfig(debug)
 	defer os.Remove(debug)
 

@@ -11,11 +11,11 @@ import (
 
 // ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	request.Method = strings.ToUpper(request.Method)
 	request.URL.Path = utils.FormatPath(request.URL.Path)
+	request.Method = strings.ToUpper(request.Method)
 
 	// Create context
-	context := factory.CreateRequestContext(request, response)
+	context := objectFactory.CreateRequestContext(request, response)
 	defer RecoveryRequest(context, s.sandbox)
 
 	/* Condition validation: validate request methods */
@@ -43,38 +43,14 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 func (s *Server) serveRequest(context *Request) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 
-	//	for _, route := range s.routes {
-	//		ok, pathQueries := route.Match(context.Method(), context.URLPath)
-	//		if !ok {
-	//			continue
-	//		}
-	//		context.PathQueries = pathQueries
+	route, pathParams := s.router.MatchRoute(context.request.Method, context.request.URL.Path)
+	context.PathParams = pathParams
 
-	//		// Validate authentication & roles if neccessary
-	//		if s.tokenStore != nil {
-	//			securityContext := CreateSecurityContext(context, s.tokenStore)
-
-	//			for rule, roles := range s.userRoles {
-	//				if rule.MatchString(context.URLPath) {
-	//					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
-
-	//					if securityContext != nil && securityContext.AuthUser != nil {
-	//						for _, role := range securityContext.AuthUser.UserRoles() {
-	//							if regexRoles.MatchString(role) {
-	//								route.InvokeHandler(context, securityContext)
-	//								return
-	//							}
-	//						}
-	//					}
-	//					context.OutputError(utils.Status401())
-	//					return
-	//				}
-	//			}
-	//		}
-	//		route.InvokeHandler(context, nil)
-	//		return
-	//	}
-	context.OutputError(utils.Status503())
+	if route != nil {
+		route.InvokeHandler(context, nil)
+	} else {
+		context.OutputError(utils.Status503())
+	}
 }
 
 func (s *Server) serveResource(context *Request, request *http.Request, response http.ResponseWriter) {

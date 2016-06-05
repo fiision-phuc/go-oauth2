@@ -17,12 +17,12 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-// Request descripts a HTTP URL request scope.
+// Request describes a HTTP URL request scope.
 type Request struct {
-	URLPath     string
-	Queries     url.Values
+	Path        string
 	Header      map[string]string
-	PathQueries map[string]string
+	PathParams  map[string]string
+	QueryParams url.Values
 
 	request  *http.Request
 	response http.ResponseWriter
@@ -30,24 +30,9 @@ type Request struct {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// BasicAuth returns basic authentication info.
-func (c *Request) BasicAuth() (username string, password string, ok bool) {
-	return c.request.BasicAuth()
-}
-
-// Method returns HTTP method.
-func (c *Request) Method() string {
-	return c.request.Method
-}
-
-// Protocol returns HTTP protocol
-func (c *Request) Protocol() string {
-	return c.request.Proto
-}
-
 // BindForm converts urlencode/multipart form to object.
 func (c *Request) BindForm(inputForm interface{}) error {
-	return utils.BindForm(c.Queries, inputForm)
+	return utils.BindForm(c.QueryParams, inputForm)
 }
 
 // BindJSON converts json data to object.

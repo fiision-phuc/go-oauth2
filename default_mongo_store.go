@@ -8,7 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// DefaultMongoStore descripts a mongodb store.
+// DefaultMongoStore describes a mongodb store.
 type DefaultMongoStore struct {
 }
 
@@ -133,9 +133,9 @@ func (m *DefaultMongoStore) CreateAccessToken(clientID string, userID string, cr
 	}
 
 	newToken := &DefaultToken{
-		ID:     bson.NewObjectId(),
-		User:      bson.ObjectIdHex(userID),
-		Client:    bson.ObjectIdHex(clientID),
+		ID:      bson.NewObjectId(),
+		User:    bson.ObjectIdHex(userID),
+		Client:  bson.ObjectIdHex(clientID),
 		Created: createdTime,
 		Expired: expiredTime,
 	}
@@ -194,9 +194,9 @@ func (m *DefaultMongoStore) CreateRefreshToken(clientID string, userID string, c
 	}
 
 	newToken := &DefaultToken{
-		ID:     bson.NewObjectId(),
-		User:      bson.ObjectIdHex(userID),
-		Client:    bson.ObjectIdHex(clientID),
+		ID:      bson.NewObjectId(),
+		User:    bson.ObjectIdHex(userID),
+		Client:  bson.ObjectIdHex(clientID),
 		Created: createdTime,
 		Expired: expiredTime,
 	}

@@ -55,16 +55,16 @@ func RecoveryInternal(logger *log.Logger) {
 func RecoveryRequest(c *Request, isDevelopment bool) {
 	if err := recover(); err != nil {
 		log := log_message{
-			Uri:         c.URLPath,
-			Method:      fmt.Sprintf("%s|%s", c.Protocol, c.Method),
+			Uri:         c.Path,
+			Method:      fmt.Sprintf("%s|%s", c.request.Proto, c.request.Method),
 			RequestTime: time.Now().UTC().Format(time.RFC822),
 
 			Trace: callStack(3),
 
 			Body: &log_body{
 				ContentType:   c.Header["content-type"],
-				RequestBody:   c.Queries,
-				RequestParams: c.PathQueries,
+				RequestBody:   c.QueryParams,
+				RequestParams: c.PathParams,
 			},
 
 			Request: &log_request{

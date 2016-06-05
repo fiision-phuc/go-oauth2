@@ -1,6 +1,6 @@
 package oauth2
 
-// IRouter descripts a router component's characteristic.
+// IRouter describes a router component's characteristic.
 type IRouter interface {
 
 	// Group all same url's prefix with user's roles.
@@ -14,4 +14,7 @@ type IRouter interface {
 
 	// Bind an url pattern with a handler.
 	BindRoute(httpMethod string, urlPattern string, handler interface{})
+
+	// Match a route with an url path.
+	MatchRoute(httpMethod string, path string) (route IRoute, pathParams map[string]string)
 }

@@ -2,20 +2,23 @@ package oauth2
 
 import (
 	"bytes"
+	"regexp"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/Sirupsen/logrus"
 )
 
-// defaultRouter object description.
+// DefaultRouter descripts a default router component implementation.
 type DefaultRouter struct {
-	routes []IRoute
-	groups []string
+	routes    []IRoute
+	groups    []string
+	userRoles map[*regexp.Regexp][]string
 }
 
-// MARK: IRouter's members
+// GroupRole groups all same url's prefix with user's roles.
 func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles string) {
 }
 
+// BindRole binds an url pattern with user's roles.
 func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles string) {
 	//	/* Condition validation: Ignore role validation if there is no token store */
 	//	if s.tokenStore == nil {
@@ -40,45 +43,73 @@ func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles str
 	//	s.userRoles[regexp.MustCompile(pattern)] = userRoles
 }
 
+// GroupRoute groups all same url's prefix.
 func (r *DefaultRouter) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
 	r.groups = append(r.groups, groupPath)
 	function(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
 
+// BindRoute binds an url pattern with a handler.
 func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler interface{}) {
-	//	defer RecoveryInternal(s.logger)
-
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
-		var groupPattern bytes.Buffer
+		var buffer bytes.Buffer
 
-		for _, g := range r.groups {
-			groupPattern.WriteString(utils.FormatPath(g))
+		for _, path := range r.groups {
+			buffer.WriteString(path)
 		}
 
-		if len(urlPattern) > 0 {
-			groupPattern.WriteString(utils.FormatPath(urlPattern))
-		}
-		urlPattern = groupPattern.String()
-	} else {
-		urlPattern = utils.FormatPath(urlPattern)
+		buffer.WriteString(urlPattern)
+		urlPattern = buffer.String()
 	}
+	logrus.Infof("%s -> %s", httpMethod, urlPattern)
 
 	// Look for existing one before create new
 	for _, route := range r.routes {
 		if route.URLPattern() == urlPattern {
 			route.BindHandler(httpMethod, handler)
-			//			s.logger.Printf("%-6s -> %s\n", method, urlPattern)
 			return
 		}
 	}
 
 	// Create new route
-	newRoute := CreateDefaultRoute(urlPattern)
+	newRoute := objectFactory.CreateRoute(urlPattern)
 	newRoute.BindHandler(httpMethod, handler)
-
-	// Add to collection
 	r.routes = append(r.routes, newRoute)
-	//	s.logger.Printf("%-6s -> %s\n", method, urlPattern)
+}
+
+// MatchRoute matches a route with an url path.
+func (r *DefaultRouter) MatchRoute(httpMethod string, path string) (IRoute, map[string]string) {
+	for _, route := range r.routes {
+		ok, pathParams := route.MatchURLPattern(httpMethod, path)
+		if !ok {
+			continue
+		}
+
+		// Validate authentication & roles if neccessary
+		if tokenStore != nil {
+			//			securityContext := CreateSecurityContext(context, s.tokenStore)
+
+			//			for rule, roles := range s.userRoles {
+			//				if rule.MatchString(context.URLPath) {
+			//					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+
+			//					if securityContext != nil && securityContext.AuthUser != nil {
+			//						for _, role := range securityContext.AuthUser.UserRoles() {
+			//							if regexRoles.MatchString(role) {
+			//								route.InvokeHandler(context, securityContext)
+			//								return
+			//							}
+			//						}
+			//					}
+			//					context.OutputError(utils.Status401())
+			//					return
+			//				}
+			//			}
+		}
+
+		return route, pathParams
+	}
+	return nil, nil
 }

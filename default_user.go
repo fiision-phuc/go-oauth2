@@ -2,7 +2,7 @@ package oauth2
 
 import "gopkg.in/mgo.v2/bson"
 
-// DefaultUser descripts a mongodb user.
+// DefaultUser describes a mongodb user.
 type DefaultUser struct {
 	ID    bson.ObjectId `bson:"_id"`
 	User  string        `bson:"username,omitempty"`

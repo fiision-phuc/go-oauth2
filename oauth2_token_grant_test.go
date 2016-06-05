@@ -1,6 +1,9 @@
 package oauth2
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -10,9 +13,9 @@ var (
 )
 
 func Test_TokenGrantGeneralValidation(t *testing.T) {
-	//	defer os.Remove(ConfigFile)
-	//	config := loadConfig()
-	//	store := createStore()
+	defer os.Remove(debug)
+	objectFactory = &DefaultFactory{}
+	tokenStore = objectFactory.CreateStore()
 
 	//	controller := CreateTokenGrant(config, store)
 	//	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

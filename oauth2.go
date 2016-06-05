@@ -18,7 +18,7 @@ const (
 	TableUser         = "oauth_user"
 )
 
-// TokenResponse descripts a granted response that will be returned to client.
+// TokenResponse describes a granted response that will be returned to client.
 type TokenResponse struct {
 	TokenType    string `json:"token_type,omitempty"`
 	AccessToken  string `json:"access_token,omitempty"`

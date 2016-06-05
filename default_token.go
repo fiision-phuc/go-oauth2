@@ -6,7 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// DefaultToken descripts a mongodb Token.
+// DefaultToken describes a mongodb Token.
 type DefaultToken struct {
 	ID      bson.ObjectId `bson:"_id"`
 	User    bson.ObjectId `bson:"user_id,omitempty"`

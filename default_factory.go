@@ -9,19 +9,14 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-var (
-	globsRegex     = regexp.MustCompile(`\*\*`)
-	pathParamRegex = regexp.MustCompile(`:[^/#?()\.\\]+`)
-)
-
-// DefaultFactory descripts a default factory object.
+// DefaultFactory describes a default factory object.
 type DefaultFactory struct {
 }
 
 // CreateRequestContext creates new request context.
 func (d *DefaultFactory) CreateRequestContext(request *http.Request, response http.ResponseWriter) *Request {
 	context := &Request{
-		URLPath:  request.URL.Path,
+		Path:  request.URL.Path,
 		request:  request,
 		response: response,
 	}
@@ -33,12 +28,12 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 	}
 
 	// Parse body context if neccessary
-	switch context.Method() {
+	switch context.request.Method {
 
 	case GET:
 		params := request.URL.Query()
 		if len(params) > 0 {
-			context.Queries = params
+			context.QueryParams = params
 		}
 		break
 
@@ -48,13 +43,13 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
 			params := utils.ParseForm(request)
 			if len(params) > 0 {
-				context.Queries = params
+				context.QueryParams = params
 			}
 		} else if strings.Contains(contentType, "multipart/form-data") {
 			params := utils.ParseMultipartForm(request)
 
 			if len(params) > 0 {
-				context.Queries = params
+				context.QueryParams = params
 			}
 		}
 		break
@@ -73,24 +68,24 @@ func (d *DefaultFactory) CreateSecurityContext() *Security {
 // CreateRoute creates new route component.
 func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 	regexPattern := pathParamRegex.ReplaceAllStringFunc(urlPattern, func(m string) string {
-		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
+		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
 	regexPattern += "/?"
 
 	route := DefaultRoute{
-		urlPattern: urlPattern,
-		handlers:   make(map[string]interface{}),
-		regex:      regexp.MustCompile(regexPattern),
+		path:     urlPattern,
+		handlers: make(map[string]interface{}),
+		regex:    regexp.MustCompile(regexPattern),
 	}
 	return &route
 }
 
 // CreateRouter creates new router component.
 func (d *DefaultFactory) CreateRouter() IRouter {
-	return nil
+	return &DefaultRouter{}
 }
 
 // CreateStore creates new store component.
 func (d *DefaultFactory) CreateStore() IStore {
-	return nil
+	return &DefaultMongoStore{}
 }

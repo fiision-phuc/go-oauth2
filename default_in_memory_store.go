@@ -6,7 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// DefaultInMemoryStore descripts an in memory store.
+// DefaultInMemoryStore describes an in memory store.
 type DefaultInMemoryStore struct {
 	clients       []IClient
 	users         []IUser
@@ -106,9 +106,9 @@ func (s *DefaultInMemoryStore) FindAccessTokenWithCredential(clientID string, us
 // CreateAccessToken returns new access_token.
 func (s *DefaultInMemoryStore) CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
 	newToken := &DefaultToken{
-		ID:     bson.NewObjectId(),
-		User:      bson.ObjectIdHex(userID),
-		Client:    bson.ObjectIdHex(clientID),
+		ID:      bson.NewObjectId(),
+		User:    bson.ObjectIdHex(userID),
+		Client:  bson.ObjectIdHex(clientID),
 		Created: createdTime,
 		Expired: expiredTime,
 	}
@@ -150,9 +150,9 @@ func (s *DefaultInMemoryStore) FindRefreshTokenWithCredential(clientID string, u
 // CreateRefreshToken returns new refresh_token.
 func (s *DefaultInMemoryStore) CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
 	newToken := &DefaultToken{
-		ID:     bson.NewObjectId(),
-		User:      bson.ObjectIdHex(userID),
-		Client:    bson.ObjectIdHex(clientID),
+		ID:      bson.NewObjectId(),
+		User:    bson.ObjectIdHex(userID),
+		Client:  bson.ObjectIdHex(clientID),
 		Created: createdTime,
 		Expired: expiredTime,
 	}

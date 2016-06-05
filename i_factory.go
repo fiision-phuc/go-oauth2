@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// IFactory descripts a factory component's characteristic.
+// IFactory describes a factory component's characteristic.
 type IFactory interface {
 
 	// Create new request context.
