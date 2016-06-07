@@ -82,7 +82,7 @@ func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 
 	route := DefaultRoute{
 		path:     urlPattern,
-		handlers: make(map[string]interface{}),
+		handlers: map[string]interface{}{},
 		regex:    regexp.MustCompile(regexPattern),
 	}
 	return &route

@@ -2,7 +2,6 @@ package oauth2
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"text/template"
@@ -67,11 +66,6 @@ func (c *Request) MultipartFile(name string) (multipart.File, *multipart.FileHea
 //	jpeg.Encode(output, resizedImage, nil)
 //	return nil
 //}
-
-// RawData returns a raw body.
-func (c *Request) RawData() ([]byte, error) {
-	return ioutil.ReadAll(c.request.Body)
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
