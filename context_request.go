@@ -2,18 +2,11 @@ package oauth2
 
 import (
 	"encoding/json"
-	"image"
-	"image/jpeg"
-	"image/png"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"net/url"
-	"os"
-	"path"
 	"text/template"
 
-	"github.com/nfnt/resize"
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
@@ -22,60 +15,58 @@ type Request struct {
 	Path        string
 	Header      map[string]string
 	PathParams  map[string]string
-	QueryParams url.Values
+	QueryParams map[string]string
 
 	request  *http.Request
 	response http.ResponseWriter
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+//// BindForm converts urlencode/multipart form to object.
+//func (c *Request) BindForm(inputForm interface{}) error {
+//	return utils.BindForm(c.QueryParams, inputForm)
+//}
 
-// BindForm converts urlencode/multipart form to object.
-func (c *Request) BindForm(inputForm interface{}) error {
-	return utils.BindForm(c.QueryParams, inputForm)
-}
-
-// BindJSON converts json data to object.
-func (c *Request) BindJSON(jsonObject interface{}) error {
-	//	return c.request.FormFile(name)
-	return nil
-}
+//// BindJSON converts json data to object.
+//func (c *Request) BindJSON(jsonObject interface{}) error {
+//	//	return c.request.FormFile(name)
+//	return nil
+//}
 
 // MultipartFile returns an uploaded file by name.
 func (c *Request) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
 	return c.request.FormFile(name)
 }
 
-// MoveImage moves a multipart image to destination and resize if neccessary.
-func (c *Request) MoveImage(name string, destinationPath string, width uint, height uint) error {
-	input, imageInfo, err := c.MultipartFile(name)
-	if err != nil {
-		return err
-	}
-	defer input.Close()
+//// MoveImage moves a multipart image to destination and resize if neccessary.
+//func (c *Request) MoveImage(name string, destinationPath string, width uint, height uint) error {
+//	input, imageInfo, err := c.MultipartFile(name)
+//	if err != nil {
+//		return err
+//	}
+//	defer input.Close()
 
-	// Decode image
-	var decodedImage image.Image
-	if path.Ext(imageInfo.Filename) == ".jpg" {
-		decodedImage, err = jpeg.Decode(input)
-	} else if path.Ext(imageInfo.Filename) == ".png" {
-		decodedImage, err = png.Decode(input)
-	}
+//	// Decode image
+//	var decodedImage image.Image
+//	if path.Ext(imageInfo.Filename) == ".jpg" {
+//		decodedImage, err = jpeg.Decode(input)
+//	} else if path.Ext(imageInfo.Filename) == ".png" {
+//		decodedImage, err = png.Decode(input)
+//	}
 
-	/* Condition validation: Validate decode image process */
-	if err != nil {
-		return err
-	}
+//	/* Condition validation: Validate decode image process */
+//	if err != nil {
+//		return err
+//	}
 
-	// Create output file
-	output, _ := os.Create(destinationPath)
-	defer output.Close()
+//	// Create output file
+//	output, _ := os.Create(destinationPath)
+//	defer output.Close()
 
-	// Continue if image can be decoded.
-	resizedImage := resize.Resize(width, height, decodedImage, resize.NearestNeighbor)
-	jpeg.Encode(output, resizedImage, nil)
-	return nil
-}
+//	// Continue if image can be decoded.
+//	resizedImage := resize.Resize(width, height, decodedImage, resize.NearestNeighbor)
+//	jpeg.Encode(output, resizedImage, nil)
+//	return nil
+//}
 
 // RawData returns a raw body.
 func (c *Request) RawData() ([]byte, error) {

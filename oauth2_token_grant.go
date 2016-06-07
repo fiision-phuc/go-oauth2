@@ -33,9 +33,9 @@ func (g *TokenGrant) HandleForm(c *Request) {
 
 // MARK: Struct's private functions
 func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
-	grantType := c.QueryParams.Get("grant_type")
-	clientID := c.QueryParams.Get("client_id")
-	clientSecret := c.QueryParams.Get("client_secret")
+	grantType := c.QueryParams["grant_type"]
+	clientID := c.QueryParams["client_id"]
+	clientSecret := c.QueryParams["client_secret"]
 
 	/* Condition validation: Validate grant_type */
 	if !(len(grantType) >= 0 && grantsValidation.MatchString(grantType)) {
@@ -177,8 +177,8 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 
 // usePasswordFlow handle password flow.
 func (g *TokenGrant) usePasswordFlow(c *Request, s *Security) *utils.Status {
-	username := c.QueryParams.Get("username")
-	password := c.QueryParams.Get("password")
+	username := c.QueryParams["username"]
+	password := c.QueryParams["password"]
 
 	/* Condition validation: Validate username and password parameters */
 	if len(username) == 0 || len(password) == 0 {
@@ -197,7 +197,7 @@ func (g *TokenGrant) usePasswordFlow(c *Request, s *Security) *utils.Status {
 
 // useRefreshTokenFlow handle refresh token flow.
 func (g *TokenGrant) useRefreshTokenFlow(c *Request, s *Security) *utils.Status {
-	queryToken := c.QueryParams.Get("refresh_token")
+	queryToken := c.QueryParams["refresh_token"]
 
 	/* Condition validation: Validate refresh_token parameter */
 	if len(queryToken) == 0 {

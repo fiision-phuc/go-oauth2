@@ -1,18 +1,15 @@
 package oauth2
 
-import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-)
+//func Test_OutputHeader(t *testing.T) {
+//	objectFactory = &DefaultFactory{}
 
-func Test_OutputHeader(t *testing.T) {
-	objectFactory = &DefaultFactory{}
+//	// Create test server
+//	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		context := objectFactory.CreateRequestContext(r, w)
 
-	// Create test server
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+//	}))
+//	defer ts.Close()
 
-	}))
-	defer ts.Close()
-}
+//	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", nil)
+//	fmt.Println(response)
+//}

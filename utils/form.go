@@ -93,27 +93,28 @@ func BindForm(values url.Values, inputForm interface{}) error {
 	return nil
 }
 
-// ParseForm parses url-encode form into map.
-func ParseForm(request *http.Request) url.Values {
-	err := request.ParseForm()
-	if err != nil {
-		return nil
-	}
-	return request.Form
-}
+//// ParseForm parses url-encode form into map.
+//func ParseForm(request *http.Request) url.Values {
+//	err := request.ParseForm()
+//	if err != nil {
+//		return nil
+//	}
+//	return request.Form
+//}
 
-// ParseMultipartForm parses multipart form into map.
-func ParseMultipartForm(request *http.Request) url.Values {
-	err := request.ParseMultipartForm(10 << 20) // 10 MB
-	if err != nil {
-		panic(err)
-	}
-	params := url.Values(request.MultipartForm.Value)
-	//	for k, v := range request.URL.Query() {
-	//		params[k] = v
-	//	}
-	return params
-}
+//// ParseMultipartForm parses multipart form into map.
+//func ParseMultipartForm(request *http.Request) url.Values {
+//	err := request.ParseMultipartForm(10 << 20) // 10 MB
+//	if err != nil {
+//		panic(err)
+//	}
+
+//	params := url.Values(request.MultipartForm.Value)
+//	//	for k, v := range request.URL.Query() {
+//	//		params[k] = v
+//	//	}
+//	return params
+//}
 
 // ParseStatus parses data into status object.
 func ParseStatus(response *http.Response) *Status {

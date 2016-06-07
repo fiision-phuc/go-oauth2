@@ -42,9 +42,10 @@ type config struct {
 	TLSPort int    `json:"tls_port,omitempty"`
 
 	// Header
-	HeaderSize   int           `json:"headers_size,omitempty"`  // In KB
-	ReadTimeout  time.Duration `json:"timeout_read,omitempty"`  // In seconds
-	WriteTimeout time.Duration `json:"timeout_write,omitempty"` // In seconds
+	HeaderSize    int           `json:"header_size,omitempty"`    // In KB
+	MultipartSize int64         `json:"multipart_size,omitempty"` // In MB
+	ReadTimeout   time.Duration `json:"timeout_read,omitempty"`   // In seconds
+	WriteTimeout  time.Duration `json:"timeout_write,omitempty"`  // In seconds
 
 	// HTTP Method
 	AllowMethods  []string          `json:"allow_methods,omitempty"`
@@ -78,9 +79,10 @@ func createConfig(configFile string) {
 		Port:    8080,
 		TLSPort: 8443,
 
-		HeaderSize:   5,
-		ReadTimeout:  15,
-		WriteTimeout: 15,
+		HeaderSize:    5,
+		MultipartSize: 1,
+		ReadTimeout:   15,
+		WriteTimeout:  15,
 
 		AllowMethods: []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
 		RedirectPaths: map[string]int{
@@ -133,6 +135,7 @@ func loadConfig(configFile string) *config {
 
 	// Convert duration to seconds
 	config.HeaderSize <<= 10
+	config.MultipartSize <<= 20
 	config.ReadTimeout *= time.Second
 	config.WriteTimeout *= time.Second
 	config.AccessTokenDuration *= time.Second

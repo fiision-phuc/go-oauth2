@@ -3,10 +3,9 @@ package oauth2
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
-
-	"github.com/phuc0302/go-oauth2/utils"
 )
 
 // DefaultFactory describes a default factory object.
@@ -16,46 +15,55 @@ type DefaultFactory struct {
 // CreateRequestContext creates new request context.
 func (d *DefaultFactory) CreateRequestContext(request *http.Request, response http.ResponseWriter) *Request {
 	context := &Request{
-		Path:  request.URL.Path,
+		Path:     request.URL.Path,
 		request:  request,
 		response: response,
 	}
 
 	// Format request headers
-	context.Header = make(map[string]string, len(request.Header))
-	for k, v := range request.Header {
-		context.Header[strings.ToLower(k)] = strings.ToLower(v[0])
+	if len(request.Header) > 0 {
+		context.Header = make(map[string]string)
+
+		for k, v := range request.Header {
+			context.Header[strings.ToLower(k)] = strings.ToLower(v[0])
+		}
 	}
 
 	// Parse body context if neccessary
+	var params url.Values
 	switch context.request.Method {
 
 	case GET:
-		params := request.URL.Query()
-		if len(params) > 0 {
-			context.QueryParams = params
-		}
+		params = request.URL.Query()
 		break
 
 	case POST, PATCH:
-		contentType := request.Header.Get("content-type")
+		contentType := context.Header["content-type"]
 
 		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-			params := utils.ParseForm(request)
-			if len(params) > 0 {
-				context.QueryParams = params
+			err := request.ParseForm()
+			if err == nil {
+				params = request.Form
 			}
-		} else if strings.Contains(contentType, "multipart/form-data") {
-			params := utils.ParseMultipartForm(request)
-
-			if len(params) > 0 {
-				context.QueryParams = params
+		} else if strings.HasPrefix(contentType, "multipart/form-data; boundary") {
+			err := request.ParseMultipartForm(cfg.MultipartSize)
+			if err == nil {
+				params = request.MultipartForm.Value
 			}
 		}
 		break
 
 	default:
 		break
+	}
+
+	// Process params
+	if len(params) > 0 {
+		context.QueryParams = make(map[string]string)
+
+		for k, v := range params {
+			context.QueryParams[k] = v[0]
+		}
 	}
 	return context
 }
