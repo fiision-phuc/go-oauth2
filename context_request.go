@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"text/template"
@@ -20,16 +21,23 @@ type Request struct {
 	response http.ResponseWriter
 }
 
-//// BindForm converts urlencode/multipart form to object.
-//func (c *Request) BindForm(inputForm interface{}) error {
-//	return utils.BindForm(c.QueryParams, inputForm)
-//}
+// BindForm converts urlencode/multipart form to object.
+func (c *Request) BindForm(inputForm interface{}) error {
+	return utils.BindForm(c.QueryParams, inputForm)
+}
 
-//// BindJSON converts json data to object.
-//func (c *Request) BindJSON(jsonObject interface{}) error {
-//	//	return c.request.FormFile(name)
-//	return nil
-//}
+// BindJSON converts json data to object.
+func (c *Request) BindJSON(jsonObject interface{}) error {
+	bytes, err := ioutil.ReadAll(c.request.Body)
+
+	/* Condition validation: Validate parse process */
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(bytes, jsonObject)
+	return err
+}
 
 // MultipartFile returns an uploaded file by name.
 func (c *Request) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
