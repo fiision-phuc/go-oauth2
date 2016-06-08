@@ -150,3 +150,49 @@ func Test_CreateRequestContext(t *testing.T) {
 
 	http.DefaultClient.Do(request)
 }
+
+func Test_CreateSecurityContext(t *testing.T) {
+	t.Error("There is no test case available yet!")
+}
+
+func Test_CreateRoute(t *testing.T) {
+	objectFactory = &DefaultFactory{}
+	route := generateRoute("/example/{userID}/profile/{profileID}")
+	route.BindHandler(GET, func() {})
+
+	if route == nil {
+		t.Error(test.ExpectedNotNil)
+	} else {
+		defaultRoute, ok := route.(*DefaultRoute)
+		if ok {
+			if defaultRoute.path != "/example/{userID}/profile/{profileID}" {
+				t.Errorf(test.ExpectedStringButFoundString, "/example/{userID}/profile/{profileID}", defaultRoute.path)
+			}
+			if defaultRoute.regex == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+		} else {
+			t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
+		}
+	}
+}
+
+func Test_CreateRouter(t *testing.T) {
+	objectFactory = &DefaultFactory{}
+	router := objectFactory.CreateRouter()
+
+	_, ok := router.(*DefaultRouter)
+	if !ok {
+		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
+	}
+}
+
+func Test_CreateStore(t *testing.T) {
+	objectFactory = &DefaultFactory{}
+	store := objectFactory.CreateStore()
+
+	_, ok := store.(*DefaultMongoStore)
+	if !ok {
+		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
+	}
+}
