@@ -9,14 +9,6 @@ const (
 	ExpectedBoolButFoundBool     = "Expected \"%t\" but found \"%t\"."
 	ExpectedNumberButFoundNumber = "Expected \"%d\" but found \"%d\"."
 	ExpectedStringButFoundString = "Expected \"%s\" but found \"%s\"."
-
-//	TemplateNil          = "Expected nil but found not nil."
-//	TemplateNotNil       = "Expected not nil but found nil."
-//	TemplateError        = "Invalid %s parameter."
-//	TemplateErrorCode    = "Expected error code %d but found %d."
-//	TemplateErrorMessage = "Expected \"Invalid %s parameter.\" but found \"%s\"."
-//	TemplateErrorStatus  = "Expected \"%d\" but found \"%d\"."
-//	TemplateErrorValue   = "Expected \"%s\" but found \"%s\"."
 )
 
 //// SetupOAuth2Server returns an oauth2 server with default settings for testing purpose.

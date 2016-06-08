@@ -69,8 +69,31 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 }
 
 // CreateSecurityContext creates new security context.
-func (d *DefaultFactory) CreateSecurityContext() *Security {
-	return nil
+func (d *DefaultFactory) CreateSecurityContext(requestContext *Request) *Security {
+	headerToken := requestContext.Header["authorization"]
+	isBearer := bearerRegex.MatchString(headerToken)
+
+	/* Condition validation: Validate existing of authorization header */
+	if !isBearer {
+		return nil
+	}
+
+	headerToken = headerToken[7:]
+	accessToken := tokenStore.FindAccessToken(headerToken)
+
+	/* Condition validation: Validate expiration time */
+	if accessToken == nil || accessToken.IsExpired() {
+		return nil
+	}
+
+	client := tokenStore.FindClientWithID(accessToken.ClientID())
+	user := tokenStore.FindUserWithID(accessToken.UserID())
+	securityContext := &Security{
+		AuthClient:      client,
+		AuthUser:        user,
+		AuthAccessToken: accessToken,
+	}
+	return securityContext
 }
 
 // CreateRoute creates new route component.

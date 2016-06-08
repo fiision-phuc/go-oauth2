@@ -11,7 +11,7 @@ type IFactory interface {
 	CreateRequestContext(request *http.Request, response http.ResponseWriter) *Request
 
 	// Create new security context.
-	CreateSecurityContext() *Security
+	CreateSecurityContext(requestContext *Request) *Security
 
 	// Create new route component.
 	CreateRoute(urlPattern string) IRoute

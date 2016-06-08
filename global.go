@@ -18,6 +18,7 @@ var (
 	methodsValidation *regexp.Regexp
 
 	// Define finder
+	bearerRegex    = regexp.MustCompile("^(B|b)earer\\s\\w+$")
 	globsRegex     = regexp.MustCompile(`\*\*`)
 	pathParamRegex = regexp.MustCompile(`{[^/#?()\.\\]+}`)
 )

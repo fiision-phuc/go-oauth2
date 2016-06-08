@@ -5,19 +5,33 @@ import (
 	"testing"
 	"time"
 
+	"gopkg.in/mgo.v2"
+
 	"github.com/phuc0302/go-oauth2/mongo"
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-func Test_DefaultMongoStore(t *testing.T) {
-	defer os.Remove(mongo.ConfigFile)
-	mongo.ConnectMongo()
+var (
+	session  *mgo.Session
+	database *mgo.Database
+)
 
-	// Prepare data
+func setup() {
+	mongo.ConnectMongo()
 	session, database := mongo.GetMonotonicSession()
-	defer session.Close()
-	database.C("client").DropCollection()
-	database.C("user").DropCollection()
+}
+func teardown() {
+	os.Remove(mongo.ConfigFile)
+	database.DropDatabase()
+	session.Close()
+}
+
+func Test_DefaultMongoStore(t *testing.T) {
+	setup()
+	defer teardown()
+
+	//	database.C("client").DropCollection()
+	//	database.C("user").DropCollection()
 
 	password1, _ := utils.EncryptPassword("admin")
 	user1 := &DefaultUser{
