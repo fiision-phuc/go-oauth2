@@ -18,15 +18,6 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var userID = bson.NewObjectId()
-var username = "admin"
-var password = "admin"
-
-var clientID = bson.NewObjectId()
-var clientSecret = bson.NewObjectId()
-
-var createdTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 func createStore() *DefaultInMemoryStore {

@@ -33,32 +33,35 @@ func (g *TokenGrant) HandleForm(c *Request) {
 
 // MARK: Struct's private functions
 func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
-	grantType := c.QueryParams["grant_type"]
-	clientID := c.QueryParams["client_id"]
-	clientSecret := c.QueryParams["client_secret"]
+	var inputForm struct {
+		GrantType    string `grant_type`
+		ClientID     string `client_id`
+		ClientSecret string `client_secret`
+	}
+	c.BindForm(&inputForm)
 
 	/* Condition validation: Validate grant_type */
-	if !(len(grantType) >= 0 && grantsValidation.MatchString(grantType)) {
+	if len(inputForm.GrantType) <= 0 || grantsValidation.MatchString(inputForm.GrantType) {
 		return utils.Status400WithDescription("Invalid grant_type parameter.")
 	}
 
 	// If client_id and client_secret are not include, try to look at the authorization header
-	if len(clientID) == 0 && len(clientSecret) == 0 {
-		clientID, clientSecret, _ = c.request.BasicAuth()
+	if len(inputForm.ClientID) == 0 || len(inputForm.ClientSecret) == 0 {
+		inputForm.ClientID, inputForm.ClientSecret, _ = c.request.BasicAuth()
 	}
 
 	/* Condition validation: Validate client_id */
-	if len(clientID) == 0 {
+	if len(inputForm.ClientID) == 0 {
 		return utils.Status400WithDescription("Invalid client_id parameter.")
 	}
 
 	/* Condition validation: Validate client_secret */
-	if len(clientSecret) == 0 {
+	if len(inputForm.ClientSecret) == 0 {
 		return utils.Status400WithDescription("Invalid client_secret parameter.")
 	}
 
 	/* Condition validation: Check the store */
-	recordClient := tokenStore.FindClientWithCredential(clientID, clientSecret)
+	recordClient := tokenStore.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
 	if recordClient == nil {
 		return utils.Status400WithDescription("Invalid client_id or client_secret parameter.")
 	}
