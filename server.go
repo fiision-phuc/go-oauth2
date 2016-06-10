@@ -61,7 +61,7 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	// Pre-define oauth2 urls
 	if tokenStore != nil {
 		//	grantAuthorization := new(AuthorizationGrant)
-		tokenGrant := CreateTokenGrant(cfg, tokenStore)
+		tokenGrant := new(TokenGrant)
 
 		//	server.Get("/authorize", grantAuthorization.HandleForm)
 		server.Post("/token", tokenGrant.HandleForm)

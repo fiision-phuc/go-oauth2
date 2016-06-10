@@ -12,27 +12,6 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-// Define HTTP Methods.
-const (
-	COPY    = "COPY"
-	DELETE  = "DELETE"
-	GET     = "GET"
-	HEAD    = "HEAD"
-	LINK    = "LINK"
-	OPTIONS = "OPTIONS"
-	PATCH   = "PATCH"
-	POST    = "POST"
-	PURGE   = "PURGE"
-	PUT     = "PUT"
-	UNLINK  = "UNLINK"
-)
-
-// Define configuration file's name.
-const (
-	debug   = "oauth2.debug.cfg"
-	release = "oauth2.release.cfg"
-)
-
 // config describes a configuration  object  that  will  be  used  during application life time.
 type config struct {
 

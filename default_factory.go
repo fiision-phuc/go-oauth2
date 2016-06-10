@@ -40,7 +40,7 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 	case POST, PATCH:
 		contentType := context.Header["content-type"]
 
-		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+		if contentType == "application/x-www-form-urlencoded" {
 			err := request.ParseForm()
 			if err == nil {
 				params = request.Form

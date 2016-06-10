@@ -1,17 +1,13 @@
 package oauth2
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/utils"
 
 	"gopkg.in/mgo.v2/bson"
 )
@@ -20,70 +16,52 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-func createStore() *DefaultInMemoryStore {
-	return &DefaultInMemoryStore{
-		clients: []IClient{
-			&DefaultClient{
-				ID:        clientID,
-				Secret:    clientSecret,
-				Grants:    []string{PasswordGrant, RefreshTokenGrant},
-				Redirects: []string{"http://sample01.com", "http://sample02.com"},
-			},
-		},
-		users: []IUser{
-			&DefaultUser{
-				ID:    userID,
-				User:  "admin",
-				Pass:  "admin",
-				Roles: []string{"r_user", "r_admin"},
-			},
-			&DefaultUser{
-				ID:   bson.NewObjectId(),
-				User: "admin2",
-				Pass: "admin2",
-			},
-		},
-		accessTokens: []IToken{
-			&DefaultToken{
-				ID:      bson.NewObjectId(),
-				User:    userID,
-				Client:  clientID,
-				Created: createdTime,
-				Expired: createdTime.Add(3600 * time.Second),
-			},
-		},
-		refreshTokens: []IToken{
-			&DefaultToken{
-				ID:      bson.NewObjectId(),
-				User:    userID,
-				Client:  clientID,
-				Created: createdTime,
-				Expired: createdTime.Add(1209600 * time.Second),
-			},
-		},
-	}
-}
+//func createStore() *DefaultInMemoryStore {
+//	return &DefaultInMemoryStore{
+//		clients: []IClient{
+//			&DefaultClient{
+//				ID:        clientID,
+//				Secret:    clientSecret,
+//				Grants:    []string{PasswordGrant, RefreshTokenGrant},
+//				Redirects: []string{"http://sample01.com", "http://sample02.com"},
+//			},
+//		},
+//		users: []IUser{
+//			&DefaultUser{
+//				ID:    userID,
+//				User:  "admin",
+//				Pass:  "admin",
+//				Roles: []string{"r_user", "r_admin"},
+//			},
+//			&DefaultUser{
+//				ID:   bson.NewObjectId(),
+//				User: "admin2",
+//				Pass: "admin2",
+//			},
+//		},
+//		accessTokens: []IToken{
+//			&DefaultToken{
+//				ID:      bson.NewObjectId(),
+//				User:    userID,
+//				Client:  clientID,
+//				Created: createdTime,
+//				Expired: createdTime.Add(3600 * time.Second),
+//			},
+//		},
+//		refreshTokens: []IToken{
+//			&DefaultToken{
+//				ID:      bson.NewObjectId(),
+//				User:    userID,
+//				Client:  clientID,
+//				Created: createdTime,
+//				Expired: createdTime.Add(1209600 * time.Second),
+//			},
+//		},
+//	}
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Helper
-func parseError(response *http.Response) *utils.Status {
-	data, _ := ioutil.ReadAll(response.Body)
-	response.Body.Close()
-
-	status := utils.Status{}
-	json.Unmarshal(data, &status)
-
-	return &status
-}
-func parseResult(response *http.Response) *TokenResponse {
-	data, _ := ioutil.ReadAll(response.Body)
-	response.Body.Close()
-
-	token := TokenResponse{}
-	json.Unmarshal(data, &token)
-
-	return &token
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

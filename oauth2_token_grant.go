@@ -1,26 +1,20 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/url"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
+// TokenGrant describes a token grant controller.
 type TokenGrant struct {
-	values    url.Values
-	grantType string
 }
 
-// MARK: Struct's constructors
-func CreateTokenGrant(config *config, store IStore) *TokenGrant {
-	return &TokenGrant{
-	//		config: config,
-	//		store:  store,
-	}
-}
-
-// MARK: Struct's public functions
+// HandleForm validates authentication form.
 func (g *TokenGrant) HandleForm(c *Request) {
 	security := &Security{}
 	err := g.validateForm(c, security)
@@ -31,8 +25,9 @@ func (g *TokenGrant) HandleForm(c *Request) {
 	}
 }
 
-// MARK: Struct's private functions
+// validateForm validates general information
 func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
+	// Bind
 	var inputForm struct {
 		GrantType    string `grant_type`
 		ClientID     string `client_id`
@@ -40,14 +35,14 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
 	}
 	c.BindForm(&inputForm)
 
-	/* Condition validation: Validate grant_type */
-	if len(inputForm.GrantType) <= 0 || grantsValidation.MatchString(inputForm.GrantType) {
-		return utils.Status400WithDescription("Invalid grant_type parameter.")
+	// If client_id and client_secret are not include, try to look at the authorization header
+	if len(inputForm.ClientID) == 0 && len(inputForm.ClientSecret) == 0 {
+		inputForm.ClientID, inputForm.ClientSecret, _ = c.request.BasicAuth()
 	}
 
-	// If client_id and client_secret are not include, try to look at the authorization header
-	if len(inputForm.ClientID) == 0 || len(inputForm.ClientSecret) == 0 {
-		inputForm.ClientID, inputForm.ClientSecret, _ = c.request.BasicAuth()
+	/* Condition validation: Validate grant_type */
+	if !grantsValidation.MatchString(inputForm.GrantType) {
+		return utils.Status400WithDescription("Invalid grant_type parameter.")
 	}
 
 	/* Condition validation: Validate client_id */
@@ -67,20 +62,16 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
 	}
 
 	/* Condition validation: Check grant_type for client */
-	isGranted := false
-	for _, recordGrant := range recordClient.GrantTypes() {
-		if recordGrant == grantType {
-			isGranted = true
-			break
-		}
-	}
+	clientGrantsValidation := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(recordClient.GrantTypes(), "|")))
+	isGranted := clientGrantsValidation.MatchString(inputForm.GrantType)
+
 	if !isGranted {
 		return utils.Status400WithDescription("The grant_type is unauthorised for this client_id.")
 	}
 	s.AuthClient = recordClient
 
 	// Choose authentication flow
-	switch grantType {
+	switch inputForm.GrantType {
 
 	case AuthorizationCodeGrant:
 		// FIX FIX FIX: Going to do soon
@@ -97,10 +88,10 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
 		break
 
 	case PasswordGrant:
-		return g.usePasswordFlow(c, s)
+		return g.passwordFlow(c, s)
 
 	case RefreshTokenGrant:
-		return g.useRefreshTokenFlow(c, s)
+		return g.refreshTokenFlow(c, s)
 	}
 	return nil
 }
@@ -178,13 +169,16 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 	// });
 }
 
-// usePasswordFlow handle password flow.
-func (g *TokenGrant) usePasswordFlow(c *Request, s *Security) *utils.Status {
-	username := c.QueryParams["username"]
-	password := c.QueryParams["password"]
+// passwordFlow implements user's authentication with user's credential.
+func (g *TokenGrant) passwordFlow(c *Request, s *Security) *utils.Status {
+	var passwordForm struct {
+		Username string `username`
+		Password string `password`
+	}
+	c.BindForm(&passwordForm)
 
 	/* Condition validation: Validate username and password parameters */
-	if len(username) == 0 || len(password) == 0 {
+	if len(passwordForm.Username) == 0 || len(passwordForm.Password) == 0 {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
 	}
 
@@ -194,12 +188,12 @@ func (g *TokenGrant) usePasswordFlow(c *Request, s *Security) *utils.Status {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
 	}
 
-	//	s.AuthUser = recordUser
+	s.AuthUser = recordUser
 	return nil
 }
 
 // useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) useRefreshTokenFlow(c *Request, s *Security) *utils.Status {
+func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *utils.Status {
 	queryToken := c.QueryParams["refresh_token"]
 
 	/* Condition validation: Validate refresh_token parameter */

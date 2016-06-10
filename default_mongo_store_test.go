@@ -1,70 +1,11 @@
 package oauth2
 
 import (
-	"os"
 	"testing"
 	"time"
 
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
-
-	"github.com/phuc0302/go-oauth2/mongo"
 	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/utils"
 )
-
-var (
-	session  *mgo.Session
-	database *mgo.Database
-	client1  IClient
-	user1    IUser
-	user2    IUser
-
-	username       = "admin"
-	password       = "admin"
-	userID         = bson.NewObjectId()
-	clientID       = bson.NewObjectId()
-	clientSecret   = bson.NewObjectId()
-	createdTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
-)
-
-func setup() {
-	mongo.ConnectMongo()
-	session, database = mongo.GetMonotonicSession()
-
-	// Generate test data
-	password1, _ := utils.EncryptPassword("admin")
-	user1 = &DefaultUser{
-		ID:    userID,
-		User:  "admin",
-		Pass:  password1,
-		Roles: []string{"r_user", "r_admin"},
-	}
-
-	password2, _ := utils.EncryptPassword(clientSecret.Hex())
-	user2 = &DefaultUser{
-		ID:    clientID,
-		User:  clientID.Hex(),
-		Pass:  password2,
-		Roles: []string{"r_device"},
-	}
-
-	client1 = &DefaultClient{
-		ID:     clientID,
-		Secret: clientSecret,
-		Grants: []string{PasswordGrant, RefreshTokenGrant},
-
-		Redirects: []string{"http://www.sample01.com", "http://www.sample02.com"},
-	}
-
-	database.C(TableUser).Insert(user1, user2)
-	database.C(TableClient).Insert(client1)
-}
-func teardown() {
-	os.Remove(mongo.ConfigFile)
-	database.DropDatabase()
-	session.Close()
-}
 
 func Test_DefaultMongoStore(t *testing.T) {
 	defer teardown()
