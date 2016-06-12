@@ -9,14 +9,15 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/phuc0302/go-oauth2/test"
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
 func Test_CreateRequestContext(t *testing.T) {
-	cfg = loadConfig(debug)
 	defer os.Remove(debug)
+	cfg = loadConfig(debug)
 
 	objectFactory = &DefaultFactory{}
 	testCase := ""
@@ -152,7 +153,43 @@ func Test_CreateRequestContext(t *testing.T) {
 }
 
 func Test_CreateSecurityContext(t *testing.T) {
-	t.Error("There is no test case available yet!")
+	defer teardown()
+	setup()
+
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+		security := objectFactory.CreateSecurityContext(context)
+
+		if security == nil {
+			t.Error(test.ExpectedNotNil)
+		} else {
+			if security.AuthAccessToken == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+			if security.AuthClient == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+			if security.AuthUser == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+		}
+	}))
+	defer ts.Close()
+
+	// Generate token
+	now := time.Now()
+	token := tokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+
+	// [Test 1] Send token as query param
+	http.Get(fmt.Sprintf("%s?access_token=%s", ts.URL, token.Token()))
+
+	// [Test 2] Send token as authorization header
+	request, _ := http.NewRequest("POST", ts.URL, nil)
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token()))
+
+	client := http.DefaultClient
+	client.Do(request)
 }
 
 func Test_CreateRoute(t *testing.T) {

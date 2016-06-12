@@ -2,6 +2,8 @@ package oauth2
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -10,42 +12,77 @@ import (
 	"testing"
 
 	"github.com/phuc0302/go-oauth2/test"
+	"github.com/phuc0302/go-oauth2/utils"
 )
 
 func Test_ServeHTTP(t *testing.T) {
 	defer os.Remove(debug)
+	defer os.RemoveAll("resources")
+
 	server := DefaultServer(true)
+	utils.CreateDir("resources", (os.ModeDir | os.ModePerm))
+
+	// Generate resources file
+	input, _ := os.Open("LICENSE")
+	output, _ := os.Create("resources/LICENSE")
+	defer input.Close()
+	defer output.Close()
+	io.Copy(output, input)
 
 	// Update allow methods
 	cfg.AllowMethods = []string{GET, POST, PATCH, DELETE}
 	methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(cfg.AllowMethods, "|")))
 
-	// [Test 1] Handle invalid HTTP method
-	request, _ := http.NewRequest("LINK", "http://localhost:8080/token", nil)
-
+	// [Test 1] Invalid resource request
+	request, _ := http.NewRequest("GET", "http://localhost:8080/resources/README", nil)
 	response := httptest.NewRecorder()
+	server.ServeHTTP(response, request)
+	if response.Code != 404 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 404, response.Code)
+	}
+
+	// [Test 2] Valid resource request
+	request, _ = http.NewRequest("GET", "http://localhost:8080/resources/LICENSE", nil)
+	response = httptest.NewRecorder()
+	server.ServeHTTP(response, request)
+	if response.Code != 200 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 200, response.Code)
+	}
+
+	// [Test 3] Invalid HTTP method
+	request, _ = http.NewRequest("LINK", "http://localhost:8080/token", nil)
+	response = httptest.NewRecorder()
 	server.ServeHTTP(response, request)
 	if response.Code != 405 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 405, response.Code)
 	}
 
-	// [Test 1] Handle data request
-	request, _ = http.NewRequest("POST", "http://localhost:8080/token", strings.NewReader(""))
+	// [Test 4] Invalid url
+	request, _ = http.NewRequest("POST", "http://localhost:8080", strings.NewReader(""))
 	request.Header.Set("content-type", "application/x-www-form-urlencoded")
-
 	response = httptest.NewRecorder()
 	server.ServeHTTP(response, request)
 	if response.Code != 503 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 503, response.Code)
 	}
 
-	// [Test 2] Handle resource request
-	request, _ = http.NewRequest("GET", "http://localhost:8080/resources/README", nil)
+	// [Test 5] Valid url
+	server.Get("/sample", func(c *Request) {
+		data := map[string]string{"apple": "apple"}
+		c.OutputJSON(utils.Status200(), data)
+	})
 
+	request, _ = http.NewRequest("GET", "http://localhost:8080/sample", nil)
 	response = httptest.NewRecorder()
 	server.ServeHTTP(response, request)
-	if response.Code != 404 {
-		t.Errorf(test.ExpectedNumberButFoundNumber, 404, response.Code)
+	if response.Code != 200 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 200, response.Code)
+	} else {
+		bytes, _ := ioutil.ReadAll(response.Body)
+
+		if string(bytes) != "{\"apple\":\"apple\"}" {
+			t.Errorf(test.ExpectedStringButFoundString, "{\"apple\":\"apple\"}", string(bytes))
+		}
 	}
 }
 
@@ -53,10 +90,10 @@ func Test_serveRequestWithOAuth2Disable(t *testing.T) {
 	//	defer os.Remove(ConfigFile)
 	//	server := DefaultServer()
 
-	//	server.Get("/sample", func(c *Request) {
-	//		data := map[string]string{"apple": "apple"}
-	//		c.OutputJSON(utils.Status200(), data)
-	//	})
+	//		server.Get("/sample", func(c *Request) {
+	//			data := map[string]string{"apple": "apple"}
+	//			c.OutputJSON(utils.Status200(), data)
+	//		})
 
 	//	// Send invalid url request
 	//	request, _ := http.NewRequest("GET", "http://localhost:8080/data", nil)

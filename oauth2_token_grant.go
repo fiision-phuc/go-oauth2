@@ -183,7 +183,7 @@ func (g *TokenGrant) passwordFlow(c *Request, s *Security) *utils.Status {
 	}
 
 	/* Condition validation: Validate user's credentials */
-	recordUser := tokenStore.FindUserWithCredential(username, password)
+	recordUser := tokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password)
 	if recordUser == nil {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
 	}
@@ -227,7 +227,7 @@ func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
 	if s.AuthAccessToken == nil {
 		accessToken := tokenStore.FindAccessTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
 		if accessToken != nil && accessToken.IsExpired() {
-			tokenStore.DeleteAccessToken(accessToken) // Note: Let the cron delete, it should be safer.
+			tokenStore.DeleteAccessToken(accessToken)
 			accessToken = nil
 		}
 

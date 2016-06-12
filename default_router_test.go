@@ -1,12 +1,20 @@
 package oauth2
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/phuc0302/go-oauth2/test"
 )
 
+func testString(value ...string) {
+	for _, v := range value {
+		fmt.Println(v)
+	}
+}
+
 func Test_GroupRole(t *testing.T) {
+	testString("r_user", "r_admin")
 }
 
 func Test_BindRole(t *testing.T) {

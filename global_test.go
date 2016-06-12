@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"utils"
 
 	"github.com/phuc0302/go-oauth2/mongo"
+	"github.com/phuc0302/go-oauth2/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

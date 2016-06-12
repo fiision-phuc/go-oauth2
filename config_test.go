@@ -107,6 +107,11 @@ func Test_LoadConfig(t *testing.T) {
 		t.Errorf(test.ExpectedStringButFoundString, staticFolders, config.StaticFolders)
 	}
 
+	// Validate private key
+	if privateKey == nil {
+		t.Errorf(test.ExpectedNotNil)
+	}
+
 	// Validate grant types
 	grantTypes := []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant}
 	if !reflect.DeepEqual(grantTypes, config.GrantTypes) {

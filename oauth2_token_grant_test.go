@@ -51,97 +51,60 @@ func Test_TokenGrantGeneralValidation(t *testing.T) {
 }
 
 func Test_PasswordGrantFlow(t *testing.T) {
-	//	defer os.Remove(ConfigFile)
-	//	config := loadConfig()
-	//	store := createStore()
+	defer teardown()
+	setup()
 
-	//	controller := CreateTokenGrant(config, store)
-	//	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//		context := CreateRequest(r, w)
-	//		controller.HandleForm(context)
-	//	}))
-	//	defer ts.Close()
+	controller := new(TokenGrant)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+		controller.HandleForm(context)
+	}))
+	defer ts.Close()
 
-	//	// Test missing username or password
-	//	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s",
-	//		PasswordGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//	)))
-	//	status := parseError(response)
-	//	if status.Description != fmt.Sprintf(templateError, "username or password") {
-	//		t.Errorf(templateErrorMessage, "username or password", status.Description)
-	//	}
+	// [Test 1] Missing username
+	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s",
+		PasswordGrant,
+		clientID.Hex(),
+		clientSecret.Hex(),
+	)))
+	status := parseError(response)
+	if status.Description != fmt.Sprintf("Invalid %s parameter.", "username or password") {
+		t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
+	}
 
-	//	// Test invalid username or password
-	//	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
-	//		PasswordGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//		"admin1",
-	//		"admin1",
-	//	)))
-	//	status = parseError(response)
-	//	if status.Description != fmt.Sprintf(templateError, "username or password") {
-	//		t.Errorf(templateErrorMessage, "username or password", status.Description)
-	//	}
+	// [Test 2] Missing password
+	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s",
+		PasswordGrant,
+		clientID.Hex(),
+		clientSecret.Hex(),
+		"admin",
+	)))
+	status = parseError(response)
+	if status.Description != fmt.Sprintf("Invalid %s parameter.", "username or password") {
+		t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
+	}
 
-	//	// Test valid username and password
-	//	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
-	//		PasswordGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//		"admin2",
-	//		"admin2",
-	//	)))
-	//	token1 := parseResult(response)
-	//	if token1 == nil {
-	//		t.Error("Expected not nil but found nil.")
-	//	}
-	//	if token1.AccessToken != store.accessTokens[1].Token() {
-	//		t.Errorf("Expected %s but found %s", store.accessTokens[1].Token(), token1.AccessToken)
-	//	}
-	//	if token1.RefreshToken != store.refreshTokens[1].Token() {
-	//		t.Errorf("Expected %s but found %s", store.refreshTokens[1].Token(), token1.RefreshToken)
-	//	}
+	// [Test 3] valid username and password
+	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
+		PasswordGrant,
+		clientID.Hex(),
+		clientSecret.Hex(),
+		"admin",
+		"admin",
+	)))
+	token1 := parseResult(response)
 
-	//	// Test request second token should be the same as the first one
-	//	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
-	//		PasswordGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//		"admin2",
-	//		"admin2",
-	//	)))
-	//	token2 := parseResult(response)
-	//	if token2.AccessToken != token1.AccessToken {
-	//		t.Errorf("Expected %s but found %s", token1.AccessToken, token2.AccessToken)
-	//	}
-	//	if token2.RefreshToken != token1.RefreshToken {
-	//		t.Errorf("Expected %s but found %s", token1.RefreshToken, token2.RefreshToken)
-	//	}
-
-	//	// Test request expired token
-	//	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
-	//		PasswordGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//		username,
-	//		password,
-	//	)))
-	//	token3 := parseResult(response)
-	//	if len(store.accessTokens) != 2 {
-	//		t.Errorf("Expected %d but found %d", 2, len(store.accessTokens))
-	//	}
-	//	if len(store.refreshTokens) != 2 {
-	//		t.Errorf("Expected %d but found %d", 2, len(store.refreshTokens))
-	//	}
-	//	if token3.AccessToken != store.accessTokens[1].Token() {
-	//		t.Errorf("Expected \"%s\" but found \"%s\".", store.accessTokens[1].Token(), token3.AccessToken)
-	//	}
-	//	if token3.RefreshToken != store.refreshTokens[1].Token() {
-	//		t.Errorf("Expected \"%s\" but found \"%s\".", store.refreshTokens[1].Token(), token1.RefreshToken)
-	//	}
+	recordedAccessToken := tokenStore.FindAccessToken(token1.AccessToken)
+	recordedRefreshToken := tokenStore.FindRefreshToken(token1.RefreshToken)
+	if token1 == nil {
+		t.Error(test.ExpectedNotNil)
+	}
+	if recordedAccessToken == nil {
+		t.Error(test.ExpectedNotNil)
+	}
+	if recordedRefreshToken == nil {
+		t.Error(test.ExpectedNotNil)
+	}
 }
 
 func Test_TokenGrantNotAllowRefreshToken(t *testing.T) {
@@ -191,74 +154,46 @@ func Test_TokenGrantNotAllowRefreshToken(t *testing.T) {
 }
 
 func Test_RefreshGrantFlow(t *testing.T) {
-	//	defer os.Remove(ConfigFile)
-	//	config := loadConfig()
-	//	store := createStore()
+	defer teardown()
+	setup()
 
-	//	controller := CreateTokenGrant(config, store)
-	//	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//		context := CreateRequest(r, w)
-	//		controller.HandleForm(context)
-	//	}))
-	//	defer ts.Close()
+	controller := new(TokenGrant)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+		controller.HandleForm(context)
+	}))
+	defer ts.Close()
 
-	//	// Send first request to get refresh token
-	//	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
-	//		PasswordGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//		username,
-	//		password,
-	//	)))
-	//	token1 := parseResult(response)
+	// Send first request to get refresh token
+	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
+		PasswordGrant,
+		clientID.Hex(),
+		clientSecret.Hex(),
+		username,
+		password,
+	)))
+	token1 := parseResult(response)
 
-	//	// Test missing refresh_token
-	//	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s",
-	//		RefreshTokenGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//	)))
-	//	status := parseError(response)
-	//	if status.Description != fmt.Sprintf(templateError, "refresh_token") {
-	//		t.Errorf(templateErrorMessage, "refresh_token", status.Description)
-	//	}
+	// [Test 1] Missing refresh_token
+	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s",
+		RefreshTokenGrant,
+		clientID.Hex(),
+		clientSecret.Hex(),
+	)))
+	status := parseError(response)
+	if status.Description != fmt.Sprintf("Invalid %s parameter.", "refresh_token") {
+		t.Errorf(test.ExpectedInvalidParameter, "refresh_token", status.Description)
+	}
 
-	//	// Send valid request
-	//	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&refresh_token=%s",
-	//		RefreshTokenGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//		token1.RefreshToken,
-	//	)))
-	//	token2 := parseResult(response)
-	//	if token2.AccessToken == token1.AccessToken {
-	//		t.Errorf("Expected new access token but found %s", token1.AccessToken)
-	//	}
-	//	if len(store.accessTokens) != 1 {
-	//		t.Errorf("Expected %d but found %d", 1, len(store.accessTokens))
-	//	}
-}
-func Test_RefreshGrantFlowWithExpiredRefreshToken(t *testing.T) {
-	//	defer os.Remove(ConfigFile)
-	//	config := loadConfig()
-	//	store := createStore()
-
-	//	controller := CreateTokenGrant(config, store)
-	//	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//		context := CreateRequest(r, w)
-	//		controller.HandleForm(context)
-	//	}))
-	//	defer ts.Close()
-
-	//	// Send valid request
-	//	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&refresh_token=%s",
-	//		RefreshTokenGrant,
-	//		clientID.Hex(),
-	//		clientSecret.Hex(),
-	//		store.refreshTokens[0].Token(),
-	//	)))
-	//	status := parseError(response)
-	//	if status.Description != fmt.Sprintf("%s is expired.", "refresh_token") {
-	//		t.Errorf("Expected \"%s is expired.\" but found \"%s\"", "refresh_token", status.Description)
-	//	}
+	// Send valid request
+	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&refresh_token=%s",
+		RefreshTokenGrant,
+		clientID.Hex(),
+		clientSecret.Hex(),
+		token1.RefreshToken,
+	)))
+	token2 := parseResult(response)
+	if token2.AccessToken == token1.AccessToken {
+		t.Errorf("Expected new access_token but found \"%s\".", token1.AccessToken)
+	}
 }

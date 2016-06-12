@@ -87,27 +87,27 @@ func (r *DefaultRouter) MatchRoute(httpMethod string, path string) (IRoute, map[
 			continue
 		}
 
-		// Validate authentication & roles if neccessary
-		if tokenStore != nil {
-			//			securityContext := CreateSecurityContext(context, s.tokenStore)
+		//		// Validate authentication & roles if neccessary
+		//		if tokenStore != nil {
+		//			securityContext := objectFactory.CreateSecurityContext(context)
 
-			//			for rule, roles := range s.userRoles {
-			//				if rule.MatchString(context.URLPath) {
-			//					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+		//			for rule, roles := range r.userRoles {
+		//				if rule.MatchString(context.URLPath) {
+		//					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 
-			//					if securityContext != nil && securityContext.AuthUser != nil {
-			//						for _, role := range securityContext.AuthUser.UserRoles() {
-			//							if regexRoles.MatchString(role) {
-			//								route.InvokeHandler(context, securityContext)
-			//								return
-			//							}
-			//						}
-			//					}
-			//					context.OutputError(utils.Status401())
-			//					return
-			//				}
-			//			}
-		}
+		//					if securityContext != nil && securityContext.AuthUser != nil {
+		//						for _, role := range securityContext.AuthUser.UserRoles() {
+		//							if regexRoles.MatchString(role) {
+		//								route.InvokeHandler(context, securityContext)
+		//								return
+		//							}
+		//						}
+		//					}
+		//					context.OutputError(utils.Status401())
+		//					return
+		//				}
+		//			}
+		//		}
 
 		return route, pathParams
 	}

@@ -1,6 +1,9 @@
 package oauth2
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -37,6 +40,9 @@ type config struct {
 	SlackIcon    string `json:"slack_icon,omitempty"`
 	SlackUser    string `json:"slack_user,omitempty"`
 	SlackChannel string `json:"slack_channel,omitempty"`
+
+	// Jwt
+	PrivateKey []byte `json:"private_key,omitempty"`
 
 	// OAuth2.0
 	GrantTypes                []string      `json:"grant_types,omitempty"`
@@ -85,6 +91,11 @@ func createConfig(configFile string) {
 		AuthorizationCodeDuration: 300,
 	}
 
+	// Generate jwt key
+	privateKey, _ := rsa.GenerateKey(rand.Reader, 1024)
+	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
+	config.PrivateKey = privateKeyDer
+
 	// Create new file
 	configJSON, _ := json.MarshalIndent(config, "", "  ")
 	file, _ := os.Create(configFile)
@@ -126,6 +137,9 @@ func loadConfig(configFile string) *config {
 	for path, status := range config.RedirectPaths {
 		redirectPaths[status] = path
 	}
+
+	// Define jwt
+	privateKey, _ = x509.ParsePKCS1PrivateKey(config.PrivateKey)
 
 	// Define regular expressions
 	//	regexp.MustCompile(`:[^/#?()\.\\]+`)

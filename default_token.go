@@ -3,6 +3,8 @@ package oauth2
 import (
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -22,7 +24,22 @@ func (t *DefaultToken) ClientID() string { return t.Client.Hex() }
 func (t *DefaultToken) UserID() string { return t.User.Hex() }
 
 // Token returns token.
-func (t *DefaultToken) Token() string { return t.ID.Hex() }
+func (t *DefaultToken) Token() string {
+	token := jwt.New(jwt.SigningMethodRS256)
+
+	// Set some claims
+	createdTime, _ := t.Created.MarshalText()
+	expiredTime, _ := t.Expired.MarshalText()
+	token.Claims["_id"] = t.ID.Hex()
+	token.Claims["user_id"] = t.User.Hex()
+	token.Claims["client_id"] = t.Client.Hex()
+	token.Claims["created_time"] = string(createdTime)
+	token.Claims["expired_time"] = string(expiredTime)
+
+	// Generate token
+	tokenString, _ := token.SignedString(privateKey)
+	return tokenString
+}
 
 // IsExpired validate if this token is expired or not.
 func (t *DefaultToken) IsExpired() bool { return time.Now().Unix() >= t.Expired.Unix() }

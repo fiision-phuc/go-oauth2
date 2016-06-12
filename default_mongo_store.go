@@ -1,8 +1,10 @@
 package oauth2
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/phuc0302/go-oauth2/mongo"
 	"github.com/phuc0302/go-oauth2/utils"
 	"gopkg.in/mgo.v2/bson"
@@ -97,127 +99,133 @@ func (m *DefaultMongoStore) FindClientWithCredential(clientID string, clientSecr
 
 // FindAccessToken returns access_token.
 func (m *DefaultMongoStore) FindAccessToken(token string) IToken {
-	/* Condition validation */
-	if len(token) == 0 || !bson.IsObjectIdHex(token) {
-		return nil
-	}
-	accessToken := DefaultToken{}
-
-	err := mongo.EntityWithID(TableAccessToken, bson.ObjectIdHex(token), &accessToken)
-	if err != nil {
-		return nil
-	}
-	return &accessToken
+	return m.findToken(token)
 }
 
 // FindAccessTokenWithCredential returns access_token associated with client_id and user_id.
 func (m *DefaultMongoStore) FindAccessTokenWithCredential(clientID string, userID string) IToken {
-	/* Condition validation */
-	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
-		return nil
-	}
-	accessToken := DefaultToken{}
-
-	err := mongo.EntityWithCriteria(TableAccessToken, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, &accessToken)
-	if err != nil {
-		return nil
-	}
-	return &accessToken
+	return m.findTokenWithCredential(TableAccessToken, clientID, userID)
 }
 
 // CreateAccessToken returns new access_token.
 func (m *DefaultMongoStore) CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
-	/* Condition validation */
-	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
-		return nil
-	}
-
-	newToken := &DefaultToken{
-		ID:      bson.NewObjectId(),
-		User:    bson.ObjectIdHex(userID),
-		Client:  bson.ObjectIdHex(clientID),
-		Created: createdTime,
-		Expired: expiredTime,
-	}
-
-	err := mongo.SaveEntity(TableAccessToken, newToken.ID, newToken)
-	if err != nil {
-		return nil
-	}
-	return newToken
+	return m.createToken(TableAccessToken, clientID, userID, createdTime, expiredTime)
 }
 
 // DeleteAccessToken deletes access_token.
 func (m *DefaultMongoStore) DeleteAccessToken(token IToken) {
-	/* Condition validation */
-	if token == nil {
-		return
-	}
-	mongo.DeleteEntity(TableAccessToken, bson.ObjectIdHex(token.Token()))
+	m.deleteToken(TableAccessToken, token)
 }
 
 // FindRefreshToken returns refresh_token.
 func (m *DefaultMongoStore) FindRefreshToken(token string) IToken {
-	/* Condition validation */
-	if len(token) == 0 || !bson.IsObjectIdHex(token) {
-		return nil
-	}
-	refreshToken := DefaultToken{}
-
-	err := mongo.EntityWithID(TableRefreshToken, bson.ObjectIdHex(token), &refreshToken)
-	if err != nil {
-		return nil
-	}
-	return &refreshToken
+	return m.findToken(token)
 }
 
 // FindRefreshTokenWithCredential returns refresh_token associated with client_id and user_id.
 func (m *DefaultMongoStore) FindRefreshTokenWithCredential(clientID string, userID string) IToken {
-	/* Condition validation */
-	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
-		return nil
-	}
-	refreshToken := DefaultToken{}
-
-	err := mongo.EntityWithCriteria(TableRefreshToken, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, &refreshToken)
-	if err != nil {
-		return nil
-	}
-	return &refreshToken
+	return m.findTokenWithCredential(TableRefreshToken, clientID, userID)
 }
 
 // CreateRefreshToken returns new refresh_token.
 func (m *DefaultMongoStore) CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
-	/* Condition validation */
-	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
-		return nil
-	}
-
-	newToken := &DefaultToken{
-		ID:      bson.NewObjectId(),
-		User:    bson.ObjectIdHex(userID),
-		Client:  bson.ObjectIdHex(clientID),
-		Created: createdTime,
-		Expired: expiredTime,
-	}
-
-	err := mongo.SaveEntity(TableRefreshToken, newToken.ID, newToken)
-	if err != nil {
-		return nil
-	}
-	return newToken
+	return m.createToken(TableRefreshToken, clientID, userID, createdTime, expiredTime)
 }
 
 // DeleteRefreshToken deletes refresh_token.
 func (m *DefaultMongoStore) DeleteRefreshToken(token IToken) {
-	/* Condition validation */
-	if token == nil {
-		return
-	}
-	mongo.DeleteEntity(TableRefreshToken, bson.ObjectIdHex(token.Token()))
+	m.deleteToken(TableRefreshToken, token)
 }
 
 //func (m *MongoDBTokenStore) FindAuthorizationCode(authorizationCode string) {
 //}
 //func (m *MongoDBTokenStore) SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time) {
 //}
+
+// Find token
+func (m *DefaultMongoStore) findToken(token string) IToken {
+	/* Condition validation */
+	if len(token) == 0 {
+		return nil
+	}
+
+	// Parse token
+	jwtToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		/* Condition validation: jwt method should be instance of RSA signing method */
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Invalid signing method: %v", t.Header["alg"])
+		}
+		return &privateKey.PublicKey, nil
+	})
+
+	/* Condition validation: validate parse process */
+	if err != nil || !jwtToken.Valid {
+		return nil
+	}
+
+	tokenID, _ := jwtToken.Claims["_id"].(string)
+	userID, _ := jwtToken.Claims["user_id"].(string)
+	clientID, _ := jwtToken.Claims["client_id"].(string)
+	createdTime, _ := jwtToken.Claims["created_time"].(string)
+	expiredTime, _ := jwtToken.Claims["expired_time"].(string)
+	created, _ := time.Parse(time.RFC3339, createdTime)
+	expired, _ := time.Parse(time.RFC3339, expiredTime)
+
+	t := &DefaultToken{
+		ID:      bson.ObjectIdHex(tokenID),
+		User:    bson.ObjectIdHex(userID),
+		Client:  bson.ObjectIdHex(clientID),
+		Created: created,
+		Expired: expired,
+	}
+	return t
+}
+
+// Find token with credential
+func (m *DefaultMongoStore) findTokenWithCredential(table string, clientID string, userID string) IToken {
+	/* Condition validation */
+	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
+		return nil
+	}
+	accessToken := DefaultToken{}
+
+	err := mongo.EntityWithCriteria(table, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, &accessToken)
+	if err != nil {
+		return nil
+	}
+	return &accessToken
+}
+
+// Create token
+func (m *DefaultMongoStore) createToken(table string, clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
+	/* Condition validation */
+	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
+		return nil
+	}
+
+	newToken := &DefaultToken{
+		ID:      bson.NewObjectId(),
+		User:    bson.ObjectIdHex(userID),
+		Client:  bson.ObjectIdHex(clientID),
+		Created: createdTime,
+		Expired: expiredTime,
+	}
+
+	err := mongo.SaveEntity(table, newToken.ID, newToken)
+	if err != nil {
+		return nil
+	}
+	return newToken
+}
+
+// Delete token
+func (m *DefaultMongoStore) deleteToken(table string, token IToken) {
+	/* Condition validation */
+	if token == nil || len(token.ClientID()) == 0 || len(token.UserID()) == 0 || !bson.IsObjectIdHex(token.ClientID()) || !bson.IsObjectIdHex(token.UserID()) {
+		return
+	}
+
+	u := bson.ObjectIdHex(token.UserID())
+	c := bson.ObjectIdHex(token.ClientID())
+	mongo.DeleteEntityWithCriteria(table, bson.M{"user_id": u, "client_id": c})
+}

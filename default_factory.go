@@ -25,7 +25,12 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 		context.Header = make(map[string]string)
 
 		for k, v := range request.Header {
-			context.Header[strings.ToLower(k)] = strings.ToLower(v[0])
+			header := strings.ToLower(k)
+			if header == "authorization" {
+				context.Header[header] = v[0]
+			} else {
+				context.Header[header] = strings.ToLower(v[0])
+			}
 		}
 	}
 
@@ -69,17 +74,23 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 }
 
 // CreateSecurityContext creates new security context.
-func (d *DefaultFactory) CreateSecurityContext(requestContext *Request) *Security {
-	headerToken := requestContext.Header["authorization"]
-	isBearer := bearerRegex.MatchString(headerToken)
+func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
+	tokenString := c.Header["authorization"]
+	isBearer := bearerRegex.MatchString(tokenString)
 
 	/* Condition validation: Validate existing of authorization header */
 	if !isBearer {
-		return nil
+		tokenString = c.QueryParams["access_token"]
+		if len(tokenString) <= 0 {
+			return nil
+		} else {
+			delete(c.QueryParams, "access_token")
+		}
+	} else {
+		tokenString = tokenString[7:]
 	}
 
-	headerToken = headerToken[7:]
-	accessToken := tokenStore.FindAccessToken(headerToken)
+	accessToken := tokenStore.FindAccessToken(tokenString)
 
 	/* Condition validation: Validate expiration time */
 	if accessToken == nil || accessToken.IsExpired() {
@@ -88,6 +99,7 @@ func (d *DefaultFactory) CreateSecurityContext(requestContext *Request) *Securit
 
 	client := tokenStore.FindClientWithID(accessToken.ClientID())
 	user := tokenStore.FindUserWithID(accessToken.UserID())
+
 	securityContext := &Security{
 		AuthClient:      client,
 		AuthUser:        user,

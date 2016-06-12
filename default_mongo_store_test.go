@@ -10,8 +10,8 @@ import (
 func Test_DefaultMongoStore(t *testing.T) {
 	defer teardown()
 	setup()
-	objectFactory = &DefaultFactory{}
-	tokenStore = objectFactory.CreateStore()
+	//	objectFactory = &DefaultFactory{}
+	//	tokenStore = objectFactory.CreateStore()
 
 	// [Test 1] FindUserWithID
 	recordUser1 := tokenStore.FindUserWithID(userID.Hex())
@@ -60,19 +60,21 @@ func Test_DefaultMongoStore(t *testing.T) {
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
 	}
+
+	// [Test 8] FindAccessTokenWithCredential
 	token3 := tokenStore.FindAccessTokenWithCredential(token1.ClientID(), token1.UserID())
 	if token3 == nil {
 		t.Error(test.ExpectedNotNil)
 	}
 
-	// [Test 8] DeleteAccessToken
+	// [Test 9] DeleteAccessToken
 	tokenStore.DeleteAccessToken(token1)
 	token4 := tokenStore.FindAccessTokenWithCredential(token1.ClientID(), token1.UserID())
 	if token4 != nil {
 		t.Errorf(test.ExpectedNil)
 	}
 
-	// [Test 9] CreateRefreshToken
+	// [Test 10] CreateRefreshToken
 	refreshToken1 := tokenStore.CreateRefreshToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(3600))
 	if refreshToken1 == nil {
 		t.Errorf(test.ExpectedNotNil)
@@ -84,19 +86,19 @@ func Test_DefaultMongoStore(t *testing.T) {
 		t.Errorf(test.ExpectedStringButFoundString, userID.Hex(), refreshToken1.ClientID())
 	}
 
-	// [Test 10] FindRefreshToken
+	// [Test 11] FindRefreshToken
 	refreshToken2 := tokenStore.FindRefreshToken(refreshToken1.Token())
 	if refreshToken2 == nil {
 		t.Errorf(test.ExpectedNotNil)
 	}
 
-	// [Test 11] FindRefreshTokenWithCredential
+	// [Test 12] FindRefreshTokenWithCredential
 	refreshToken3 := tokenStore.FindRefreshTokenWithCredential(refreshToken1.ClientID(), refreshToken1.UserID())
 	if refreshToken3 == nil {
 		t.Errorf("Expected not nil but found nil.")
 	}
 
-	// [Test 12] DeleteRefreshToken
+	// [Test 13] DeleteRefreshToken
 	tokenStore.DeleteRefreshToken(refreshToken1)
 	refreshToken4 := tokenStore.FindRefreshTokenWithCredential(refreshToken1.ClientID(), refreshToken1.UserID())
 	if refreshToken4 != nil {
