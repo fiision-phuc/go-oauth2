@@ -66,7 +66,7 @@ func Test_BindJSON(t *testing.T) {
 	client.Do(request)
 }
 
-func Test_OutputError(t *testing.T) {
+func Test_OutputHeader(t *testing.T) {
 	defer teardown()
 	setup()
 
@@ -75,18 +75,30 @@ func Test_OutputError(t *testing.T) {
 		context := objectFactory.CreateRequestContext(r, w)
 
 		context.OutputHeader("test-header", "test-header-value")
-		context.OutputError(utils.Status400())
+		context.OutputError(utils.Status200())
 	}))
 	defer ts.Close()
 
-	// [Test 1] Output header
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", nil)
 	if response.Header.Get("test-header") != "test-header-value" {
 		t.Errorf(test.ExpectedStringButFoundString, "test-header-value", response.Header.Get("test-header"))
 	}
+}
 
-	// [Test 2] Output error
+func Test_OutputError(t *testing.T) {
+	defer teardown()
+	setup()
+
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+		context.OutputError(utils.Status400())
+	}))
+	defer ts.Close()
+
+	response, _ := http.Get(ts.URL)
 	bytes, _ := ioutil.ReadAll(response.Body)
+
 	if response.StatusCode != 400 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 400, response.StatusCode)
 	}

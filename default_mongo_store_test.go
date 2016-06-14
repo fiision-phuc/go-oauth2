@@ -10,37 +10,35 @@ import (
 func Test_DefaultMongoStore(t *testing.T) {
 	defer teardown()
 	setup()
-	//	objectFactory = &DefaultFactory{}
-	//	tokenStore = objectFactory.CreateStore()
 
 	// [Test 1] FindUserWithID
 	recordUser1 := tokenStore.FindUserWithID(userID.Hex())
 	if recordUser1 == nil {
-		t.Errorf(test.ExpectedStringButFoundString, user1, recordUser1) // Fail
+		t.Errorf(test.ExpectedStringButFoundString, user1, recordUser1)
 	}
 
 	// [Test 2] FindUserWithClient
 	recordUser2 := tokenStore.FindUserWithClient(clientID.Hex(), clientSecret.Hex())
 	if recordUser2 == nil {
-		t.Errorf(test.ExpectedStringButFoundString, user2, recordUser2) // Fail
+		t.Errorf(test.ExpectedStringButFoundString, user2, recordUser2)
 	}
 
 	// [Test 3] FindUserWithCredential
 	recordUser3 := tokenStore.FindUserWithCredential("admin", "admin")
 	if recordUser3 == nil {
-		t.Errorf(test.ExpectedStringButFoundString, user1, recordUser1) // Fail
+		t.Errorf(test.ExpectedStringButFoundString, user1, recordUser1)
 	}
 
 	// [Test 4] FindClientWithID
 	recordClient1 := tokenStore.FindClientWithID(clientID.Hex())
 	if recordClient1 == nil {
-		t.Errorf(test.ExpectedStringButFoundString, client1, recordClient1) // Fail
+		t.Errorf(test.ExpectedStringButFoundString, client1, recordClient1)
 	}
 
 	// [Test 5] FindClientWithCredential
 	recordClient2 := tokenStore.FindClientWithCredential(clientID.Hex(), clientSecret.Hex())
 	if recordClient2 == nil {
-		t.Errorf(test.ExpectedStringButFoundString, client1, recordClient2) // Fail
+		t.Errorf(test.ExpectedStringButFoundString, client1, recordClient2)
 	}
 
 	// [Test 6] CreateAccessToken
@@ -95,7 +93,7 @@ func Test_DefaultMongoStore(t *testing.T) {
 	// [Test 12] FindRefreshTokenWithCredential
 	refreshToken3 := tokenStore.FindRefreshTokenWithCredential(refreshToken1.ClientID(), refreshToken1.UserID())
 	if refreshToken3 == nil {
-		t.Errorf("Expected not nil but found nil.")
+		t.Errorf(test.ExpectedNotNil)
 	}
 
 	// [Test 13] DeleteRefreshToken

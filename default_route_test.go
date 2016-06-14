@@ -29,7 +29,9 @@ func Test_BindHandler(t *testing.T) {
 }
 
 func Test_InvokeHandler(t *testing.T) {
-	route := generateRoute("/example/{userID}/profile/{profileID}")
+	defer teardown()
+	setup()
+	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 	route.BindHandler(GET, func() {
 		panic("Test if func had been invoked or not.")
 	})
@@ -54,7 +56,9 @@ func Test_URLPattern(t *testing.T) {
 }
 
 func Test_MatchURLPattern(t *testing.T) {
-	route := generateRoute("/example/{userID}/profile/{profileID}")
+	defer teardown()
+	setup()
+	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 	route.BindHandler(GET, func() {})
 
 	// [Test 1] Invalid HTTP method
@@ -90,9 +94,4 @@ func Test_MatchURLPattern(t *testing.T) {
 			t.Errorf(test.ExpectedStringButFoundString, "1", pathParams["profileID"])
 		}
 	}
-}
-
-func generateRoute(urlPattern string) IRoute {
-	objectFactory = &DefaultFactory{}
-	return objectFactory.CreateRoute(urlPattern)
 }

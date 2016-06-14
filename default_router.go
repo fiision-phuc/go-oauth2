@@ -26,10 +26,10 @@ func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) 
 	}
 
 	// Format path
-	groupPath = pathParamRegex.ReplaceAllStringFunc(groupPath, func(m string) string {
+	groupPath = pathParamFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
-	groupPath = globsRegex.ReplaceAllStringFunc(groupPath, func(m string) string {
+	groupPath = globsFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
 		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
 	})
 	groupPath += `\/?`

@@ -6,7 +6,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -16,13 +15,11 @@ import (
 )
 
 func Test_CreateRequestContext(t *testing.T) {
-	defer os.Remove(debug)
-	cfg = loadConfig(debug)
-
-	objectFactory = &DefaultFactory{}
-	testCase := ""
+	defer teardown()
+	setup()
 
 	// Create test server
+	testCase := ""
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
 
@@ -97,6 +94,12 @@ func Test_CreateRequestContext(t *testing.T) {
 			break
 
 		case "Test 5":
+			if context.QueryParams != nil {
+				t.Error(test.ExpectedNil)
+			}
+			break
+
+		case "Test 6":
 			if context.QueryParams == nil {
 				t.Error(test.ExpectedNotNil)
 			} else {
@@ -133,6 +136,13 @@ func Test_CreateRequestContext(t *testing.T) {
 
 	// [Test 5] Send Post request with multipart data
 	testCase = "Test 5"
+	request, _ := http.NewRequest("POST", ts.URL, nil)
+	request.Header.Set("content-type", "multipart/form-data; boundary=gc0p4Jq0M2Yt08jU534c0p")
+
+	http.DefaultClient.Do(request)
+
+	// [Test 6] Send Post request with multipart data
+	testCase = "Test 6"
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	writer.SetBoundary("gc0p4Jq0M2Yt08jU534c0p")
@@ -146,7 +156,7 @@ func Test_CreateRequestContext(t *testing.T) {
 	}
 	writer.Close()
 
-	request, _ := http.NewRequest("POST", ts.URL, body)
+	request, _ = http.NewRequest("POST", ts.URL, body)
 	request.Header.Set("content-type", "multipart/form-data; boundary=gc0p4Jq0M2Yt08jU534c0p")
 
 	http.DefaultClient.Do(request)
@@ -194,9 +204,9 @@ func Test_CreateSecurityContext(t *testing.T) {
 
 func Test_CreateRoute(t *testing.T) {
 	objectFactory = &DefaultFactory{}
-	route := generateRoute("/example/{userID}/profile/{profileID}")
-	route.BindHandler(GET, func() {})
+	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 
+	route.BindHandler(GET, func() {})
 	if route == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {

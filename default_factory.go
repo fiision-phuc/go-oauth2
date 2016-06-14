@@ -76,7 +76,7 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 // CreateSecurityContext creates new security context.
 func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 	tokenString := c.Header["authorization"]
-	isBearer := bearerRegex.MatchString(tokenString)
+	isBearer := bearerFinder.MatchString(tokenString)
 
 	/* Condition validation: Validate existing of authorization header */
 	if !isBearer {
@@ -110,7 +110,7 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 
 // CreateRoute creates new route component.
 func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
-	regexPattern := pathParamRegex.ReplaceAllStringFunc(urlPattern, func(m string) string {
+	regexPattern := pathParamFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
 	regexPattern += "/?"
