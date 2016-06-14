@@ -14,15 +14,16 @@ import (
 )
 
 func Test_BindForm(t *testing.T) {
-	objectFactory = &DefaultFactory{}
-
-	var form struct {
-		UserID    string `userID`
-		ProfileID int64  `profileID`
-	}
+	defer teardown()
+	setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var form struct {
+			UserID    string `userID`
+			ProfileID int64  `profileID`
+		}
+
 		context := objectFactory.CreateRequestContext(r, w)
 		context.BindForm(&form)
 
@@ -34,12 +35,12 @@ func Test_BindForm(t *testing.T) {
 		}
 	}))
 	defer ts.Close()
-
 	http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader("userID=1&profileID=2"))
 }
 
 func Test_BindJSON(t *testing.T) {
-	objectFactory = &DefaultFactory{}
+	defer teardown()
+	setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +51,9 @@ func Test_BindJSON(t *testing.T) {
 
 		if status.Code != 200 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 200, status.Code)
+		}
+		if status.Description != http.StatusText(200) {
+			t.Errorf(test.ExpectedStringButFoundString, http.StatusText(200), status.Description)
 		}
 	}))
 	defer ts.Close()
@@ -63,7 +67,8 @@ func Test_BindJSON(t *testing.T) {
 }
 
 func Test_OutputError(t *testing.T) {
-	objectFactory = &DefaultFactory{}
+	defer teardown()
+	setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +96,8 @@ func Test_OutputError(t *testing.T) {
 }
 
 func Test_OutputRedirect(t *testing.T) {
-	objectFactory = &DefaultFactory{}
+	defer teardown()
+	setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +116,8 @@ func Test_OutputRedirect(t *testing.T) {
 }
 
 func Test_OutputText(t *testing.T) {
-	objectFactory = &DefaultFactory{}
+	defer teardown()
+	setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

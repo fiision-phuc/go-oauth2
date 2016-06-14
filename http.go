@@ -14,7 +14,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	request.URL.Path = utils.FormatPath(request.URL.Path)
 	request.Method = strings.ToUpper(request.Method)
 
-	// Create context
+	// Create request context
 	context := objectFactory.CreateRequestContext(request, response)
 	defer RecoveryRequest(context, s.sandbox)
 
@@ -36,18 +36,20 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 			}
 		}
 	}
-	s.serveRequest(context)
+
+	// Create security context
+	security := objectFactory.CreateSecurityContext(context)
+	s.serveRequest(context, security)
 }
 
 // MARK: Struct's private functions
-func (s *Server) serveRequest(context *Request) {
+func (s *Server) serveRequest(context *Request, security *Security) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 
-	route, pathParams := s.router.MatchRoute(context.request.Method, context.request.URL.Path)
+	route, pathParams := s.router.MatchRoute(context, security)
 	context.PathParams = pathParams
-
 	if route != nil {
-		route.InvokeHandler(context, nil)
+		route.InvokeHandler(context, security)
 	} else {
 		context.OutputError(utils.Status503())
 	}

@@ -85,43 +85,45 @@ func Test_MatchRoute(t *testing.T) {
 		router.BindRoute(POST, "/{profileID}", func() {})
 	})
 
-	// [Test 1] Invalid path
-	route, pathParams := router.MatchRoute(GET, "/user")
-	if route != nil {
-		t.Error(test.ExpectedNil)
-	}
-	if pathParams != nil {
-		t.Error(test.ExpectedNil)
-	}
+	t.Error("Test case fail and need to rewrite")
 
-	// [Test 2] Invalid HTTP method
-	route, pathParams = router.MatchRoute(POST, "/user/profile")
-	if route != nil {
-		t.Error(test.ExpectedNil)
-	}
-	if pathParams != nil {
-		t.Error(test.ExpectedNil)
-	}
+	//	// [Test 1] Invalid path
+	//	route, pathParams := router.MatchRoute(GET, "/user")
+	//	if route != nil {
+	//		t.Error(test.ExpectedNil)
+	//	}
+	//	if pathParams != nil {
+	//		t.Error(test.ExpectedNil)
+	//	}
 
-	// [Test 3] Valid HTTP method & path
-	route, pathParams = router.MatchRoute(GET, "/user/profile")
-	if route == nil {
-		t.Error(test.ExpectedNotNil)
-	}
-	if pathParams != nil {
-		t.Error(test.ExpectedNil)
-	}
+	//	// [Test 2] Invalid HTTP method
+	//	route, pathParams = router.MatchRoute(POST, "/user/profile")
+	//	if route != nil {
+	//		t.Error(test.ExpectedNil)
+	//	}
+	//	if pathParams != nil {
+	//		t.Error(test.ExpectedNil)
+	//	}
 
-	// [Test 4] Valid HTTP method & path
-	route, pathParams = router.MatchRoute(GET, "/user/profile/1")
-	if route == nil {
-		t.Error(test.ExpectedNotNil)
-	}
-	if pathParams == nil {
-		t.Error(test.ExpectedNotNil)
-	} else {
-		if pathParams["profileID"] != "1" {
-			t.Errorf(test.ExpectedStringButFoundString, "1", pathParams["profileID"])
-		}
-	}
+	//	// [Test 3] Valid HTTP method & path
+	//	route, pathParams = router.MatchRoute(GET, "/user/profile")
+	//	if route == nil {
+	//		t.Error(test.ExpectedNotNil)
+	//	}
+	//	if pathParams != nil {
+	//		t.Error(test.ExpectedNil)
+	//	}
+
+	//	// [Test 4] Valid HTTP method & path
+	//	route, pathParams = router.MatchRoute(GET, "/user/profile/1")
+	//	if route == nil {
+	//		t.Error(test.ExpectedNotNil)
+	//	}
+	//	if pathParams == nil {
+	//		t.Error(test.ExpectedNotNil)
+	//	} else {
+	//		if pathParams["profileID"] != "1" {
+	//			t.Errorf(test.ExpectedStringButFoundString, "1", pathParams["profileID"])
+	//		}
+	//	}
 }

@@ -2,9 +2,12 @@ package oauth2
 
 import (
 	"bytes"
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/phuc0302/go-oauth2/utils"
 )
 
 // DefaultRouter descripts a default router component implementation.
@@ -15,32 +18,32 @@ type DefaultRouter struct {
 }
 
 // GroupRole groups all same url's prefix with user's roles.
-func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles string) {
+func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) {
+	/* Condition validation: Ignore role validation if there is no token store */
+	if tokenStore == nil {
+		return
+		
+	}
+
+	// Format path
+	groupPath = pathParamRegex.ReplaceAllStringFunc(groupPath, func(m string) string {
+		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
+	})
+	groupPath = globsRegex.ReplaceAllStringFunc(groupPath, func(m string) string {
+		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
+	})
+	groupPath += `\/?`
+
+	// Define validator
+	if r.userRoles == nil {
+		r.userRoles = make(map[*regexp.Regexp][]string, 1)
+	}
+	r.userRoles[regexp.MustCompile(groupPath)] = roles
 }
 
 // BindRole binds an url pattern with user's roles.
-func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles string) {
-	//	/* Condition validation: Ignore role validation if there is no token store */
-	//	if s.tokenStore == nil {
-	//		return
-	//	}
+func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles ...string) {
 
-	//	pattern = utils.FormatPath(pattern)
-
-	//	pattern = pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
-	//		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
-	//	})
-	//	pattern = globsRegex.ReplaceAllStringFunc(pattern, func(m string) string {
-	//		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
-	//	})
-	//	pattern += `\/?`
-
-	//	userRoles := strings.Split(roles, ",")
-
-	//	if s.userRoles == nil {
-	//		s.userRoles = make(map[*regexp.Regexp][]string, 1)
-	//	}
-	//	s.userRoles[regexp.MustCompile(pattern)] = userRoles
 }
 
 // GroupRoute groups all same url's prefix.
@@ -80,36 +83,29 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 }
 
 // MatchRoute matches a route with an url path.
-func (r *DefaultRouter) MatchRoute(httpMethod string, path string) (IRoute, map[string]string) {
+func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
 	for _, route := range r.routes {
-		ok, pathParams := route.MatchURLPattern(httpMethod, path)
+		ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path)
 		if !ok {
 			continue
 		}
 
-		//		// Validate authentication & roles if neccessary
-		//		if tokenStore != nil {
-		//			securityContext := objectFactory.CreateSecurityContext(context)
+		// Validate authentication & roles if neccessary
+		if tokenStore != nil && security != nil && security.AuthUser != nil {
+			for rule, roles := range r.userRoles {
 
-		//			for rule, roles := range r.userRoles {
-		//				if rule.MatchString(context.URLPath) {
-		//					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+				if rule.MatchString(context.Path) {
+					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 
-		//					if securityContext != nil && securityContext.AuthUser != nil {
-		//						for _, role := range securityContext.AuthUser.UserRoles() {
-		//							if regexRoles.MatchString(role) {
-		//								route.InvokeHandler(context, securityContext)
-		//								return
-		//							}
-		//						}
-		//					}
-		//					context.OutputError(utils.Status401())
-		//					return
-		//				}
-		//			}
-		//		}
-
-		return route, pathParams
+					for _, role := range security.AuthUser.UserRoles() {
+						if regexRoles.MatchString(role) {
+							return route, pathParams
+						}
+					}
+					panic(utils.Status401())
+				}
+			}
+		}
 	}
 	return nil, nil
 }
