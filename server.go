@@ -34,12 +34,11 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	logrus.SetFormatter(&logrus.TextFormatter{})
 	logrus.SetOutput(os.Stderr)
 
-	level, err := logrus.ParseLevel(cfg.LogLevel)
-	if err != nil {
-		level = logrus.DebugLevel
+	if level, err := logrus.ParseLevel(cfg.LogLevel); err != nil {
+		logrus.SetLevel(logrus.DebugLevel)
+	} else {
+		logrus.SetLevel(level)
 	}
-	logrus.SetLevel(level)
-
 	logrus.AddHook(&slackrus.SlackrusHook{
 		HookURL:        cfg.SlackURL,     // "https://hooks.slack.com/services/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"
 		Channel:        cfg.SlackChannel, // "#keywords"
@@ -64,6 +63,7 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 		tokenGrant := new(TokenGrant)
 
 		//	server.Get("/authorize", grantAuthorization.HandleForm)
+		server.Get("/token", tokenGrant.HandleForm)
 		server.Post("/token", tokenGrant.HandleForm)
 	}
 	return &server

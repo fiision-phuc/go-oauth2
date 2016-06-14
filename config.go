@@ -104,47 +104,40 @@ func createConfig(configFile string) {
 }
 
 // loadConfig retrieves previous configuration from file.
-func loadConfig(configFile string) *config {
+func loadConfig(configFile string) config {
 	// Generate config file if neccessary
 	if !utils.FileExisted(configFile) {
 		createConfig(configFile)
 	}
 
 	// Load config file
-	file, err := os.Open(configFile)
-	if err != nil {
-		return nil
-	}
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil
-	}
-
 	config := config{}
-	json.Unmarshal(bytes, &config)
+	file, _ := os.Open(configFile)
+	bytes, _ := ioutil.ReadAll(file)
 
-	// Convert duration to seconds
-	config.HeaderSize <<= 10
-	config.MultipartSize <<= 20
-	config.ReadTimeout *= time.Second
-	config.WriteTimeout *= time.Second
-	config.AccessTokenDuration *= time.Second
-	config.RefreshTokenDuration *= time.Second
-	config.AuthorizationCodeDuration *= time.Second
+	if err := json.Unmarshal(bytes, &config); err == nil {
+		// Convert duration to seconds
+		config.HeaderSize <<= 10
+		config.MultipartSize <<= 20
+		config.ReadTimeout *= time.Second
+		config.WriteTimeout *= time.Second
+		config.AccessTokenDuration *= time.Second
+		config.RefreshTokenDuration *= time.Second
+		config.AuthorizationCodeDuration *= time.Second
 
-	// Define redirectPaths
-	redirectPaths = make(map[int]string, len(config.RedirectPaths))
-	for path, status := range config.RedirectPaths {
-		redirectPaths[status] = path
+		// Define redirectPaths
+		redirectPaths = make(map[int]string, len(config.RedirectPaths))
+		for path, status := range config.RedirectPaths {
+			redirectPaths[status] = path
+		}
+
+		// Define jwt
+		privateKey, _ = x509.ParsePKCS1PrivateKey(config.PrivateKey)
+
+		// Define regular expressions
+		//	regexp.MustCompile(`:[^/#?()\.\\]+`)
+		grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
+		methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.AllowMethods, "|")))
 	}
-
-	// Define jwt
-	privateKey, _ = x509.ParsePKCS1PrivateKey(config.PrivateKey)
-
-	// Define regular expressions
-	//	regexp.MustCompile(`:[^/#?()\.\\]+`)
-	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
-	methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.AllowMethods, "|")))
-
-	return &config
+	return config
 }

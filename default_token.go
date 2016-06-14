@@ -42,7 +42,7 @@ func (t *DefaultToken) Token() string {
 }
 
 // IsExpired validate if this token is expired or not.
-func (t *DefaultToken) IsExpired() bool { return time.Now().Unix() >= t.Expired.Unix() }
+func (t *DefaultToken) IsExpired() bool { return time.Now().UTC().Unix() >= t.Expired.Unix() }
 
 // CreatedTime returns created_time.
 func (t *DefaultToken) CreatedTime() time.Time { return t.Created }

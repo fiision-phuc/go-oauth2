@@ -22,11 +22,10 @@ func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) 
 	/* Condition validation: Ignore role validation if there is no token store */
 	if tokenStore == nil {
 		return
-		
 	}
 
 	// Format path
-	groupPath = pathParamFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
+	groupPath = pathFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
 	groupPath = globsFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
@@ -36,14 +35,17 @@ func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) 
 
 	// Define validator
 	if r.userRoles == nil {
-		r.userRoles = make(map[*regexp.Regexp][]string, 1)
+		r.userRoles = make(map[*regexp.Regexp][]string)
 	}
 	r.userRoles[regexp.MustCompile(groupPath)] = roles
 }
 
 // BindRole binds an url pattern with user's roles.
 func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles ...string) {
-
+	/* Condition validation: Ignore role validation if there is no token store */
+	if tokenStore == nil {
+		return
+	}
 }
 
 // GroupRoute groups all same url's prefix.
@@ -85,24 +87,23 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 // MatchRoute matches a route with an url path.
 func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
 	for _, route := range r.routes {
-		ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path)
-		if !ok {
+		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); !ok {
 			continue
-		}
+		} else {
+			// Validate authentication & roles if neccessary
+			if tokenStore != nil && security != nil && security.AuthUser != nil {
+				for rule, roles := range r.userRoles {
 
-		// Validate authentication & roles if neccessary
-		if tokenStore != nil && security != nil && security.AuthUser != nil {
-			for rule, roles := range r.userRoles {
+					if rule.MatchString(context.Path) {
+						regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 
-				if rule.MatchString(context.Path) {
-					regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
-
-					for _, role := range security.AuthUser.UserRoles() {
-						if regexRoles.MatchString(role) {
-							return route, pathParams
+						for _, role := range security.AuthUser.UserRoles() {
+							if regexRoles.MatchString(role) {
+								return route, pathParams
+							}
 						}
+						panic(utils.Status401())
 					}
-					panic(utils.Status401())
 				}
 			}
 		}

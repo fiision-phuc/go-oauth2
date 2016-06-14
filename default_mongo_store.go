@@ -99,12 +99,12 @@ func (m *DefaultMongoStore) FindClientWithCredential(clientID string, clientSecr
 
 // FindAccessToken returns access_token.
 func (m *DefaultMongoStore) FindAccessToken(token string) IToken {
-	return m.findToken(token)
+	return m.parseToken(token)
 }
 
 // FindAccessTokenWithCredential returns access_token associated with client_id and user_id.
 func (m *DefaultMongoStore) FindAccessTokenWithCredential(clientID string, userID string) IToken {
-	return m.findTokenWithCredential(TableAccessToken, clientID, userID)
+	return m.queryTokenWithCredential(TableAccessToken, clientID, userID)
 }
 
 // CreateAccessToken returns new access_token.
@@ -119,12 +119,12 @@ func (m *DefaultMongoStore) DeleteAccessToken(token IToken) {
 
 // FindRefreshToken returns refresh_token.
 func (m *DefaultMongoStore) FindRefreshToken(token string) IToken {
-	return m.findToken(token)
+	return m.parseToken(token)
 }
 
 // FindRefreshTokenWithCredential returns refresh_token associated with client_id and user_id.
 func (m *DefaultMongoStore) FindRefreshTokenWithCredential(clientID string, userID string) IToken {
-	return m.findTokenWithCredential(TableRefreshToken, clientID, userID)
+	return m.queryTokenWithCredential(TableRefreshToken, clientID, userID)
 }
 
 // CreateRefreshToken returns new refresh_token.
@@ -142,8 +142,8 @@ func (m *DefaultMongoStore) DeleteRefreshToken(token IToken) {
 //func (m *MongoDBTokenStore) SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time) {
 //}
 
-// Find token
-func (m *DefaultMongoStore) findToken(token string) IToken {
+// Parse Token
+func (m *DefaultMongoStore) parseToken(token string) IToken {
 	/* Condition validation */
 	if len(token) == 0 {
 		return nil
@@ -182,15 +182,14 @@ func (m *DefaultMongoStore) findToken(token string) IToken {
 }
 
 // Find token with credential
-func (m *DefaultMongoStore) findTokenWithCredential(table string, clientID string, userID string) IToken {
+func (m *DefaultMongoStore) queryTokenWithCredential(table string, clientID string, userID string) IToken {
 	/* Condition validation */
 	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
 		return nil
 	}
-	accessToken := DefaultToken{}
 
-	err := mongo.EntityWithCriteria(table, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, &accessToken)
-	if err != nil {
+	accessToken := DefaultToken{}
+	if err := mongo.EntityWithCriteria(table, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, &accessToken); err != nil {
 		return nil
 	}
 	return &accessToken
@@ -211,8 +210,7 @@ func (m *DefaultMongoStore) createToken(table string, clientID string, userID st
 		Expired: expiredTime,
 	}
 
-	err := mongo.SaveEntity(table, newToken.ID, newToken)
-	if err != nil {
+	if err := mongo.SaveEntity(table, newToken.ID, newToken); err != nil {
 		return nil
 	}
 	return newToken

@@ -11,9 +11,6 @@ func Test_DefaultServer(t *testing.T) {
 	defer os.Remove(debug)
 	server := DefaultServer(true)
 
-	if cfg == nil {
-		t.Error(test.ExpectedNotNil)
-	}
 	if objectFactory == nil {
 		t.Error(test.ExpectedNotNil)
 	}

@@ -1,32 +1,28 @@
 package oauth2
 
 import (
-	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/phuc0302/go-oauth2/test"
 )
 
-func testString(value ...string) {
-	for _, v := range value {
-		fmt.Println(v)
-	}
-}
-
 func Test_GroupRole(t *testing.T) {
-	testString("r_user", "r_admin")
+	t.Error("Not yet implemented!")
 }
 
 func Test_BindRole(t *testing.T) {
+	t.Error("Not yet implemented!")
 }
 
 func Test_GroupRoute(t *testing.T) {
-	objectFactory = &DefaultFactory{}
-	router := DefaultRouter{}
+	defer teardown()
+	setup()
 
+	router, _ := objectFactory.CreateRouter().(*DefaultRouter)
 	router.GroupRoute(nil, "/user/profile", func(s *Server) {
 		router.BindRoute(GET, "", func() {})
-
 		router.BindRoute(GET, "/{profileID}", func() {})
 		router.BindRoute(POST, "/{profileID}", func() {})
 	})
@@ -54,10 +50,12 @@ func Test_GroupRoute(t *testing.T) {
 }
 
 func Test_BindRoute(t *testing.T) {
-	objectFactory = &DefaultFactory{}
-	router := DefaultRouter{}
+	defer teardown()
+	setup()
 
-	// Test first bind
+	router, _ := objectFactory.CreateRouter().(*DefaultRouter)
+
+	// [Test 1] First bind
 	router.BindRoute(GET, "/", func() {})
 	if router.routes == nil {
 		t.Error(test.ExpectedNotNil)
@@ -67,7 +65,7 @@ func Test_BindRoute(t *testing.T) {
 		}
 	}
 
-	// Test second bind
+	// [Test 2] Second bind
 	router.BindRoute(GET, "/sample", func() {})
 	if len(router.routes) != 2 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
@@ -75,9 +73,11 @@ func Test_BindRoute(t *testing.T) {
 }
 
 func Test_MatchRoute(t *testing.T) {
-	objectFactory = &DefaultFactory{}
-	router := DefaultRouter{}
+	defer teardown()
+	setup()
 
+	// Setup router
+	router := objectFactory.CreateRouter()
 	router.GroupRoute(nil, "/user/profile", func(s *Server) {
 		router.BindRoute(GET, "", func() {})
 
@@ -85,7 +85,25 @@ func Test_MatchRoute(t *testing.T) {
 		router.BindRoute(POST, "/{profileID}", func() {})
 	})
 
-	t.Error("Test case fail and need to rewrite")
+	// Setup test server
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var form struct {
+			UserID    string `userID`
+			ProfileID int64  `profileID`
+		}
+
+		context := objectFactory.CreateRequestContext(r, w)
+		context.BindForm(&form)
+
+		if form.UserID != "1" {
+			t.Errorf(test.ExpectedStringButFoundString, "1", form.UserID)
+		}
+		if form.ProfileID != 2 {
+			t.Errorf(test.ExpectedNumberButFoundNumber, 2, form.ProfileID)
+		}
+	}))
+	defer ts.Close()
 
 	//	// [Test 1] Invalid path
 	//	route, pathParams := router.MatchRoute(GET, "/user")

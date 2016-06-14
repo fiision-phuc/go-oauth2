@@ -46,24 +46,20 @@ const (
 
 // Define global variables.
 var (
-	// Global config.
-	cfg *config
-
-	// Global objects.
+	cfg           config
 	tokenStore    IStore
 	objectFactory IFactory
 
-	//Global jwt
+	// Global jwt
 	privateKey *rsa.PrivateKey
 
 	// Global validation
-	redirectPaths map[int]string
-	//	clientValidation  *regexp.Regexp
+	redirectPaths     map[int]string
 	grantsValidation  *regexp.Regexp
 	methodsValidation *regexp.Regexp
 
 	// Define finder
-	bearerFinder    = regexp.MustCompile("^(B|b)earer\\s.+$")
-	globsFinder     = regexp.MustCompile(`\*\*`)
-	pathParamFinder = regexp.MustCompile(`{[^/#?()\.\\]+}`)
+	bearerFinder = regexp.MustCompile("^(B|b)earer\\s.+$")
+	globsFinder  = regexp.MustCompile(`\*\*`)
+	pathFinder   = regexp.MustCompile(`{[^/#?()\.\\]+}`)
 )

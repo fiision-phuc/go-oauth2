@@ -31,6 +31,7 @@ func Test_BindHandler(t *testing.T) {
 func Test_InvokeHandler(t *testing.T) {
 	defer teardown()
 	setup()
+
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 	route.BindHandler(GET, func() {
 		panic("Test if func had been invoked or not.")
@@ -58,6 +59,7 @@ func Test_URLPattern(t *testing.T) {
 func Test_MatchURLPattern(t *testing.T) {
 	defer teardown()
 	setup()
+
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 	route.BindHandler(GET, func() {})
 

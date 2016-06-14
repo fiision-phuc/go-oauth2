@@ -25,8 +25,7 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 		context.Header = make(map[string]string)
 
 		for k, v := range request.Header {
-			header := strings.ToLower(k)
-			if header == "authorization" {
+			if header := strings.ToLower(k); header == "authorization" {
 				context.Header[header] = v[0]
 			} else {
 				context.Header[header] = strings.ToLower(v[0])
@@ -43,9 +42,7 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 		break
 
 	case POST, PATCH:
-		contentType := context.Header["content-type"]
-
-		if contentType == "application/x-www-form-urlencoded" {
+		if contentType := context.Header["content-type"]; contentType == "application/x-www-form-urlencoded" {
 			err := request.ParseForm()
 			if err == nil {
 				params = request.Form
@@ -76,10 +73,9 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 // CreateSecurityContext creates new security context.
 func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 	tokenString := c.Header["authorization"]
-	isBearer := bearerFinder.MatchString(tokenString)
 
 	/* Condition validation: Validate existing of authorization header */
-	if !isBearer {
+	if isBearer := bearerFinder.MatchString(tokenString); !isBearer {
 		tokenString = c.QueryParams["access_token"]
 		if len(tokenString) <= 0 {
 			return nil
@@ -90,27 +86,24 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 		tokenString = tokenString[7:]
 	}
 
-	accessToken := tokenStore.FindAccessToken(tokenString)
-
 	/* Condition validation: Validate expiration time */
-	if accessToken == nil || accessToken.IsExpired() {
+	if accessToken := tokenStore.FindAccessToken(tokenString); accessToken == nil || accessToken.IsExpired() {
 		return nil
+	} else {
+		client := tokenStore.FindClientWithID(accessToken.ClientID())
+		user := tokenStore.FindUserWithID(accessToken.UserID())
+		securityContext := &Security{
+			AuthClient:      client,
+			AuthUser:        user,
+			AuthAccessToken: accessToken,
+		}
+		return securityContext
 	}
-
-	client := tokenStore.FindClientWithID(accessToken.ClientID())
-	user := tokenStore.FindUserWithID(accessToken.UserID())
-
-	securityContext := &Security{
-		AuthClient:      client,
-		AuthUser:        user,
-		AuthAccessToken: accessToken,
-	}
-	return securityContext
 }
 
 // CreateRoute creates new route component.
 func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
-	regexPattern := pathParamFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
+	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
 	regexPattern += "/?"

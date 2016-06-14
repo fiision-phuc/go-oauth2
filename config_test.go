@@ -23,11 +23,6 @@ func Test_LoadConfig(t *testing.T) {
 	defer os.Remove(debug)
 	config := loadConfig(debug)
 
-	// Validate configFile
-	if config == nil {
-		t.Errorf("%s could not be loaded.", debug)
-	}
-
 	// Validate basic information
 	if config.Host != "localhost" {
 		t.Errorf(test.ExpectedStringButFoundString, "localhost", config.Host)

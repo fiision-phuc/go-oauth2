@@ -17,8 +17,7 @@ type TokenGrant struct {
 // HandleForm validates authentication form.
 func (g *TokenGrant) HandleForm(c *Request) {
 	security := &Security{}
-	err := g.validateForm(c, security)
-	if err != nil {
+	if err := g.validateForm(c, security); err != nil {
 		c.OutputError(err)
 	} else {
 		g.finalizeToken(c, security)
@@ -63,9 +62,7 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
 
 	/* Condition validation: Check grant_type for client */
 	clientGrantsValidation := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(recordClient.GrantTypes(), "|")))
-	isGranted := clientGrantsValidation.MatchString(inputForm.GrantType)
-
-	if !isGranted {
+	if isGranted := clientGrantsValidation.MatchString(inputForm.GrantType); !isGranted {
 		return utils.Status400WithDescription("The grant_type is unauthorised for this client_id.")
 	}
 	s.AuthClient = recordClient
@@ -183,12 +180,11 @@ func (g *TokenGrant) passwordFlow(c *Request, s *Security) *utils.Status {
 	}
 
 	/* Condition validation: Validate user's credentials */
-	recordUser := tokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password)
-	if recordUser == nil {
+	if recordUser := tokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser == nil {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
+	} else {
+		s.AuthUser = recordUser
 	}
-
-	s.AuthUser = recordUser
 	return nil
 }
 
@@ -246,7 +242,7 @@ func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
 	if cfg.AllowRefreshToken && s.AuthRefreshToken == nil {
 		refreshToken := tokenStore.FindRefreshTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
-			tokenStore.DeleteRefreshToken(refreshToken) // Note: Let the cron delete, it should be safer.
+			tokenStore.DeleteRefreshToken(refreshToken)
 			refreshToken = nil
 		}
 

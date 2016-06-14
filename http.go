@@ -42,13 +42,11 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	s.serveRequest(context, security)
 }
 
-// MARK: Struct's private functions
 func (s *Server) serveRequest(context *Request, security *Security) {
 	// FIX FIX FIX: Add priority here so that we can move the mosted used node to top
 
-	route, pathParams := s.router.MatchRoute(context, security)
-	context.PathParams = pathParams
-	if route != nil {
+	if route, pathParams := s.router.MatchRoute(context, security); route != nil {
+		context.PathParams = pathParams
 		route.InvokeHandler(context, security)
 	} else {
 		context.OutputError(utils.Status503())
@@ -56,28 +54,21 @@ func (s *Server) serveRequest(context *Request, security *Security) {
 }
 
 func (s *Server) serveResource(context *Request, request *http.Request, response http.ResponseWriter) {
-	resourcePath := request.URL.Path
-
 	/* Condition validation: Check if file exist or not */
-	if !utils.FileExisted(resourcePath) {
+	if resourcePath := request.URL.Path; !utils.FileExisted(resourcePath) {
 		context.OutputError(utils.Status404())
-		return
-	}
+	} else {
+		if file, err := os.Open(resourcePath); err != nil {
+			context.OutputError(utils.Status404())
+		} else {
+			defer file.Close()
 
-	// Open file as read only
-	file, err := os.Open(resourcePath)
-	defer file.Close()
-
-	if err != nil {
-		context.OutputError(utils.Status404())
-		return
+			/* Condition validation: Only serve file, not directory */
+			if info, _ := file.Stat(); info.IsDir() {
+				context.OutputError(utils.Status403())
+			} else {
+				http.ServeContent(response, request, resourcePath, info.ModTime(), file)
+			}
+		}
 	}
-
-	/* Condition validation: Only serve file, not directory */
-	info, _ := file.Stat()
-	if info.IsDir() {
-		context.OutputError(utils.Status403())
-		return
-	}
-	http.ServeContent(response, request, resourcePath, info.ModTime(), file)
 }
