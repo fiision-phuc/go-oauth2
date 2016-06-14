@@ -84,11 +84,16 @@ func (c *Request) OutputHeader(headerName string, headerValue string) {
 
 // OutputError returns an error JSON.
 func (c *Request) OutputError(status *utils.Status) {
-	c.response.Header().Set("Content-Type", "application/problem+json")
-	c.response.WriteHeader(status.Code)
+	if redirectURL := redirectPaths[status.Code]; len(redirectURL) > 0 {
+		c.OutputRedirect(status, redirectURL)
+	} else {
+		c.response.Header().Set("Content-Type", "application/problem+json")
+		c.response.WriteHeader(status.Code)
 
-	cause, _ := json.Marshal(status)
-	c.response.Write(cause)
+		cause, _ := json.Marshal(status)
+		c.response.Write(cause)
+	}
+
 }
 
 // OutputRedirect returns a redirect instruction.

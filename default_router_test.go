@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -86,62 +87,64 @@ func Test_MatchRoute(t *testing.T) {
 	})
 
 	// Setup test server
-	// Create test server
+	testCase := ""
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var form struct {
-			UserID    string `userID`
-			ProfileID int64  `profileID`
-		}
-
 		context := objectFactory.CreateRequestContext(r, w)
-		context.BindForm(&form)
 
-		if form.UserID != "1" {
-			t.Errorf(test.ExpectedStringButFoundString, "1", form.UserID)
-		}
-		if form.ProfileID != 2 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 2, form.ProfileID)
+		if route, pathParams := router.MatchRoute(context, nil); route != nil {
+			context.PathParams = pathParams
+			route.InvokeHandler(context, nil)
+		} else {
+			switch testCase {
+
+			case "Test 1", "Test 2":
+				if route != nil {
+					t.Error(test.ExpectedNil)
+				}
+				if pathParams != nil {
+					t.Error(test.ExpectedNil)
+				}
+				break
+
+			case "Test 3":
+				if route == nil {
+					t.Error(test.ExpectedNotNil)
+				}
+				if pathParams != nil {
+					t.Error(test.ExpectedNil)
+				}
+				break
+
+			case "Test 4":
+				if route == nil {
+					t.Error(test.ExpectedNotNil)
+				}
+				if pathParams == nil {
+					t.Error(test.ExpectedNil)
+				} else {
+					if pathParams["profileID"] != "1" {
+						t.Errorf(test.ExpectedStringButFoundString, "1", pathParams["profileID"])
+					}
+				}
+				break
+			}
 		}
 	}))
 	defer ts.Close()
 
-	//	// [Test 1] Invalid path
-	//	route, pathParams := router.MatchRoute(GET, "/user")
-	//	if route != nil {
-	//		t.Error(test.ExpectedNil)
-	//	}
-	//	if pathParams != nil {
-	//		t.Error(test.ExpectedNil)
-	//	}
+	// [Test 1] Invalid path
+	testCase = "Test 1"
+	http.Get(fmt.Sprintf("%s/user", ts.URL))
 
-	//	// [Test 2] Invalid HTTP method
-	//	route, pathParams = router.MatchRoute(POST, "/user/profile")
-	//	if route != nil {
-	//		t.Error(test.ExpectedNil)
-	//	}
-	//	if pathParams != nil {
-	//		t.Error(test.ExpectedNil)
-	//	}
+	// [Test 2] Invalid HTTP method
+	testCase = "Test 2"
+	http.Post(fmt.Sprintf("%s/user/profile", ts.URL), "application/x-www-form-urlencoded", nil)
 
-	//	// [Test 3] Valid HTTP method & path
-	//	route, pathParams = router.MatchRoute(GET, "/user/profile")
-	//	if route == nil {
-	//		t.Error(test.ExpectedNotNil)
-	//	}
-	//	if pathParams != nil {
-	//		t.Error(test.ExpectedNil)
-	//	}
+	// [Test 3] Valid HTTP method & path
+	testCase = "Test 3"
+	http.Get(fmt.Sprintf("%s/user/profile", ts.URL))
 
-	//	// [Test 4] Valid HTTP method & path
-	//	route, pathParams = router.MatchRoute(GET, "/user/profile/1")
-	//	if route == nil {
-	//		t.Error(test.ExpectedNotNil)
-	//	}
-	//	if pathParams == nil {
-	//		t.Error(test.ExpectedNotNil)
-	//	} else {
-	//		if pathParams["profileID"] != "1" {
-	//			t.Errorf(test.ExpectedStringButFoundString, "1", pathParams["profileID"])
-	//		}
-	//	}
+	// [Test 4] Valid HTTP method & path
+	testCase = "Test 4"
+	http.Get(fmt.Sprintf("%s/user/profile/1", ts.URL))
 }

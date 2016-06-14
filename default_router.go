@@ -106,6 +106,9 @@ func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute
 					}
 				}
 			}
+
+			// Simply return
+			return route, pathParams
 		}
 	}
 	return nil, nil

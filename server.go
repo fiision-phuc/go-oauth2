@@ -31,14 +31,14 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	}
 
 	// Setup logger
+	level, err := logrus.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		level = logrus.DebugLevel
+	}
 	logrus.SetFormatter(&logrus.TextFormatter{})
 	logrus.SetOutput(os.Stderr)
+	logrus.SetLevel(level)
 
-	if level, err := logrus.ParseLevel(cfg.LogLevel); err != nil {
-		logrus.SetLevel(logrus.DebugLevel)
-	} else {
-		logrus.SetLevel(level)
-	}
 	logrus.AddHook(&slackrus.SlackrusHook{
 		HookURL:        cfg.SlackURL,     // "https://hooks.slack.com/services/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"
 		Channel:        cfg.SlackChannel, // "#keywords"
