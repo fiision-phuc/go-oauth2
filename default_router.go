@@ -105,10 +105,10 @@ func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute
 						panic(utils.Status401())
 					}
 				}
+			} else {
+				// Simply return
+				return route, pathParams
 			}
-
-			// Simply return
-			return route, pathParams
 		}
 	}
 	return nil, nil

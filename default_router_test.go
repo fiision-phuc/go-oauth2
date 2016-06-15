@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/phuc0302/go-oauth2/test"
 )
@@ -85,15 +86,32 @@ func Test_MatchRoute(t *testing.T) {
 		router.BindRoute(GET, "/{profileID}", func() {})
 		router.BindRoute(POST, "/{profileID}", func() {})
 	})
+	router.GroupRoute(nil, "/private", func(s *Server) {
+		router.BindRoute(GET, "/{profileID}", func() {})
+	})
+	router.GroupRole(nil, "/private**", "r_admin")
 
 	// Setup test server
 	testCase := ""
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
+		Security := objectFactory.CreateSecurityContext(context)
 
-		if route, pathParams := router.MatchRoute(context, nil); route != nil {
+		if route, pathParams := router.MatchRoute(context, Security); route != nil {
+			switch testCase {
+
+			case "Test 5":
+				if route != nil {
+					t.Error(test.ExpectedNil)
+				}
+				if pathParams != nil {
+					t.Error(test.ExpectedNil)
+				}
+				break
+			}
+
 			context.PathParams = pathParams
-			route.InvokeHandler(context, nil)
+			route.InvokeHandler(context, Security)
 		} else {
 			switch testCase {
 
@@ -127,6 +145,15 @@ func Test_MatchRoute(t *testing.T) {
 					}
 				}
 				break
+
+			case "Test 6":
+				if route == nil {
+					t.Error(test.ExpectedNotNil)
+				}
+				if pathParams == nil {
+					t.Error(test.ExpectedNil)
+				}
+				break
 			}
 		}
 	}))
@@ -147,4 +174,14 @@ func Test_MatchRoute(t *testing.T) {
 	// [Test 4] Valid HTTP method & path
 	testCase = "Test 4"
 	http.Get(fmt.Sprintf("%s/user/profile/1", ts.URL))
+
+	// [Test 5] Send request to secure resource without access_token
+	testCase = "Test 5"
+	http.Get(fmt.Sprintf("%s/private/profile/1", ts.URL))
+
+	// [Test 6] Send request to secure resource with access_token
+	testCase = "Test 5"
+	now := time.Now()
+	token := tokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+	http.Get(fmt.Sprintf("%s/private/profile/1?access_token=%s", ts.URL, token.Token()))
 }
