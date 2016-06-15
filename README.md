@@ -15,8 +15,7 @@ written in Node.js with some additional features.
 
 ### Example Server
 
-````
-go
+````go
 import "github.com/phuc0302/go-oauth2"
 
 // Create server with sandbox mode enable.
