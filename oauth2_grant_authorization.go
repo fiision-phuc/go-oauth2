@@ -8,12 +8,12 @@ package oauth2
 //)
 
 //type AuthorizationGrant struct {
-//	config *Config
-//	store  TokenStore
+//	config *config
+//	store  IStore
 //}
 
 //// MARK: Struct's constructors
-//func CreateAuthorizationGrantController(oauth2Config *Config) *AuthorizationGrant {
+//func CreateAuthorizationGrantController(oauth2Config *config) *AuthorizationGrant {
 //	return &AuthorizationGrant{
 //		config: oauth2Config,
 //		//		store:  oauth2Config.Store,
@@ -26,7 +26,7 @@ package oauth2
 // * @param  {Function} done
 // * @this   OAuth
 // */
-//func (a *AuthorizationGrant) HandleForm(c *RequestContext) {
+//func (a *AuthorizationGrant) HandleForm(c *Request) {
 //	client := createAuthClientDefault(c)
 //	values := c.Queries
 //	/* Condition validation: Validate client_id */
@@ -88,7 +88,7 @@ package oauth2
 // * @param  {Function} done
 // * @this   OAuth
 // */
-//func (a *AuthorizationController) CheckUserApproved() {
+//func (a *AuthorizationGrant) CheckUserApproved() {
 //	// var self = this;
 //	// this.check(this.req, function (err, allowed, user) {
 //	//   if (err) return done(error('server_error', false, err));
