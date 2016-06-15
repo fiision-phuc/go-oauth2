@@ -2,111 +2,169 @@ package oauth2
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
-	"regexp"
-	"strings"
-	"time"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/Sirupsen/logrus"
+	"github.com/johntdyer/slackrus"
 )
 
-var (
-	globsRegex     = regexp.MustCompile(`\*\*`)
-	pathParamRegex = regexp.MustCompile(`:[^/#?()\.\\]+`)
-)
-
-// Server object description.
+// Server describes server object.
 type Server struct {
-	*Config
-
-	routes []Route
-	groups []string
-	logger *log.Logger
-
-	tokenStore TokenStore
-	userRoles  map[*regexp.Regexp][]string
+	sandbox bool
+	router  IRouter
 }
 
-// DefaultServer create a server object with preset config.
-func DefaultServer() *Server {
-	return DefaultServerWithTokenStore(nil)
+// DefaultServer returns a server with build in components.
+func DefaultServer(isSandbox bool) *Server {
+	factory := &DefaultFactory{}
+	return CreateServer(factory, isSandbox)
 }
 
-// DefaultServerWithTokenStore create a server object with preset config and oauth2.0 enabled.
-func DefaultServerWithTokenStore(tokenStore TokenStore) *Server {
-	config := LoadConfigs()
-
-	server := &Server{
-		Config: config,
-		logger: log.New(os.Stdout, "[OAuth2.0] ", 0),
+// CreateServer create a server object with preset config and oauth2.0 enabled.
+func CreateServer(instance IFactory, isSandbox bool) *Server {
+	// Load config file
+	if isSandbox {
+		cfg = loadConfig(debug)
+	} else {
+		cfg = loadConfig(release)
 	}
 
-	if tokenStore != nil {
-		server.tokenStore = tokenStore
+	// Setup logger
+	level, err := logrus.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		level = logrus.DebugLevel
+	}
+	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetOutput(os.Stderr)
+	logrus.SetLevel(level)
 
-		// Pre-define oauth2 urls
+	logrus.AddHook(&slackrus.SlackrusHook{
+		HookURL:        cfg.SlackURL,     // "https://hooks.slack.com/services/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"
+		Channel:        cfg.SlackChannel, // "#keywords"
+		Username:       cfg.SlackUser,    // "Server"
+		IconEmoji:      cfg.SlackIcon,    // ":ghost:"
+		AcceptedLevels: slackrus.LevelThreshold(level),
+	})
+
+	// Register components
+	objectFactory = instance
+	tokenStore = objectFactory.CreateStore()
+
+	// Create server
+	server := Server{
+		sandbox: isSandbox,
+		router:  objectFactory.CreateRouter(),
+	}
+
+	// Pre-define oauth2 urls
+	if tokenStore != nil {
 		//	grantAuthorization := new(AuthorizationGrant)
-		tokenGrant := CreateTokenGrant(config, tokenStore)
+		tokenGrant := new(TokenGrant)
 
 		//	server.Get("/authorize", grantAuthorization.HandleForm)
+		server.Get("/token", tokenGrant.HandleForm)
 		server.Post("/token", tokenGrant.HandleForm)
 	}
-	return server
+	return &server
 }
 
-// AddRoles will define user's role validation for each url.
-func (s *Server) AddRoles(pattern string, roles string) {
-	/* Condition validation: Ignore role validation if there is no token store */
-	if s.tokenStore == nil {
-		return
-	}
+// GroupRole binds user's roles to all url with same prefix.
+func (s *Server) GroupRole(groupPath string, roles string) {
+	s.router.GroupRole(s, groupPath, roles)
+}
 
-	pattern = utils.FormatPath(pattern)
+// Bind an url pattern with user's roles.
+func (s *Server) BindRole(httpMethod string, urlPattern string, roles string) {
+	s.router.BindRole(httpMethod, urlPattern, roles)
+}
 
-	pattern = pathParamRegex.ReplaceAllStringFunc(pattern, func(m string) string {
-		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:])
-	})
-	pattern = globsRegex.ReplaceAllStringFunc(pattern, func(m string) string {
-		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
-	})
-	pattern += `\/?`
+// GroupRoute routes all url with same prefix.
+func (s *Server) GroupRoute(urlGroup string, function func(s *Server)) {
+	s.router.GroupRoute(s, urlGroup, function)
+}
 
-	userRoles := strings.Split(roles, ",")
+// Copy routes copy request to registered handler.
+func (s *Server) Copy(urlPattern string, handler interface{}) {
+	s.router.BindRoute(COPY, urlPattern, handler)
+}
 
-	if s.userRoles == nil {
-		s.userRoles = make(map[*regexp.Regexp][]string, 1)
-	}
-	s.userRoles[regexp.MustCompile(pattern)] = userRoles
+// Delete routes delete request to registered handler.
+func (s *Server) Delete(urlPattern string, handler interface{}) {
+	s.router.BindRoute(DELETE, urlPattern, handler)
+}
+
+// Get routes get request to registered handler.
+func (s *Server) Get(urlPattern string, handler interface{}) {
+	s.router.BindRoute(GET, urlPattern, handler)
+}
+
+// Head routes head request to registered handler.
+func (s *Server) Head(urlPattern string, handler interface{}) {
+	s.router.BindRoute(HEAD, urlPattern, handler)
+}
+
+// Link routes link request to registered handler.
+func (s *Server) Link(urlPattern string, handler interface{}) {
+	s.router.BindRoute(LINK, urlPattern, handler)
+}
+
+// Options routes options request to registered handler.
+func (s *Server) Options(urlPattern string, handler interface{}) {
+	s.router.BindRoute(OPTIONS, urlPattern, handler)
+}
+
+// Patch routes patch request to registered handler.
+func (s *Server) Patch(urlPattern string, handler interface{}) {
+	s.router.BindRoute(PATCH, urlPattern, handler)
+}
+
+// Post routes post request to registered handler.
+func (s *Server) Post(urlPattern string, handler interface{}) {
+	s.router.BindRoute(POST, urlPattern, handler)
+}
+
+// Purge routes purge request to registered handler.
+func (s *Server) Purge(urlPattern string, handler interface{}) {
+	s.router.BindRoute(PURGE, urlPattern, handler)
+}
+
+// Put routes put request to registered handler.
+func (s *Server) Put(urlPattern string, handler interface{}) {
+	s.router.BindRoute(PUT, urlPattern, handler)
+}
+
+// Unlink routes unlink request to registered handler.
+func (s *Server) Unlink(urlPattern string, handler interface{}) {
+	s.router.BindRoute(UNLINK, urlPattern, handler)
 }
 
 // Run will start server on http port.
 func (s *Server) Run() {
-	address := fmt.Sprintf("%s:%s", s.Host, s.Port)
+	address := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    s.TimeoutRead * time.Second,
-		WriteTimeout:   s.TimeoutWrite * time.Second,
-		MaxHeaderBytes: s.HeaderSize << 10,
+		ReadTimeout:    cfg.ReadTimeout,
+		WriteTimeout:   cfg.WriteTimeout,
+		MaxHeaderBytes: cfg.HeaderSize,
 		Handler:        s,
 	}
 
-	s.logger.Printf("listening on %s\n", address)
-	s.logger.Fatalln(server.ListenAndServe())
+	logrus.Infof("listening on %s", address)
+	logrus.Fatal(server.ListenAndServe())
 }
 
 // RunTLS will start server on https port.
 func (s *Server) RunTLS(certFile string, keyFile string) {
-	address := fmt.Sprintf("%s:%s", s.Host, s.TLSPort)
+	address := fmt.Sprintf("%s:%d", cfg.Host, cfg.TLSPort)
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    s.TimeoutRead * time.Second,
-		WriteTimeout:   s.TimeoutWrite * time.Second,
-		MaxHeaderBytes: s.HeaderSize << 10,
+		ReadTimeout:    cfg.ReadTimeout,
+		WriteTimeout:   cfg.WriteTimeout,
+		MaxHeaderBytes: cfg.HeaderSize,
 		Handler:        s,
 	}
 
-	s.logger.Printf("listening on %s\n", address)
-	s.logger.Fatalln(server.ListenAndServeTLS(certFile, keyFile))
+	logrus.Infof("listening on %s\n", address)
+	logrus.Fatal(server.ListenAndServeTLS(certFile, keyFile))
 }

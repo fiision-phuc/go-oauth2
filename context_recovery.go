@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/url"
 	"os"
 	"reflect"
 	"runtime"
@@ -33,7 +32,7 @@ type log_message struct {
 
 type log_body struct {
 	ContentType   string            `json:"content_type,omitempty"`
-	RequestBody   url.Values        `json:"request_body,omitempty"`
+	RequestBody   map[string]string `json:"request_body,omitempty"`
 	RequestParams map[string]string `json:"request_params,omitempty"`
 }
 
@@ -52,19 +51,19 @@ func RecoveryInternal(logger *log.Logger) {
 		logger.Println(string(cause))
 	}
 }
-func RecoveryRequest(c *RequestContext, isDevelopment bool) {
+func RecoveryRequest(c *Request, isDevelopment bool) {
 	if err := recover(); err != nil {
 		log := log_message{
-			Uri:         c.URLPath,
-			Method:      fmt.Sprintf("%s|%s", c.Protocol, c.Method),
+			Uri:         c.Path,
+			Method:      fmt.Sprintf("%s|%s", c.request.Proto, c.request.Method),
 			RequestTime: time.Now().UTC().Format(time.RFC822),
 
 			Trace: callStack(3),
 
 			Body: &log_body{
 				ContentType:   c.Header["content-type"],
-				RequestBody:   c.Queries,
-				RequestParams: c.PathQueries,
+				RequestBody:   c.QueryParams,
+				RequestParams: c.PathParams,
 			},
 
 			Request: &log_request{

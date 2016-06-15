@@ -1,86 +1,74 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/url"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
+// TokenGrant describes a token grant controller.
 type TokenGrant struct {
-	config *Config
-	store  TokenStore
-
-	values    url.Values
-	grantType string
 }
 
-// MARK: Struct's constructors
-func CreateTokenGrant(config *Config, store TokenStore) *TokenGrant {
-	return &TokenGrant{
-		config: config,
-		store:  store,
-	}
-}
-
-// MARK: Struct's public functions
-func (g *TokenGrant) HandleForm(c *RequestContext) {
-	securityContext := &SecurityContext{}
-	err := g.validateForm(c, securityContext)
-	if err != nil {
+// HandleForm validates authentication form.
+func (g *TokenGrant) HandleForm(c *Request) {
+	security := &Security{}
+	if err := g.validateForm(c, security); err != nil {
 		c.OutputError(err)
 	} else {
-		g.finalizeToken(c, securityContext)
+		g.finalizeToken(c, security)
 	}
 }
 
-// MARK: Struct's private functions
-func (g *TokenGrant) validateForm(c *RequestContext, s *SecurityContext) *utils.Status {
-	grantType := c.Queries.Get("grant_type")
-	clientID := c.Queries.Get("client_id")
-	clientSecret := c.Queries.Get("client_secret")
+// validateForm validates general information
+func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
+	// Bind
+	var inputForm struct {
+		GrantType    string `grant_type`
+		ClientID     string `client_id`
+		ClientSecret string `client_secret`
+	}
+	c.BindForm(&inputForm)
+
+	// If client_id and client_secret are not include, try to look at the authorization header
+	if len(inputForm.ClientID) == 0 && len(inputForm.ClientSecret) == 0 {
+		inputForm.ClientID, inputForm.ClientSecret, _ = c.request.BasicAuth()
+	}
 
 	/* Condition validation: Validate grant_type */
-	if !(len(grantType) >= 0 && g.config.grantsValidation.MatchString(grantType)) {
+	if !grantsValidation.MatchString(inputForm.GrantType) {
 		return utils.Status400WithDescription("Invalid grant_type parameter.")
 	}
 
-	// If client_id and client_secret are not include, try to look at the authorization header
-	if len(clientID) == 0 && len(clientSecret) == 0 {
-		clientID, clientSecret, _ = c.BasicAuth()
-	}
-
 	/* Condition validation: Validate client_id */
-	if len(clientID) == 0 {
+	if len(inputForm.ClientID) == 0 {
 		return utils.Status400WithDescription("Invalid client_id parameter.")
 	}
 
 	/* Condition validation: Validate client_secret */
-	if len(clientSecret) == 0 {
+	if len(inputForm.ClientSecret) == 0 {
 		return utils.Status400WithDescription("Invalid client_secret parameter.")
 	}
 
 	/* Condition validation: Check the store */
-	recordClient := g.store.FindClientWithCredential(clientID, clientSecret)
+	recordClient := tokenStore.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
 	if recordClient == nil {
 		return utils.Status400WithDescription("Invalid client_id or client_secret parameter.")
 	}
 
 	/* Condition validation: Check grant_type for client */
-	isGranted := false
-	for _, recordGrant := range recordClient.GetGrantTypes() {
-		if recordGrant == grantType {
-			isGranted = true
-			break
-		}
-	}
-	if !isGranted {
+	clientGrantsValidation := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(recordClient.GrantTypes(), "|")))
+	if isGranted := clientGrantsValidation.MatchString(inputForm.GrantType); !isGranted {
 		return utils.Status400WithDescription("The grant_type is unauthorised for this client_id.")
 	}
 	s.AuthClient = recordClient
 
 	// Choose authentication flow
-	switch grantType {
+	switch inputForm.GrantType {
 
 	case AuthorizationCodeGrant:
 		// FIX FIX FIX: Going to do soon
@@ -97,15 +85,15 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *SecurityContext) *utils.
 		break
 
 	case PasswordGrant:
-		return g.usePasswordFlow(c, s)
+		return g.passwordFlow(c, s)
 
 	case RefreshTokenGrant:
-		return g.useRefreshTokenFlow(c, s)
+		return g.refreshTokenFlow(c, s)
 	}
 	return nil
 }
 
-func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, values url.Values, client *AuthClientDefault) {
+func (t *TokenGrant) handleAuthorizationCodeGrant(c *Request, values url.Values, client IClient) {
 	//	/* Condition validation: Validate redirect_uri */
 	//	if len(queryClient.RedirectURI) == 0 {
 	//		err := utils.Status400WithDescription("Missing redirect_uri parameter.")
@@ -178,29 +166,31 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 	// });
 }
 
-// usePasswordFlow handle password flow.
-func (g *TokenGrant) usePasswordFlow(c *RequestContext, s *SecurityContext) *utils.Status {
-	username := c.Queries.Get("username")
-	password := c.Queries.Get("password")
+// passwordFlow implements user's authentication with user's credential.
+func (g *TokenGrant) passwordFlow(c *Request, s *Security) *utils.Status {
+	var passwordForm struct {
+		Username string `username`
+		Password string `password`
+	}
+	c.BindForm(&passwordForm)
 
 	/* Condition validation: Validate username and password parameters */
-	if len(username) == 0 || len(password) == 0 {
+	if len(passwordForm.Username) == 0 || len(passwordForm.Password) == 0 {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
 	}
 
 	/* Condition validation: Validate user's credentials */
-	recordUser := g.store.FindUserWithCredential(username, password)
-	if recordUser == nil {
+	if recordUser := tokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser == nil {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
+	} else {
+		s.AuthUser = recordUser
 	}
-
-	s.AuthUser = recordUser
 	return nil
 }
 
 // useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext, s *SecurityContext) *utils.Status {
-	queryToken := c.Queries.Get("refresh_token")
+func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *utils.Status {
+	queryToken := c.QueryParams["refresh_token"]
 
 	/* Condition validation: Validate refresh_token parameter */
 	if len(queryToken) == 0 {
@@ -208,61 +198,60 @@ func (g *TokenGrant) useRefreshTokenFlow(c *RequestContext, s *SecurityContext) 
 	}
 
 	/* Condition validation: Validate refresh_token */
-	recordToken := g.store.FindRefreshToken(queryToken)
-	if recordToken == nil || recordToken.GetClientID() != s.AuthClient.GetClientID() {
+	recordToken := tokenStore.FindRefreshToken(queryToken)
+	if recordToken == nil || recordToken.ClientID() != s.AuthClient.ClientID() {
 		return utils.Status400WithDescription("Invalid refresh_token parameter.")
 
 	} else if recordToken.IsExpired() {
 		return utils.Status400WithDescription("refresh_token is expired.")
 	}
 
-	s.AuthUser = g.store.FindUserWithID(recordToken.GetUserID())
+	s.AuthUser = tokenStore.FindUserWithID(recordToken.UserID())
 	s.AuthRefreshToken = recordToken
 
 	// Delete current access token
-	accessToken := g.store.FindAccessTokenWithCredential(recordToken.GetClientID(), recordToken.GetUserID())
-	g.store.DeleteAccessToken(accessToken)
-
+	accessToken := tokenStore.FindAccessTokenWithCredential(recordToken.ClientID(), recordToken.UserID())
+	tokenStore.DeleteAccessToken(accessToken)
 	return nil
 }
 
 // finalizeToken summary and return result to client.
-func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
+func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
 	now := time.Now()
 
 	// Generate access token if neccessary
 	if s.AuthAccessToken == nil {
-		accessToken := g.store.FindAccessTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
+		accessToken := tokenStore.FindAccessTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
 		if accessToken != nil && accessToken.IsExpired() {
-			g.store.DeleteAccessToken(accessToken) // Note: Let the cron delete, it should be safer.
+			tokenStore.DeleteAccessToken(accessToken)
 			accessToken = nil
 		}
 
 		if accessToken == nil {
-			accessToken = g.store.CreateAccessToken(
-				s.AuthClient.GetClientID(),
-				s.AuthUser.GetUserID(),
+			accessToken = tokenStore.CreateAccessToken(
+				s.AuthClient.ClientID(),
+				s.AuthUser.UserID(),
 				now,
-				now.Add(g.config.DurationAccessToken),
+				now.Add(cfg.AccessTokenDuration),
 			)
 		}
 		s.AuthAccessToken = accessToken
 	}
 
 	// Generate refresh token if neccessary
-	if g.config.AllowRefreshToken && s.AuthRefreshToken == nil {
-		refreshToken := g.store.FindRefreshTokenWithCredential(s.AuthClient.GetClientID(), s.AuthUser.GetUserID())
+	if cfg.AllowRefreshToken && s.AuthRefreshToken == nil {
+		refreshToken := tokenStore.FindRefreshTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
-			g.store.DeleteRefreshToken(refreshToken) // Note: Let the cron delete, it should be safer.
+			tokenStore.DeleteRefreshToken(refreshToken)
 			refreshToken = nil
 		}
 
 		if refreshToken == nil {
-			refreshToken = g.store.CreateRefreshToken(
-				s.AuthClient.GetClientID(),
-				s.AuthUser.GetUserID(),
+			refreshToken = tokenStore.CreateRefreshToken(
+				s.AuthClient.ClientID(),
+				s.AuthUser.UserID(),
 				now,
-				now.Add(g.config.DurationRefreshToken),
+				now.Add(cfg.RefreshTokenDuration),
 			)
 		}
 		s.AuthRefreshToken = refreshToken
@@ -271,14 +260,14 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *SecurityContext) {
 	// Generate response token
 	tokenResponse := &TokenResponse{
 		TokenType:   "Bearer",
-		AccessToken: s.AuthAccessToken.GetToken(),
-		ExpiresIn:   s.AuthAccessToken.GetExpiredTime().Unix() - time.Now().Unix(),
-		Roles:       s.AuthUser.GetUserRoles(),
+		AccessToken: s.AuthAccessToken.Token(),
+		ExpiresIn:   s.AuthAccessToken.ExpiredTime().Unix() - time.Now().Unix(),
+		Roles:       s.AuthUser.UserRoles(),
 	}
 
 	// Only add refresh_token if allowed
-	if g.config.AllowRefreshToken {
-		tokenResponse.RefreshToken = s.AuthRefreshToken.GetToken()
+	if cfg.AllowRefreshToken {
+		tokenResponse.RefreshToken = s.AuthRefreshToken.Token()
 	}
 	c.OutputJSON(utils.Status200(), tokenResponse)
 }

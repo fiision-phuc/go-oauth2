@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
 )
 
 // BindForm binds data into given form object.
-func BindForm(values url.Values, inputForm interface{}) error {
+func BindForm(values map[string]string, inputForm interface{}) error {
 	/* Condition validation */
 	if values == nil || inputForm == nil {
 		return fmt.Errorf("Input must not be nil.")
@@ -31,11 +30,11 @@ func BindForm(values url.Values, inputForm interface{}) error {
 	for idx := 0; idx < reflector.NumField(); idx++ {
 		property := reflector.Field(idx)
 		structField := inputStruct.Field(idx)
-		propertyTag := structField.Tag.Get("inject")
+		propertyTag := string(structField.Tag)
 
-		if property.CanSet() && len(propertyTag) != 0 {
+		if property.CanSet() && len(propertyTag) > 0 {
 			propertyType := property.Type()
-			data := values.Get(propertyTag)
+			data := values[propertyTag]
 
 			dataType := reflect.TypeOf(data)
 			value := reflect.ValueOf(data)
@@ -91,28 +90,6 @@ func BindForm(values url.Values, inputForm interface{}) error {
 		}
 	}
 	return nil
-}
-
-// ParseForm parses url-encode form into map.
-func ParseForm(request *http.Request) url.Values {
-	err := request.ParseForm()
-	if err != nil {
-		return nil
-	}
-	return request.Form
-}
-
-// ParseMultipartForm parses multipart form into map.
-func ParseMultipartForm(request *http.Request) url.Values {
-	err := request.ParseMultipartForm(10 << 20) // 10 MB
-	if err != nil {
-		panic(err)
-	}
-	params := url.Values(request.MultipartForm.Value)
-	//	for k, v := range request.URL.Query() {
-	//		params[k] = v
-	//	}
-	return params
 }
 
 // ParseStatus parses data into status object.
