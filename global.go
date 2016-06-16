@@ -46,8 +46,8 @@ const (
 
 // Define global variables.
 var (
-	cfg           config
-	tokenStore    IStore
+	Cfg           Config
+	TokenStore    IStore
 	objectFactory IFactory
 
 	// Global jwt

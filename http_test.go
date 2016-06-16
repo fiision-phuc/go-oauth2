@@ -30,8 +30,8 @@ func Test_ServeHTTP(t *testing.T) {
 	io.Copy(output, input)
 
 	// Update allow methods
-	cfg.AllowMethods = []string{GET, POST, PATCH, DELETE}
-	methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(cfg.AllowMethods, "|")))
+	Cfg.AllowMethods = []string{GET, POST, PATCH, DELETE}
+	methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(Cfg.AllowMethods, "|")))
 
 	// [Test 1] Invalid resource request
 	request, _ := http.NewRequest("GET", "http://localhost:8080/resources/README", nil)

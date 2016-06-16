@@ -15,8 +15,8 @@ import (
 	"github.com/phuc0302/go-oauth2/utils"
 )
 
-// config describes a configuration  object  that  will  be  used  during application life time.
-type config struct {
+// Config describes a configuration  object  that  will  be  used  during application life time.
+type Config struct {
 
 	// Server
 	Host    string `json:"host,omitempty"`
@@ -59,7 +59,7 @@ func createConfig(configFile string) {
 	}
 
 	// Create default config
-	config := config{
+	config := Config{
 		Host:    "localhost",
 		Port:    8080,
 		TLSPort: 8443,
@@ -104,14 +104,14 @@ func createConfig(configFile string) {
 }
 
 // loadConfig retrieves previous configuration from file.
-func loadConfig(configFile string) config {
+func loadConfig(configFile string) Config {
 	// Generate config file if neccessary
 	if !utils.FileExisted(configFile) {
 		createConfig(configFile)
 	}
 
 	// Load config file
-	config := config{}
+	config := Config{}
 	file, _ := os.Open(configFile)
 	bytes, _ := ioutil.ReadAll(file)
 

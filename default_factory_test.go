@@ -189,7 +189,7 @@ func Test_CreateSecurityContext(t *testing.T) {
 
 	// Generate token
 	now := time.Now()
-	token := tokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// [Test 1] Send token as query param
 	http.Get(fmt.Sprintf("%s?access_token=%s", ts.URL, token.Token()))

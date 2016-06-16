@@ -14,7 +14,7 @@ func Test_DefaultServer(t *testing.T) {
 	if objectFactory == nil {
 		t.Error(test.ExpectedNotNil)
 	}
-	if tokenStore == nil {
+	if TokenStore == nil {
 		t.Error(test.ExpectedNotNil)
 	}
 	if redirectPaths == nil {

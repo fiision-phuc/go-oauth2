@@ -182,6 +182,6 @@ func Test_MatchRoute(t *testing.T) {
 	// [Test 6] Send request to secure resource with access_token
 	testCase = "Test 5"
 	now := time.Now()
-	token := tokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 	http.Get(fmt.Sprintf("%s/private/profile/1?access_token=%s", ts.URL, token.Token()))
 }

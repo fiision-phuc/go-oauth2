@@ -14,7 +14,7 @@ import (
 
 func Test_DefaultToken(t *testing.T) {
 	defer os.Remove(debug)
-	cfg = loadConfig(debug)
+	Cfg = loadConfig(debug)
 
 	token := DefaultToken{
 		ID:      bson.NewObjectId(),
@@ -22,7 +22,7 @@ func Test_DefaultToken(t *testing.T) {
 		Client:  bson.NewObjectId(),
 		Created: time.Now(),
 	}
-	token.Expired = token.Created.Add(cfg.RefreshTokenDuration)
+	token.Expired = token.Created.Add(Cfg.RefreshTokenDuration)
 
 	// Test token
 	tokenString := token.Token()

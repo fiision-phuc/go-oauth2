@@ -61,9 +61,9 @@ func setup() {
 	database.C(TableClient).Insert(client1)
 
 	// Define global variables
-	cfg = loadConfig(debug)
+	Cfg = loadConfig(debug)
 	objectFactory = &DefaultFactory{}
-	tokenStore = objectFactory.CreateStore()
+	TokenStore = objectFactory.CreateStore()
 }
 
 func teardown() {

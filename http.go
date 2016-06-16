@@ -25,8 +25,8 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	}
 
 	// Should redirect request to static folder or not?
-	if request.Method == GET && len(cfg.StaticFolders) > 0 {
-		for prefix, folder := range cfg.StaticFolders {
+	if request.Method == GET && len(Cfg.StaticFolders) > 0 {
+		for prefix, folder := range Cfg.StaticFolders {
 			if strings.HasPrefix(request.URL.Path, prefix) {
 				newPath := strings.Replace(request.URL.Path, prefix, folder, 1)
 				request.URL, _ = url.Parse(newPath)
