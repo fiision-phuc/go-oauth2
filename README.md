@@ -31,6 +31,7 @@ server.GroupRole("/protected**", "r_user")
 
 // Start server.
 server.Run()
+````
 
 ### Author
 

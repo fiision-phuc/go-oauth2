@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/phuc0302/go-oauth2/mongo"
 )
 
 // DefaultFactory describes a default factory object.
@@ -123,5 +125,6 @@ func (d *DefaultFactory) CreateRouter() IRouter {
 
 // CreateStore creates new store component.
 func (d *DefaultFactory) CreateStore() IStore {
+	mongo.ConnectMongo()
 	return &DefaultMongoStore{}
 }

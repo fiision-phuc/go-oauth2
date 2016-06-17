@@ -29,7 +29,6 @@ var (
 )
 
 func setup() {
-	mongo.ConnectMongo()
 	session, database = mongo.GetMonotonicSession()
 
 	// Generate test data
@@ -69,6 +68,7 @@ func setup() {
 func teardown() {
 	os.Remove(mongo.ConfigFile)
 	os.Remove(debug)
+
 	database.DropDatabase()
 	session.Close()
 }
