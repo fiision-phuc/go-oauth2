@@ -21,6 +21,12 @@ type Request struct {
 	response http.ResponseWriter
 }
 
+// BasicAuth returns username & password.
+func (c *Request) BasicAuth() (username string, password string, ok bool) {
+	username, password, ok = c.request.BasicAuth()
+	return
+}
+
 // BindForm converts urlencode/multipart form to object.
 func (c *Request) BindForm(inputForm interface{}) error {
 	return utils.BindForm(c.QueryParams, inputForm)

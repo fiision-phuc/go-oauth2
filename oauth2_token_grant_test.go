@@ -94,8 +94,8 @@ func Test_PasswordGrantFlow(t *testing.T) {
 	)))
 	token1 := parseResult(response)
 
-	recordedAccessToken := tokenStore.FindAccessToken(token1.AccessToken)
-	recordedRefreshToken := tokenStore.FindRefreshToken(token1.RefreshToken)
+	recordedAccessToken := TokenStore.FindAccessToken(token1.AccessToken)
+	recordedRefreshToken := TokenStore.FindRefreshToken(token1.RefreshToken)
 	if token1 == nil {
 		t.Error(test.ExpectedNotNil)
 	}
@@ -112,13 +112,13 @@ func Test_TokenGrantNotAllowRefreshToken(t *testing.T) {
 	setup()
 
 	// Modify config
-	cfg.GrantTypes = []string{
+	Cfg.GrantTypes = []string{
 		AuthorizationCodeGrant,
 		ClientCredentialsGrant,
 		PasswordGrant,
 	}
-	cfg.AllowRefreshToken = false
-	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(cfg.GrantTypes, "|")))
+	Cfg.AllowRefreshToken = false
+	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(Cfg.GrantTypes, "|")))
 
 	// Setup test server
 	controller := new(TokenGrant)

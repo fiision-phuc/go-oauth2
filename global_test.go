@@ -29,7 +29,6 @@ var (
 )
 
 func setup() {
-	mongo.ConnectMongo()
 	session, database = mongo.GetMonotonicSession()
 
 	// Generate test data
@@ -61,14 +60,15 @@ func setup() {
 	database.C(TableClient).Insert(client1)
 
 	// Define global variables
-	cfg = loadConfig(debug)
+	Cfg = loadConfig(debug)
 	objectFactory = &DefaultFactory{}
-	tokenStore = objectFactory.CreateStore()
+	TokenStore = objectFactory.CreateStore()
 }
 
 func teardown() {
 	os.Remove(mongo.ConfigFile)
 	os.Remove(debug)
+
 	database.DropDatabase()
 	session.Close()
 }

@@ -20,7 +20,7 @@ type DefaultRouter struct {
 // GroupRole groups all same url's prefix with user's roles.
 func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
-	if tokenStore == nil {
+	if TokenStore == nil {
 		return
 	}
 
@@ -43,7 +43,7 @@ func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) 
 // BindRole binds an url pattern with user's roles.
 func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
-	if tokenStore == nil {
+	if TokenStore == nil {
 		return
 	}
 }
@@ -91,7 +91,7 @@ func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute
 			continue
 		} else {
 			// Validate authentication & roles if neccessary
-			if tokenStore != nil && security != nil && security.AuthUser != nil {
+			if TokenStore != nil && security != nil && security.AuthUser != nil {
 				for rule, roles := range r.userRoles {
 
 					if rule.MatchString(context.Path) {

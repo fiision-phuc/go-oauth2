@@ -55,7 +55,7 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *utils.Status {
 	}
 
 	/* Condition validation: Check the store */
-	recordClient := tokenStore.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
+	recordClient := TokenStore.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
 	if recordClient == nil {
 		return utils.Status400WithDescription("Invalid client_id or client_secret parameter.")
 	}
@@ -180,7 +180,7 @@ func (g *TokenGrant) passwordFlow(c *Request, s *Security) *utils.Status {
 	}
 
 	/* Condition validation: Validate user's credentials */
-	if recordUser := tokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser == nil {
+	if recordUser := TokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser == nil {
 		return utils.Status400WithDescription("Invalid username or password parameter.")
 	} else {
 		s.AuthUser = recordUser
@@ -198,7 +198,7 @@ func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *utils.Status {
 	}
 
 	/* Condition validation: Validate refresh_token */
-	recordToken := tokenStore.FindRefreshToken(queryToken)
+	recordToken := TokenStore.FindRefreshToken(queryToken)
 	if recordToken == nil || recordToken.ClientID() != s.AuthClient.ClientID() {
 		return utils.Status400WithDescription("Invalid refresh_token parameter.")
 
@@ -206,12 +206,12 @@ func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *utils.Status {
 		return utils.Status400WithDescription("refresh_token is expired.")
 	}
 
-	s.AuthUser = tokenStore.FindUserWithID(recordToken.UserID())
+	s.AuthUser = TokenStore.FindUserWithID(recordToken.UserID())
 	s.AuthRefreshToken = recordToken
 
 	// Delete current access token
-	accessToken := tokenStore.FindAccessTokenWithCredential(recordToken.ClientID(), recordToken.UserID())
-	tokenStore.DeleteAccessToken(accessToken)
+	accessToken := TokenStore.FindAccessTokenWithCredential(recordToken.ClientID(), recordToken.UserID())
+	TokenStore.DeleteAccessToken(accessToken)
 	return nil
 }
 
@@ -221,37 +221,37 @@ func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
 
 	// Generate access token if neccessary
 	if s.AuthAccessToken == nil {
-		accessToken := tokenStore.FindAccessTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
+		accessToken := TokenStore.FindAccessTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
 		if accessToken != nil && accessToken.IsExpired() {
-			tokenStore.DeleteAccessToken(accessToken)
+			TokenStore.DeleteAccessToken(accessToken)
 			accessToken = nil
 		}
 
 		if accessToken == nil {
-			accessToken = tokenStore.CreateAccessToken(
+			accessToken = TokenStore.CreateAccessToken(
 				s.AuthClient.ClientID(),
 				s.AuthUser.UserID(),
 				now,
-				now.Add(cfg.AccessTokenDuration),
+				now.Add(Cfg.AccessTokenDuration),
 			)
 		}
 		s.AuthAccessToken = accessToken
 	}
 
 	// Generate refresh token if neccessary
-	if cfg.AllowRefreshToken && s.AuthRefreshToken == nil {
-		refreshToken := tokenStore.FindRefreshTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
+	if Cfg.AllowRefreshToken && s.AuthRefreshToken == nil {
+		refreshToken := TokenStore.FindRefreshTokenWithCredential(s.AuthClient.ClientID(), s.AuthUser.UserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
-			tokenStore.DeleteRefreshToken(refreshToken)
+			TokenStore.DeleteRefreshToken(refreshToken)
 			refreshToken = nil
 		}
 
 		if refreshToken == nil {
-			refreshToken = tokenStore.CreateRefreshToken(
+			refreshToken = TokenStore.CreateRefreshToken(
 				s.AuthClient.ClientID(),
 				s.AuthUser.UserID(),
 				now,
-				now.Add(cfg.RefreshTokenDuration),
+				now.Add(Cfg.RefreshTokenDuration),
 			)
 		}
 		s.AuthRefreshToken = refreshToken
@@ -266,7 +266,7 @@ func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
 	}
 
 	// Only add refresh_token if allowed
-	if cfg.AllowRefreshToken {
+	if Cfg.AllowRefreshToken {
 		tokenResponse.RefreshToken = s.AuthRefreshToken.Token()
 	}
 	c.OutputJSON(utils.Status200(), tokenResponse)

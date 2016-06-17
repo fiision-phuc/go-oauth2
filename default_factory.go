@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/phuc0302/go-oauth2/mongo"
 )
 
 // DefaultFactory describes a default factory object.
@@ -48,7 +50,7 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 				params = request.Form
 			}
 		} else if strings.HasPrefix(contentType, "multipart/form-data; boundary") {
-			err := request.ParseMultipartForm(cfg.MultipartSize)
+			err := request.ParseMultipartForm(Cfg.MultipartSize)
 			if err == nil {
 				params = request.MultipartForm.Value
 			}
@@ -87,11 +89,11 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 	}
 
 	/* Condition validation: Validate expiration time */
-	if accessToken := tokenStore.FindAccessToken(tokenString); accessToken == nil || accessToken.IsExpired() {
+	if accessToken := TokenStore.FindAccessToken(tokenString); accessToken == nil || accessToken.IsExpired() {
 		return nil
 	} else {
-		client := tokenStore.FindClientWithID(accessToken.ClientID())
-		user := tokenStore.FindUserWithID(accessToken.UserID())
+		client := TokenStore.FindClientWithID(accessToken.ClientID())
+		user := TokenStore.FindUserWithID(accessToken.UserID())
 		securityContext := &Security{
 			AuthClient:      client,
 			AuthUser:        user,
@@ -123,5 +125,6 @@ func (d *DefaultFactory) CreateRouter() IRouter {
 
 // CreateStore creates new store component.
 func (d *DefaultFactory) CreateStore() IStore {
+	mongo.ConnectMongo()
 	return &DefaultMongoStore{}
 }

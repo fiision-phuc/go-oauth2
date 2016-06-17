@@ -25,13 +25,13 @@ func DefaultServer(isSandbox bool) *Server {
 func CreateServer(instance IFactory, isSandbox bool) *Server {
 	// Load config file
 	if isSandbox {
-		cfg = loadConfig(debug)
+		Cfg = loadConfig(debug)
 	} else {
-		cfg = loadConfig(release)
+		Cfg = loadConfig(release)
 	}
 
 	// Setup logger
-	level, err := logrus.ParseLevel(cfg.LogLevel)
+	level, err := logrus.ParseLevel(Cfg.LogLevel)
 	if err != nil {
 		level = logrus.DebugLevel
 	}
@@ -40,16 +40,16 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	logrus.SetLevel(level)
 
 	logrus.AddHook(&slackrus.SlackrusHook{
-		HookURL:        cfg.SlackURL,     // "https://hooks.slack.com/services/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"
-		Channel:        cfg.SlackChannel, // "#keywords"
-		Username:       cfg.SlackUser,    // "Server"
-		IconEmoji:      cfg.SlackIcon,    // ":ghost:"
+		HookURL:        Cfg.SlackURL,     // "https://hooks.slack.com/services/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"
+		Channel:        Cfg.SlackChannel, // "#keywords"
+		Username:       Cfg.SlackUser,    // "Server"
+		IconEmoji:      Cfg.SlackIcon,    // ":ghost:"
 		AcceptedLevels: slackrus.LevelThreshold(level),
 	})
 
 	// Register components
 	objectFactory = instance
-	tokenStore = objectFactory.CreateStore()
+	TokenStore = objectFactory.CreateStore()
 
 	// Create server
 	server := Server{
@@ -58,7 +58,7 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	}
 
 	// Pre-define oauth2 urls
-	if tokenStore != nil {
+	if TokenStore != nil {
 		//	grantAuthorization := new(AuthorizationGrant)
 		tokenGrant := new(TokenGrant)
 
@@ -70,13 +70,13 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 }
 
 // GroupRole binds user's roles to all url with same prefix.
-func (s *Server) GroupRole(groupPath string, roles string) {
-	s.router.GroupRole(s, groupPath, roles)
+func (s *Server) GroupRole(groupPath string, roles ...string) {
+	s.router.GroupRole(s, groupPath, roles...)
 }
 
 // Bind an url pattern with user's roles.
-func (s *Server) BindRole(httpMethod string, urlPattern string, roles string) {
-	s.router.BindRole(httpMethod, urlPattern, roles)
+func (s *Server) BindRole(httpMethod string, urlPattern string, roles ...string) {
+	s.router.BindRole(httpMethod, urlPattern, roles...)
 }
 
 // GroupRoute routes all url with same prefix.
@@ -141,12 +141,12 @@ func (s *Server) Unlink(urlPattern string, handler interface{}) {
 
 // Run will start server on http port.
 func (s *Server) Run() {
-	address := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	address := fmt.Sprintf("%s:%d", Cfg.Host, Cfg.Port)
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    cfg.ReadTimeout,
-		WriteTimeout:   cfg.WriteTimeout,
-		MaxHeaderBytes: cfg.HeaderSize,
+		ReadTimeout:    Cfg.ReadTimeout,
+		WriteTimeout:   Cfg.WriteTimeout,
+		MaxHeaderBytes: Cfg.HeaderSize,
 		Handler:        s,
 	}
 
@@ -156,12 +156,12 @@ func (s *Server) Run() {
 
 // RunTLS will start server on https port.
 func (s *Server) RunTLS(certFile string, keyFile string) {
-	address := fmt.Sprintf("%s:%d", cfg.Host, cfg.TLSPort)
+	address := fmt.Sprintf("%s:%d", Cfg.Host, Cfg.TLSPort)
 	server := &http.Server{
 		Addr:           address,
-		ReadTimeout:    cfg.ReadTimeout,
-		WriteTimeout:   cfg.WriteTimeout,
-		MaxHeaderBytes: cfg.HeaderSize,
+		ReadTimeout:    Cfg.ReadTimeout,
+		WriteTimeout:   Cfg.WriteTimeout,
+		MaxHeaderBytes: Cfg.HeaderSize,
 		Handler:        s,
 	}
 
