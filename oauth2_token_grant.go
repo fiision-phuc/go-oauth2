@@ -217,7 +217,7 @@ func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *utils.Status {
 
 // finalizeToken summary and return result to client.
 func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
-	now := time.Now()
+	now := time.Now().UTC()
 
 	// Generate access token if neccessary
 	if s.AuthAccessToken == nil {
@@ -261,7 +261,7 @@ func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
 	tokenResponse := &TokenResponse{
 		TokenType:   "Bearer",
 		AccessToken: s.AuthAccessToken.Token(),
-		ExpiresIn:   s.AuthAccessToken.ExpiredTime().Unix() - time.Now().Unix(),
+		ExpiresIn:   s.AuthAccessToken.ExpiredTime().Unix() - time.Now().UTC().Unix(),
 		Roles:       s.AuthUser.UserRoles(),
 	}
 
