@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 // ConfigFile defines configuration file's name.
@@ -25,20 +25,13 @@ type Config struct {
 // CreateConfigs generates a default configuration file.
 func CreateConfigs() {
 	/* Condition validation */
-	if utils.FileExisted(ConfigFile) {
+	if util.FileExisted(ConfigFile) {
 		os.Remove(ConfigFile)
 	}
 
-	host := os.Getenv("OPENSHIFT_MONGODB_DB_HOST")
-	port := os.Getenv("OPENSHIFT_MONGODB_DB_PORT")
-	if len(host) == 0 {
-		host = "127.0.0.1"
-	}
-	if len(port) == 0 {
-		port = "27017"
-	}
-
 	// Create default config
+	host := "127.0.0.1"
+	port := "27017"
 	config := Config{
 		Addresses: []string{fmt.Sprintf("%s:%s", host, port)},
 		Database:  "mongo",
@@ -56,7 +49,7 @@ func CreateConfigs() {
 // LoadConfigs retrieves previous configuration from file.
 func LoadConfigs() *Config {
 	/* Condition validation */
-	if !utils.FileExisted(ConfigFile) {
+	if !util.FileExisted(ConfigFile) {
 		CreateConfigs()
 	}
 

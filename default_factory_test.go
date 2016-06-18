@@ -11,78 +11,57 @@ import (
 	"time"
 
 	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
-func Test_CreateRequestContext(t *testing.T) {
+func Test_CreateRequestContext_GetRequest(t *testing.T) {
 	defer teardown()
 	setup()
 
 	// Create test server
-	testCase := ""
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
 
-		switch testCase {
-
-		case "Test 1":
-			if context.Path != utils.FormatPath(r.URL.Path) {
-				t.Errorf(test.ExpectedStringButFoundString, utils.FormatPath(r.URL.Path), context.Path)
-			}
-			if context.Header == nil {
-				t.Error(test.ExpectedNotNil)
+		if context.Path != util.FormatPath(r.URL.Path) {
+			t.Errorf(test.ExpectedStringButFoundString, util.FormatPath(r.URL.Path), context.Path)
+		}
+		if context.Header == nil {
+			t.Error(test.ExpectedNotNil)
+		} else {
+			if len(context.Header) != 2 {
+				t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(context.Header))
 			} else {
-				if len(context.Header) != 2 {
-					t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(context.Header))
-				} else {
-					if context.Header["user-agent"] != "go-http-client/1.1" {
-						t.Errorf(test.ExpectedStringButFoundString, "go-http-client/1.1", context.Header["user-agent"])
-					}
-					if context.Header["accept-encoding"] != "gzip" {
-						t.Errorf(test.ExpectedStringButFoundString, "gzip", context.Header["accept-encoding"])
-					}
+				if context.Header["user-agent"] != "go-http-client/1.1" {
+					t.Errorf(test.ExpectedStringButFoundString, "go-http-client/1.1", context.Header["user-agent"])
+				}
+				if context.Header["accept-encoding"] != "gzip" {
+					t.Errorf(test.ExpectedStringButFoundString, "gzip", context.Header["accept-encoding"])
 				}
 			}
-			if context.PathParams != nil {
-				t.Error(test.ExpectedNil)
-			}
-			if context.QueryParams != nil {
-				t.Error(test.ExpectedNil)
-			}
-			break
+		}
+		if context.PathParams != nil {
+			t.Error(test.ExpectedNil)
+		}
+		if context.QueryParams != nil {
+			t.Error(test.ExpectedNil)
+		}
+	}))
+	defer ts.Close()
+	http.Get(ts.URL)
+}
+func Test_CreateRequestContext_GetRequestWithQueryParams(t *testing.T) {
+	defer teardown()
+	setup()
 
-		case "Test 2":
-			if context.QueryParams == nil {
-				t.Error(test.ExpectedNotNil)
-			} else {
-				if len(context.QueryParams) != 2 {
-					t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(context.QueryParams))
-				} else {
-					if context.QueryParams["userID"] != "1" {
-						t.Errorf(test.ExpectedStringButFoundString, "1", context.QueryParams["userID"])
-					}
-					if context.QueryParams["profileID"] != "2" {
-						t.Errorf(test.ExpectedStringButFoundString, "2", context.QueryParams["profileID"])
-					}
-				}
-			}
-			break
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
 
-		case "Test 3":
-			if context.Header["content-type"] != "application/x-www-form-urlencoded" {
-				t.Errorf(test.ExpectedStringButFoundString, "application/x-www-form-urlencoded", context.Header["content-type"])
-			}
-			if context.QueryParams != nil {
-				t.Error(test.ExpectedNil)
-			}
-			break
-
-		case "Test 4":
-			if context.Header["content-type"] != "application/x-www-form-urlencoded" {
-				t.Errorf(test.ExpectedStringButFoundString, "application/x-www-form-urlencoded", context.Header["content-type"])
-			}
-			if context.QueryParams == nil {
-				t.Error(test.ExpectedNotNil)
+		if context.QueryParams == nil {
+			t.Error(test.ExpectedNotNil)
+		} else {
+			if len(context.QueryParams) != 2 {
+				t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(context.QueryParams))
 			} else {
 				if context.QueryParams["userID"] != "1" {
 					t.Errorf(test.ExpectedStringButFoundString, "1", context.QueryParams["userID"])
@@ -91,58 +70,101 @@ func Test_CreateRequestContext(t *testing.T) {
 					t.Errorf(test.ExpectedStringButFoundString, "2", context.QueryParams["profileID"])
 				}
 			}
-			break
+		}
+	}))
+	defer ts.Close()
+	http.Get(fmt.Sprintf("%s?userID=1&profileID=2", ts.URL))
+}
+func Test_CreateRequestContext_PostFormRequest(t *testing.T) {
+	defer teardown()
+	setup()
 
-		case "Test 5":
-			if context.QueryParams != nil {
-				t.Error(test.ExpectedNil)
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+
+		if context.Header["content-type"] != "application/x-www-form-urlencoded" {
+			t.Errorf(test.ExpectedStringButFoundString, "application/x-www-form-urlencoded", context.Header["content-type"])
+		}
+		if context.QueryParams != nil {
+			t.Error(test.ExpectedNil)
+		}
+	}))
+	defer ts.Close()
+	http.Post(ts.URL, strings.ToUpper("application/x-www-form-urlencoded"), nil)
+}
+func Test_CreateRequestContext_PostFormRequestWithData(t *testing.T) {
+	defer teardown()
+	setup()
+
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+
+		if context.Header["content-type"] != "application/x-www-form-urlencoded" {
+			t.Errorf(test.ExpectedStringButFoundString, "application/x-www-form-urlencoded", context.Header["content-type"])
+		}
+		if context.QueryParams == nil {
+			t.Error(test.ExpectedNotNil)
+		} else {
+			if context.QueryParams["userID"] != "1" {
+				t.Errorf(test.ExpectedStringButFoundString, "1", context.QueryParams["userID"])
 			}
-			break
-
-		case "Test 6":
-			if context.QueryParams == nil {
-				t.Error(test.ExpectedNotNil)
-			} else {
-				if context.QueryParams["userID"] != "1" {
-					t.Errorf(test.ExpectedStringButFoundString, "1", context.QueryParams["userID"])
-				}
-				if context.QueryParams["profileID"] != "2" {
-					t.Errorf(test.ExpectedStringButFoundString, "2", context.QueryParams["profileID"])
-				}
+			if context.QueryParams["profileID"] != "2" {
+				t.Errorf(test.ExpectedStringButFoundString, "2", context.QueryParams["profileID"])
 			}
-			break
+		}
 
-		default:
-			break
+	}))
+	defer ts.Close()
+	http.Post(ts.URL, strings.ToUpper("application/x-www-form-urlencoded"), strings.NewReader("userID=1&profileID=2"))
+}
+func Test_CreateRequestContext_PostMultipartRequest(t *testing.T) {
+	defer teardown()
+	setup()
+
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+
+		if context.Header["content-type"] != "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p" {
+			t.Errorf(test.ExpectedStringButFoundString, "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p", context.Header["content-type"])
+		}
+		if context.QueryParams != nil {
+			t.Error(test.ExpectedNil)
 		}
 	}))
 	defer ts.Close()
 
-	// [Test 1] Send Get request
-	testCase = "Test 1"
-	http.Get(ts.URL)
-
-	// [Test 2] Send Get request with query params
-	testCase = "Test 2"
-	http.Get(fmt.Sprintf("%s?userID=1&profileID=2", ts.URL))
-
-	// [Test 3] Send Post request
-	testCase = "Test 3"
-	http.Post(ts.URL, strings.ToUpper("application/x-www-form-urlencoded"), nil)
-
-	// [Test 4] Send Post request with data
-	testCase = "Test 4"
-	http.Post(ts.URL, strings.ToUpper("application/x-www-form-urlencoded"), strings.NewReader("userID=1&profileID=2"))
-
-	// [Test 5] Send Post request with multipart data
-	testCase = "Test 5"
 	request, _ := http.NewRequest("POST", ts.URL, nil)
 	request.Header.Set("content-type", "multipart/form-data; boundary=gc0p4Jq0M2Yt08jU534c0p")
 
 	http.DefaultClient.Do(request)
+}
+func Test_CreateRequestContext_PostMultipartRequestWithData(t *testing.T) {
+	defer teardown()
+	setup()
 
-	// [Test 6] Send Post request with multipart data
-	testCase = "Test 6"
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+
+		if context.Header["content-type"] != "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p" {
+			t.Errorf(test.ExpectedStringButFoundString, "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p", context.Header["content-type"])
+		}
+		if context.QueryParams == nil {
+			t.Error(test.ExpectedNotNil)
+		} else {
+			if context.QueryParams["userID"] != "1" {
+				t.Errorf(test.ExpectedStringButFoundString, "1", context.QueryParams["userID"])
+			}
+			if context.QueryParams["profileID"] != "2" {
+				t.Errorf(test.ExpectedStringButFoundString, "2", context.QueryParams["profileID"])
+			}
+		}
+	}))
+	defer ts.Close()
+
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	writer.SetBoundary("gc0p4Jq0M2Yt08jU534c0p")
@@ -156,13 +178,29 @@ func Test_CreateRequestContext(t *testing.T) {
 	}
 	writer.Close()
 
-	request, _ = http.NewRequest("POST", ts.URL, body)
+	request, _ := http.NewRequest("POST", ts.URL, body)
 	request.Header.Set("content-type", "multipart/form-data; boundary=gc0p4Jq0M2Yt08jU534c0p")
 
 	http.DefaultClient.Do(request)
 }
 
-func Test_CreateSecurityContext(t *testing.T) {
+func Test_CreateSecurityContext_NoAccessToken(t *testing.T) {
+	defer teardown()
+	setup()
+
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+		security := objectFactory.CreateSecurityContext(context)
+
+		if security != nil {
+			t.Error(test.ExpectedNil)
+		}
+	}))
+	defer ts.Close()
+	http.Get(ts.URL)
+}
+func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
 	defer teardown()
 	setup()
 
@@ -174,13 +212,16 @@ func Test_CreateSecurityContext(t *testing.T) {
 		if security == nil {
 			t.Error(test.ExpectedNotNil)
 		} else {
-			if security.AuthAccessToken == nil {
+			if security.AccessToken == nil {
 				t.Error(test.ExpectedNotNil)
 			}
-			if security.AuthClient == nil {
+			if security.RefreshToken != nil {
+				t.Error(test.ExpectedNil)
+			}
+			if security.Client == nil {
 				t.Error(test.ExpectedNotNil)
 			}
-			if security.AuthUser == nil {
+			if security.User == nil {
 				t.Error(test.ExpectedNotNil)
 			}
 		}
@@ -191,14 +232,46 @@ func Test_CreateSecurityContext(t *testing.T) {
 	now := time.Now()
 	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
-	// [Test 1] Send token as query param
+	// Send token as query param
 	http.Get(fmt.Sprintf("%s?access_token=%s", ts.URL, token.Token()))
+}
+func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
+	defer teardown()
+	setup()
 
-	// [Test 2] Send token as authorization header
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+		security := objectFactory.CreateSecurityContext(context)
+
+		if security == nil {
+			t.Error(test.ExpectedNotNil)
+		} else {
+			if security.AccessToken == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+			if security.RefreshToken != nil {
+				t.Error(test.ExpectedNil)
+			}
+			if security.Client == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+			if security.User == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+		}
+	}))
+	defer ts.Close()
+
+	// Generate token
+	now := time.Now().UTC()
+	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+
+	// Send token as authorization header
 	request, _ := http.NewRequest("POST", ts.URL, nil)
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token()))
-
 	client := http.DefaultClient
+
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token()))
 	client.Do(request)
 }
 

@@ -95,9 +95,9 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 		client := TokenStore.FindClientWithID(accessToken.ClientID())
 		user := TokenStore.FindUserWithID(accessToken.UserID())
 		securityContext := &Security{
-			AuthClient:      client,
-			AuthUser:        user,
-			AuthAccessToken: accessToken,
+			Client:      client,
+			User:        user,
+			AccessToken: accessToken,
 		}
 		return securityContext
 	}

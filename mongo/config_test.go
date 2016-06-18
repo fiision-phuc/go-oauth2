@@ -5,14 +5,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 func Test_CreateMongoConfigs(t *testing.T) {
 	CreateConfigs()
 	defer os.Remove(ConfigFile)
 
-	if !utils.FileExisted(ConfigFile) {
+	if !util.FileExisted(ConfigFile) {
 		t.Errorf("Expected %s file had been created but found nil.", ConfigFile)
 	}
 }

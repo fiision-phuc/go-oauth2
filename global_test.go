@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/phuc0302/go-oauth2/mongo"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -29,10 +29,11 @@ var (
 )
 
 func setup() {
+	mongo.ConnectMongo()
 	session, database = mongo.GetMonotonicSession()
 
 	// Generate test data
-	password1, _ := utils.EncryptPassword("admin")
+	password1, _ := util.EncryptPassword("admin")
 	user1 = &DefaultUser{
 		ID:    userID,
 		User:  "admin",
@@ -40,7 +41,7 @@ func setup() {
 		Roles: []string{"r_user", "r_admin"},
 	}
 
-	password2, _ := utils.EncryptPassword(clientSecret.Hex())
+	password2, _ := util.EncryptPassword(clientSecret.Hex())
 	user2 = &DefaultUser{
 		ID:    clientID,
 		User:  clientID.Hex(),
@@ -73,11 +74,11 @@ func teardown() {
 	session.Close()
 }
 
-func parseError(response *http.Response) *utils.Status {
+func parseError(response *http.Response) *util.Status {
 	data, _ := ioutil.ReadAll(response.Body)
 	response.Body.Close()
 
-	status := utils.Status{}
+	status := util.Status{}
 	json.Unmarshal(data, &status)
 
 	return &status

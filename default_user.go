@@ -5,11 +5,12 @@ import "gopkg.in/mgo.v2/bson"
 // DefaultUser describes a mongodb user.
 type DefaultUser struct {
 	ID    bson.ObjectId `bson:"_id"`
-	User  string        `bson:"username,omitempty"`
-	Pass  string        `bson:"password,omitempty"`
-	Roles []string      `bson:"roles,omitempty"`
+	User  string        `bson:"username"`
+	Pass  string        `bson:"password"`
+	Roles []string      `bson:"roles"`
 
-	FacebookID string `bson:"facebook_id,omitempty"`
+	FacebookID    string `bson:"facebook_id,omitempty"`
+	FacebookToken string `bson:"facebook_token,omitempty"`
 }
 
 // UserID returns user_id.

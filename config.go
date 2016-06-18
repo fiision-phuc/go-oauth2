@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 // Config describes a configuration  object  that  will  be  used  during application life time.
@@ -54,7 +54,7 @@ type Config struct {
 
 // createConfig generates a default configuration file.
 func createConfig(configFile string) {
-	if utils.FileExisted(configFile) {
+	if util.FileExisted(configFile) {
 		os.Remove(configFile)
 	}
 
@@ -106,7 +106,7 @@ func createConfig(configFile string) {
 // loadConfig retrieves previous configuration from file.
 func loadConfig(configFile string) Config {
 	// Generate config file if neccessary
-	if !utils.FileExisted(configFile) {
+	if !util.FileExisted(configFile) {
 		createConfig(configFile)
 	}
 

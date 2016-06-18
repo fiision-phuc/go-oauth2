@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 var (
@@ -74,11 +74,11 @@ func RecoveryRequest(c *Request, isDevelopment bool) {
 		}
 
 		// Define status error
-		var httpError *utils.Status
-		if status, ok := reflect.ValueOf(err).Interface().(utils.Status); ok {
+		var httpError *util.Status
+		if status, ok := reflect.ValueOf(err).Interface().(util.Status); ok {
 			httpError = &status
 		} else {
-			httpError = utils.Status500()
+			httpError = util.Status500()
 			httpError.Description = fmt.Sprintf("%s", err)
 		}
 

@@ -7,14 +7,14 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 // DefaultRouter descripts a default router component implementation.
 type DefaultRouter struct {
 	routes    []IRoute
 	groups    []string
-	userRoles map[*regexp.Regexp][]string
+	userRoles map[*regexp.Regexp]*regexp.Regexp
 }
 
 // GroupRole groups all same url's prefix with user's roles.
@@ -35,9 +35,9 @@ func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) 
 
 	// Define validator
 	if r.userRoles == nil {
-		r.userRoles = make(map[*regexp.Regexp][]string)
+		r.userRoles = make(map[*regexp.Regexp]*regexp.Regexp)
 	}
-	r.userRoles[regexp.MustCompile(groupPath)] = roles
+	r.userRoles[regexp.MustCompile(groupPath)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 }
 
 // BindRole binds an url pattern with user's roles.
@@ -60,14 +60,14 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
-
 		for _, path := range r.groups {
-			buffer.WriteString(path)
+			buffer.WriteString(util.FormatPath(path))
 		}
+		buffer.WriteString(util.FormatPath(urlPattern))
 
-		buffer.WriteString(urlPattern)
 		urlPattern = buffer.String()
 	}
+	urlPattern = util.FormatPath(urlPattern)
 	logrus.Infof("%s -> %s", httpMethod, urlPattern)
 
 	// Look for existing one before create new
@@ -87,28 +87,24 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 // MatchRoute matches a route with an url path.
 func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
 	for _, route := range r.routes {
-		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); !ok {
-			continue
-		} else {
+		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); ok {
+
 			// Validate authentication & roles if neccessary
-			if TokenStore != nil && security != nil && security.AuthUser != nil {
+			if TokenStore != nil && security != nil && security.User != nil {
 				for rule, roles := range r.userRoles {
-
 					if rule.MatchString(context.Path) {
-						regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
-
-						for _, role := range security.AuthUser.UserRoles() {
-							if regexRoles.MatchString(role) {
+						for _, role := range security.User.UserRoles() {
+							if roles.MatchString(role) {
 								return route, pathParams
 							}
 						}
-						panic(utils.Status401())
+						panic(util.Status401())
 					}
 				}
-			} else {
-				// Simply return
-				return route, pathParams
 			}
+
+			// Simply return
+			return route, pathParams
 		}
 	}
 	return nil, nil

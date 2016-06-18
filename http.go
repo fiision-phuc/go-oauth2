@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 // ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	request.URL.Path = utils.FormatPath(request.URL.Path)
+	request.URL.Path = util.FormatPath(request.URL.Path)
 	request.Method = strings.ToUpper(request.Method)
 
 	// Create request context
@@ -20,7 +20,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 	/* Condition validation: validate request methods */
 	if !methodsValidation.MatchString(request.Method) {
-		context.OutputError(utils.Status405())
+		context.OutputError(util.Status405())
 		return
 	}
 
@@ -49,23 +49,23 @@ func (s *Server) serveRequest(context *Request, security *Security) {
 		context.PathParams = pathParams
 		route.InvokeHandler(context, security)
 	} else {
-		context.OutputError(utils.Status503())
+		context.OutputError(util.Status503())
 	}
 }
 
 func (s *Server) serveResource(context *Request, request *http.Request, response http.ResponseWriter) {
 	/* Condition validation: Check if file exist or not */
-	if resourcePath := request.URL.Path; !utils.FileExisted(resourcePath) {
-		context.OutputError(utils.Status404())
+	if resourcePath := request.URL.Path; !util.FileExisted(resourcePath) {
+		context.OutputError(util.Status404())
 	} else {
 		if file, err := os.Open(resourcePath); err != nil {
-			context.OutputError(utils.Status404())
+			context.OutputError(util.Status404())
 		} else {
 			defer file.Close()
 
 			/* Condition validation: Only serve file, not directory */
 			if info, _ := file.Stat(); info.IsDir() {
-				context.OutputError(utils.Status403())
+				context.OutputError(util.Status403())
 			} else {
 				http.ServeContent(response, request, resourcePath, info.ModTime(), file)
 			}

@@ -1,4 +1,4 @@
-package utils
+package util
 
 // FormatPath will standardize the url path.
 func FormatPath(path string) string {

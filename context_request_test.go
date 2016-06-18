@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 func Test_BindForm(t *testing.T) {
@@ -46,7 +46,7 @@ func Test_BindJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
 
-		status := utils.Status{}
+		status := util.Status{}
 		context.BindJSON(&status)
 
 		if status.Code != 200 {
@@ -57,7 +57,7 @@ func Test_BindJSON(t *testing.T) {
 		}
 	}))
 	defer ts.Close()
-	b, _ := json.Marshal(utils.Status200())
+	b, _ := json.Marshal(util.Status200())
 
 	request, _ := http.NewRequest("POST", ts.URL, bytes.NewBuffer(b))
 	request.Header.Set("Content-Type", "application/json")
@@ -75,7 +75,7 @@ func Test_OutputHeader(t *testing.T) {
 		context := objectFactory.CreateRequestContext(r, w)
 
 		context.OutputHeader("test-header", "test-header-value")
-		context.OutputError(utils.Status200())
+		context.OutputError(util.Status200())
 	}))
 	defer ts.Close()
 
@@ -92,7 +92,7 @@ func Test_OutputError(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		context.OutputError(utils.Status400())
+		context.OutputError(util.Status400())
 	}))
 	defer ts.Close()
 
@@ -114,7 +114,7 @@ func Test_OutputRedirect(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		context.OutputRedirect(utils.Status301(), "https://www.google.com")
+		context.OutputRedirect(util.Status301(), "https://www.google.com")
 	}))
 	defer ts.Close()
 
@@ -134,7 +134,7 @@ func Test_OutputText(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		context.OutputText(utils.Status200(), "Sample test!")
+		context.OutputText(util.Status200(), "Sample test!")
 	}))
 	defer ts.Close()
 

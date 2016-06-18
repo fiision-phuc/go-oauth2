@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 func Test_ServeHTTP(t *testing.T) {
@@ -20,7 +20,7 @@ func Test_ServeHTTP(t *testing.T) {
 	defer os.RemoveAll("resources")
 
 	server := DefaultServer(true)
-	utils.CreateDir("resources", (os.ModeDir | os.ModePerm))
+	util.CreateDir("resources", (os.ModeDir | os.ModePerm))
 
 	// Generate resources file
 	input, _ := os.Open("LICENSE")
@@ -69,7 +69,7 @@ func Test_ServeHTTP(t *testing.T) {
 	// [Test 5] Valid url
 	server.Get("/sample", func(c *Request) {
 		data := map[string]string{"apple": "apple"}
-		c.OutputJSON(utils.Status200(), data)
+		c.OutputJSON(util.Status200(), data)
 	})
 
 	request, _ = http.NewRequest("GET", "http://localhost:8080/sample", nil)
@@ -92,7 +92,7 @@ func Test_serveRequestWithOAuth2Disable(t *testing.T) {
 
 	//		server.Get("/sample", func(c *Request) {
 	//			data := map[string]string{"apple": "apple"}
-	//			c.OutputJSON(utils.Status200(), data)
+	//			c.OutputJSON(util.Status200(), data)
 	//		})
 
 	//	// Send invalid url request
@@ -123,15 +123,15 @@ func Test_serveRequestWithOAuth2Enable(t *testing.T) {
 
 	//	s.Get("/user", func(c *Request) {
 	//		data := map[string]string{"user": "r_user"}
-	//		c.OutputJSON(utils.Status200(), data)
+	//		c.OutputJSON(util.Status200(), data)
 	//	})
 	//	s.Get("/admin", func(c *Request) {
 	//		data := map[string]string{"user": "r_admin"}
-	//		c.OutputJSON(utils.Status200(), data)
+	//		c.OutputJSON(util.Status200(), data)
 	//	})
 	//	s.Get("/manager", func(c *Request) {
 	//		data := map[string]string{"user": "r_manager"}
-	//		c.OutputJSON(utils.Status200(), data)
+	//		c.OutputJSON(util.Status200(), data)
 	//	})
 
 	//	s.AddRoles("/user", "r_user")
