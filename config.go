@@ -15,6 +15,12 @@ import (
 	"github.com/phuc0302/go-oauth2/util"
 )
 
+// Define configuration file's name.
+const (
+	debug   = "oauth2.debug.cfg"
+	release = "oauth2.release.cfg"
+)
+
 // Config describes a configuration  object  that  will  be  used  during application life time.
 type Config struct {
 

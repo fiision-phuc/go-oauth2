@@ -16,11 +16,12 @@ type TokenGrant struct {
 
 // HandleForm validates authentication form.
 func (g *TokenGrant) HandleForm(c *Request) {
-	security := &Security{}
-	if err := g.validateForm(c, security); err != nil {
-		c.OutputError(err)
-	} else {
+	security := new(Security)
+
+	if err := g.validateForm(c, security); err == nil {
 		g.finalizeToken(c, security)
+	} else {
+		c.OutputError(err)
 	}
 }
 
@@ -71,16 +72,16 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *util.Status {
 	switch inputForm.GrantType {
 
 	case AuthorizationCodeGrant:
-		// FIX FIX FIX: Going to do soon
+		// TODO: Going to do soon
 		//		g.handleAuthorizationCodeGrant(c, values, queryClient)
 		break
 
 		//	case ImplicitGrant:
-		//		// FIX FIX FIX: Going to do soon
+		// TODO: Going to do soon
 		//		break
 
 	case ClientCredentialsGrant:
-		// FIX FIX FIX: Going to do soon
+		// TODO: Going to do soon
 		//		g.handleClientCredentialsGrant()
 		break
 
@@ -190,34 +191,34 @@ func (g *TokenGrant) passwordFlow(c *Request, s *Security) *util.Status {
 
 // useRefreshTokenFlow handle refresh token flow.
 func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *util.Status {
-	queryToken := c.QueryParams["refresh_token"]
-
 	/* Condition validation: Validate refresh_token parameter */
-	if len(queryToken) == 0 {
-		return util.Status400WithDescription("Invalid refresh_token parameter.")
+	if queryToken := c.QueryParams["refresh_token"]; len(queryToken) > 0 {
+
+		/* Condition validation: Validate refresh_token */
+		refreshToken := TokenStore.FindRefreshToken(queryToken)
+		if refreshToken == nil || refreshToken.ClientID() != s.Client.ClientID() {
+			return util.Status400WithDescription("Invalid refresh_token parameter.")
+		} else if refreshToken.IsExpired() {
+			return util.Status400WithDescription("refresh_token is expired.")
+		}
+		TokenStore.DeleteRefreshToken(refreshToken)
+
+		s.User = TokenStore.FindUserWithID(refreshToken.UserID())
+		s.RefreshToken = refreshToken
+
+		// Delete current access token
+		accessToken := TokenStore.FindAccessTokenWithCredential(refreshToken.ClientID(), refreshToken.UserID())
+		TokenStore.DeleteAccessToken(accessToken)
+
+		// Delete current refresh token
+		return nil
 	}
-
-	/* Condition validation: Validate refresh_token */
-	recordToken := TokenStore.FindRefreshToken(queryToken)
-	if recordToken == nil || recordToken.ClientID() != s.Client.ClientID() {
-		return util.Status400WithDescription("Invalid refresh_token parameter.")
-
-	} else if recordToken.IsExpired() {
-		return util.Status400WithDescription("refresh_token is expired.")
-	}
-
-	s.User = TokenStore.FindUserWithID(recordToken.UserID())
-	s.RefreshToken = recordToken
-
-	// Delete current access token
-	accessToken := TokenStore.FindAccessTokenWithCredential(recordToken.ClientID(), recordToken.UserID())
-	TokenStore.DeleteAccessToken(accessToken)
-	return nil
+	return util.Status400WithDescription("Invalid refresh_token parameter.")
 }
 
 // finalizeToken summary and return result to client.
 func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
-	now := time.Now().UTC()
+	now := time.Now()
 
 	// Generate access token if neccessary
 	if s.AccessToken == nil {
