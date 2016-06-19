@@ -50,7 +50,6 @@ func (r *DefaultRoute) URLPattern() string {
 
 // MatchURLPattern matchs url pattern.
 func (r *DefaultRoute) MatchURLPattern(method string, urlPath string) (bool, map[string]string) {
-
 	if matches := r.regex.FindStringSubmatch(urlPath); len(matches) > 0 && matches[0] == urlPath {
 		if handler := r.handlers[method]; handler != nil {
 			var params map[string]string

@@ -81,17 +81,14 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 		tokenString = c.QueryParams["access_token"]
 		if len(tokenString) <= 0 {
 			return nil
-		} else {
-			delete(c.QueryParams, "access_token")
 		}
+		delete(c.QueryParams, "access_token")
 	} else {
 		tokenString = tokenString[7:]
 	}
 
 	/* Condition validation: Validate expiration time */
-	if accessToken := TokenStore.FindAccessToken(tokenString); accessToken == nil || accessToken.IsExpired() {
-		return nil
-	} else {
+	if accessToken := TokenStore.FindAccessToken(tokenString); accessToken != nil && !accessToken.IsExpired() {
 		client := TokenStore.FindClientWithID(accessToken.ClientID())
 		user := TokenStore.FindUserWithID(accessToken.UserID())
 		securityContext := &Security{
@@ -101,6 +98,7 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 		}
 		return securityContext
 	}
+	return nil
 }
 
 // CreateRoute creates new route component.
@@ -108,7 +106,14 @@ func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
-	regexPattern += "/?"
+	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
+		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
+	})
+	if len(regexPattern) == 1 && regexPattern == "/" {
+		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
+	} else {
+		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
+	}
 
 	route := DefaultRoute{
 		path:     urlPattern,
