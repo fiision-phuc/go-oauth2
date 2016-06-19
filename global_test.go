@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -16,9 +17,13 @@ import (
 var (
 	session  *mgo.Session
 	database *mgo.Database
-	client1  IClient
-	user1    IUser
-	user2    IUser
+
+	client IClient
+	user1  IUser
+	user2  IUser
+
+	expiredAccessToken  IToken
+	expiredRefreshToken IToken
 
 	username       = "admin"
 	password       = "admin"
@@ -32,7 +37,20 @@ func setup() {
 	mongo.ConnectMongo()
 	session, database = mongo.GetMonotonicSession()
 
+	// Define global variables
+	Cfg = loadConfig(debug)
+	objectFactory = &DefaultFactory{}
+	TokenStore = objectFactory.CreateStore()
+
 	// Generate test data
+	client = &DefaultClient{
+		ID:     clientID,
+		Secret: clientSecret,
+		Grants: []string{AuthorizationCodeGrant, PasswordGrant, RefreshTokenGrant},
+
+		Redirects: []string{"http://www.sample01.com", "http://www.sample02.com"},
+	}
+
 	password1, _ := util.EncryptPassword("admin")
 	user1 = &DefaultUser{
 		ID:    userID,
@@ -49,26 +67,40 @@ func setup() {
 		Roles: []string{"r_device"},
 	}
 
-	client1 = &DefaultClient{
-		ID:     clientID,
-		Secret: clientSecret,
-		Grants: []string{AuthorizationCodeGrant, PasswordGrant, RefreshTokenGrant},
-
-		Redirects: []string{"http://www.sample01.com", "http://www.sample02.com"},
-	}
+	//	expiredAccessToken = &DefaultToken{
+	//		ID:      bson.NewObjectId(),
+	//		User:    userID,
+	//		Client:  clientID,
+	//		Created: createdTime,
+	//		Expired: createdTime.Add(Cfg.AccessTokenDuration),
+	//	}
+	//	expiredRefreshToken = &DefaultToken{
+	//		ID:      bson.NewObjectId(),
+	//		User:    userID,
+	//		Client:  clientID,
+	//		Created: createdTime,
+	//		Expired: createdTime.Add(Cfg.RefreshTokenDuration),
+	//	}
 
 	database.C(TableUser).Insert(user1, user2)
-	database.C(TableClient).Insert(client1)
+	database.C(TableClient).Insert(client)
+	//	database.C(TableAccessToken).Insert(expiredAccessToken)
+	//	database.C(TableRefreshToken).Insert(expiredRefreshToken)
 
-	// Define global variables
-	Cfg = loadConfig(debug)
-	objectFactory = &DefaultFactory{}
-	TokenStore = objectFactory.CreateStore()
+	// Generate test resources
+	util.CreateDir("resources", (os.ModeDir | os.ModePerm))
+	output, _ := os.Create("resources/LICENSE")
+	input, _ := os.Open("LICENSE")
+	io.Copy(output, input)
+	output.Close()
+	input.Close()
 }
 
 func teardown() {
 	os.Remove(mongo.ConfigFile)
 	os.Remove(debug)
+
+	os.RemoveAll("resources")
 
 	database.DropDatabase()
 	session.Close()

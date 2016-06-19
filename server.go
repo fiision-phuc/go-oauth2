@@ -39,13 +39,16 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	logrus.SetOutput(os.Stderr)
 	logrus.SetLevel(level)
 
-	logrus.AddHook(&slackrus.SlackrusHook{
-		HookURL:        Cfg.SlackURL,     // "https://hooks.slack.com/services/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"
-		Channel:        Cfg.SlackChannel, // "#keywords"
-		Username:       Cfg.SlackUser,    // "Server"
-		IconEmoji:      Cfg.SlackIcon,    // ":ghost:"
-		AcceptedLevels: slackrus.LevelThreshold(level),
-	})
+	// Enable slack notification if neccessary
+	if len(Cfg.SlackURL) > 0 {
+		logrus.AddHook(&slackrus.SlackrusHook{
+			HookURL:        Cfg.SlackURL,     // "https://hooks.slack.com/services/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"
+			Channel:        Cfg.SlackChannel, // "#keywords"
+			Username:       Cfg.SlackUser,    // "Server"
+			IconEmoji:      Cfg.SlackIcon,    // ":ghost:"
+			AcceptedLevels: slackrus.LevelThreshold(level),
+		})
+	}
 
 	// Register components
 	objectFactory = instance
