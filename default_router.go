@@ -7,50 +7,49 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 // DefaultRouter descripts a default router component implementation.
 type DefaultRouter struct {
 	routes    []IRoute
 	groups    []string
-	userRoles map[*regexp.Regexp][]string
+	userRoles map[*regexp.Regexp]*regexp.Regexp
 }
 
-// GroupRole groups all same url's prefix with user's roles.
-func (r *DefaultRouter) GroupRole(s *Server, groupPath string, roles ...string) {
+// GroupRoles groups all same url's prefix with user's roles.
+func (r *DefaultRouter) GroupRoles(groupPath string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
 	if TokenStore == nil {
 		return
 	}
 
-	// Format path
+	// Format pattern
 	groupPath = pathFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
 	groupPath = globsFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
 		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
 	})
-	groupPath += `\/?`
 
 	// Define validator
 	if r.userRoles == nil {
-		r.userRoles = make(map[*regexp.Regexp][]string)
+		r.userRoles = make(map[*regexp.Regexp]*regexp.Regexp)
 	}
-	r.userRoles[regexp.MustCompile(groupPath)] = roles
+	r.userRoles[regexp.MustCompile(groupPath)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 }
 
-// BindRole binds an url pattern with user's roles.
-func (r *DefaultRouter) BindRole(httpMethod string, urlPattern string, roles ...string) {
+// BindRoles binds an url pattern with user's roles.
+func (r *DefaultRouter) BindRoles(httpMethod string, urlPattern string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
-	if TokenStore == nil {
+	if TokenStore == nil || len(r.routes) == 0 {
 		return
 	}
 }
 
 // GroupRoute groups all same url's prefix.
 func (r *DefaultRouter) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
-	r.groups = append(r.groups, groupPath)
+	r.groups = append(r.groups, util.FormatPath(groupPath))
 	function(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
@@ -60,13 +59,16 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
-
 		for _, path := range r.groups {
 			buffer.WriteString(path)
 		}
 
-		buffer.WriteString(urlPattern)
+		if len(urlPattern) > 0 {
+			buffer.WriteString(util.FormatPath(urlPattern))
+		}
 		urlPattern = buffer.String()
+	} else {
+		urlPattern = util.FormatPath(urlPattern)
 	}
 	logrus.Infof("%s -> %s", httpMethod, urlPattern)
 
@@ -87,28 +89,27 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 // MatchRoute matches a route with an url path.
 func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
 	for _, route := range r.routes {
-		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); !ok {
-			continue
-		} else {
-			// Validate authentication & roles if neccessary
-			if TokenStore != nil && security != nil && security.AuthUser != nil {
-				for rule, roles := range r.userRoles {
 
-					if rule.MatchString(context.Path) {
-						regexRoles := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+		// Validate user's authorized first
+		for rule, roles := range r.userRoles {
+			if rule.MatchString(context.Path) {
 
-						for _, role := range security.AuthUser.UserRoles() {
-							if regexRoles.MatchString(role) {
-								return route, pathParams
-							}
+				if TokenStore != nil && security != nil && security.User != nil {
+					for _, role := range security.User.UserRoles() {
+						if roles.MatchString(role) {
+							//							return route, pathParams
+							break // If user is authorized, break the loop
 						}
-						panic(utils.Status401())
 					}
+				} else {
+					return nil, nil
 				}
-			} else {
-				// Simply return
-				return route, pathParams
 			}
+		}
+
+		// Match route
+		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); ok {
+			return route, pathParams
 		}
 	}
 	return nil, nil

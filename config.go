@@ -12,49 +12,55 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
+)
+
+// Define configuration file's name.
+const (
+	debug   = "oauth2.debug.cfg"
+	release = "oauth2.release.cfg"
 )
 
 // Config describes a configuration  object  that  will  be  used  during application life time.
 type Config struct {
 
 	// Server
-	Host    string `json:"host,omitempty"`
-	Port    int    `json:"port,omitempty"`
-	TLSPort int    `json:"tls_port,omitempty"`
+	Host    string `json:"host"`
+	Port    int    `json:"port"`
+	TLSPort int    `json:"tls_port"`
 
 	// Header
-	HeaderSize    int           `json:"header_size,omitempty"`    // In KB
-	MultipartSize int64         `json:"multipart_size,omitempty"` // In MB
-	ReadTimeout   time.Duration `json:"timeout_read,omitempty"`   // In seconds
-	WriteTimeout  time.Duration `json:"timeout_write,omitempty"`  // In seconds
+	HeaderSize    int           `json:"header_size"`    // In KB
+	MultipartSize int64         `json:"multipart_size"` // In MB
+	ReadTimeout   time.Duration `json:"timeout_read"`   // In seconds
+	WriteTimeout  time.Duration `json:"timeout_write"`  // In seconds
 
 	// HTTP Method
-	AllowMethods  []string          `json:"allow_methods,omitempty"`
-	RedirectPaths map[string]int    `json:"redirect_paths,omitempty"`
-	StaticFolders map[string]string `json:"static_folders,omitempty"`
+	AllowMethods  []string          `json:"allow_methods"`
+	RedirectPaths map[string]int    `json:"redirect_paths"`
+	StaticFolders map[string]string `json:"static_folders"`
 
 	// Log
-	LogLevel     string `json:"log_level,omitempty"`
-	SlackURL     string `json:"slack_url,omitempty"`
-	SlackIcon    string `json:"slack_icon,omitempty"`
-	SlackUser    string `json:"slack_user,omitempty"`
-	SlackChannel string `json:"slack_channel,omitempty"`
+	LogLevel     string `json:"log_level"`
+	SlackURL     string `json:"slack_url"`
+	SlackIcon    string `json:"slack_icon"`
+	SlackUser    string `json:"slack_user"`
+	SlackChannel string `json:"slack_channel"`
 
 	// Jwt
-	PrivateKey []byte `json:"private_key,omitempty"`
+	PrivateKey []byte `json:"private_key"`
 
 	// OAuth2.0
-	GrantTypes                []string      `json:"grant_types,omitempty"`
-	AllowRefreshToken         bool          `json:"allow_refresh_token,omitempty"`
-	AccessTokenDuration       time.Duration `json:"access_token_duration,omitempty"`       // In seconds
-	RefreshTokenDuration      time.Duration `json:"refresh_token_duration,omitempty"`      // In seconds
-	AuthorizationCodeDuration time.Duration `json:"authorization_code_duration,omitempty"` // In seconds
+	GrantTypes                []string      `json:"grant_types"`
+	AllowRefreshToken         bool          `json:"allow_refresh_token"`
+	AccessTokenDuration       time.Duration `json:"access_token_duration"`       // In seconds
+	RefreshTokenDuration      time.Duration `json:"refresh_token_duration"`      // In seconds
+	AuthorizationCodeDuration time.Duration `json:"authorization_code_duration"` // In seconds
 }
 
 // createConfig generates a default configuration file.
 func createConfig(configFile string) {
-	if utils.FileExisted(configFile) {
+	if util.FileExisted(configFile) {
 		os.Remove(configFile)
 	}
 
@@ -79,7 +85,7 @@ func createConfig(configFile string) {
 		},
 
 		LogLevel:     "debug",
-		SlackURL:     "https://hooks.slack.com/services/",
+		SlackURL:     "",
 		SlackIcon:    ":ghost:",
 		SlackUser:    "OAuth2",
 		SlackChannel: "#channel",
@@ -106,7 +112,7 @@ func createConfig(configFile string) {
 // loadConfig retrieves previous configuration from file.
 func loadConfig(configFile string) Config {
 	// Generate config file if neccessary
-	if !utils.FileExisted(configFile) {
+	if !util.FileExisted(configFile) {
 		createConfig(configFile)
 	}
 

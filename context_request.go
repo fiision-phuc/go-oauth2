@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 // Request describes a HTTP URL request scope.
@@ -29,7 +29,7 @@ func (c *Request) BasicAuth() (username string, password string, ok bool) {
 
 // BindForm converts urlencode/multipart form to object.
 func (c *Request) BindForm(inputForm interface{}) error {
-	return utils.BindForm(c.QueryParams, inputForm)
+	return util.BindForm(c.QueryParams, inputForm)
 }
 
 // BindJSON converts json data to object.
@@ -89,7 +89,7 @@ func (c *Request) OutputHeader(headerName string, headerValue string) {
 }
 
 // OutputError returns an error JSON.
-func (c *Request) OutputError(status *utils.Status) {
+func (c *Request) OutputError(status *util.Status) {
 	if redirectURL := redirectPaths[status.Code]; len(redirectURL) > 0 {
 		c.OutputRedirect(status, redirectURL)
 	} else {
@@ -103,12 +103,12 @@ func (c *Request) OutputError(status *utils.Status) {
 }
 
 // OutputRedirect returns a redirect instruction.
-func (c *Request) OutputRedirect(status *utils.Status, url string) {
+func (c *Request) OutputRedirect(status *util.Status, url string) {
 	http.Redirect(c.response, c.request, url, status.Code)
 }
 
 // OutputJSON returns a JSON.
-func (c *Request) OutputJSON(status *utils.Status, model interface{}) {
+func (c *Request) OutputJSON(status *util.Status, model interface{}) {
 	c.response.Header().Set("Content-Type", "application/json")
 	c.response.WriteHeader(status.Code)
 
@@ -120,14 +120,14 @@ func (c *Request) OutputJSON(status *utils.Status, model interface{}) {
 func (c *Request) OutputHTML(filePath string, model interface{}) {
 	tmpl, error := template.ParseFiles(filePath)
 	if error != nil {
-		c.OutputError(utils.Status404())
+		c.OutputError(util.Status404())
 	} else {
 		tmpl.Execute(c.response, model)
 	}
 }
 
 // OutputText returns a string.
-func (c *Request) OutputText(status *utils.Status, data string) {
+func (c *Request) OutputText(status *util.Status, data string) {
 	c.response.Header().Set("Content-Type", "text/plain")
 	c.response.WriteHeader(status.Code)
 	c.response.Write([]byte(data))

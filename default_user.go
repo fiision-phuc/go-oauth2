@@ -9,7 +9,8 @@ type DefaultUser struct {
 	Pass  string        `bson:"password,omitempty"`
 	Roles []string      `bson:"roles,omitempty"`
 
-	FacebookID string `bson:"facebook_id,omitempty"`
+	FacebookID    string `bson:"facebook_id,omitempty"`
+	FacebookToken string `bson:"facebook_token,omitempty"`
 }
 
 // UserID returns user_id.

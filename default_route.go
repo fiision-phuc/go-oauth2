@@ -50,24 +50,21 @@ func (r *DefaultRoute) URLPattern() string {
 
 // MatchURLPattern matchs url pattern.
 func (r *DefaultRoute) MatchURLPattern(method string, urlPath string) (bool, map[string]string) {
+	if matches := r.regex.FindStringSubmatch(urlPath); len(matches) > 0 && matches[0] == urlPath {
+		if handler := r.handlers[method]; handler != nil {
+			var params map[string]string
 
-	if matches := r.regex.FindStringSubmatch(urlPath); len(matches) == 0 || matches[0] != urlPath {
-		return false, nil
-	} else {
-		if handler := r.handlers[method]; handler == nil {
-			return false, nil
-		}
+			if names := r.regex.SubexpNames(); len(names) > 1 {
+				params = map[string]string{}
 
-		// Extract path params
-		var params map[string]string
-		if names := r.regex.SubexpNames(); len(names) > 1 {
-			params = map[string]string{}
-			for i, name := range names {
-				if len(name) > 0 {
-					params[name] = matches[i]
+				for i, name := range names {
+					if len(name) > 0 {
+						params[name] = matches[i]
+					}
 				}
 			}
+			return true, params
 		}
-		return true, params
 	}
+	return false, nil
 }

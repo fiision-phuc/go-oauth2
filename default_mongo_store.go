@@ -6,7 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/phuc0302/go-oauth2/mongo"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -15,135 +15,122 @@ type DefaultMongoStore struct {
 }
 
 // FindUserWithID returns user with user_id.
-func (m *DefaultMongoStore) FindUserWithID(userID string) IUser {
+func (d *DefaultMongoStore) FindUserWithID(userID string) IUser {
 	/* Condition validation */
 	if len(userID) == 0 || !bson.IsObjectIdHex(userID) {
 		return nil
 	}
-	user := DefaultUser{}
 
-	err := mongo.EntityWithID(TableUser, bson.ObjectIdHex(userID), &user)
-	if err != nil {
-		return nil
+	user := new(DefaultUser)
+	if err := mongo.EntityWithID(TableUser, bson.ObjectIdHex(userID), user); err == nil {
+		return user
 	}
-	return &user
+	return nil
 }
 
 // FindUserWithClient returns user associated with client_id and client_secret.
-func (m *DefaultMongoStore) FindUserWithClient(clientID string, clientSecret string) IUser {
+func (d *DefaultMongoStore) FindUserWithClient(clientID string, clientSecret string) IUser {
 	/* Condition validation */
 	if len(clientID) == 0 || len(clientSecret) == 0 {
 		return nil
 	}
-	user := DefaultUser{}
 
-	err := mongo.EntityWithID(TableUser, bson.ObjectIdHex(clientID), &user)
-	if err != nil {
-		return nil
+	user := new(DefaultUser)
+	if err := mongo.EntityWithID(TableUser, bson.ObjectIdHex(clientID), user); err == nil && util.ComparePassword(user.Pass, clientSecret) {
+		return user
 	}
-
-	if !utils.ComparePassword(user.Pass, clientSecret) {
-		return nil
-	}
-	return &user
+	return nil
 }
 
 // FindUserWithCredential returns user associated with username and password.
-func (m *DefaultMongoStore) FindUserWithCredential(username string, password string) IUser {
+func (d *DefaultMongoStore) FindUserWithCredential(username string, password string) IUser {
 	/* Condition validation */
 	if len(username) == 0 || len(password) == 0 {
 		return nil
 	}
-	user := DefaultUser{}
 
-	err := mongo.EntityWithCriteria(TableUser, bson.M{"username": username}, &user)
-	if err != nil {
-		return nil
+	user := new(DefaultUser)
+	if err := mongo.EntityWithCriteria(TableUser, bson.M{"username": username}, user); err == nil && util.ComparePassword(user.Pass, password) {
+		return user
 	}
-
-	if !utils.ComparePassword(user.Pass, password) {
-		return nil
-	}
-	return &user
+	return nil
 }
 
 // FindClientWithID returns user associated with client_id.
-func (m *DefaultMongoStore) FindClientWithID(clientID string) IClient {
+func (d *DefaultMongoStore) FindClientWithID(clientID string) IClient {
 	/* Condition validation */
 	if len(clientID) == 0 || !bson.IsObjectIdHex(clientID) {
 		return nil
 	}
-	client := DefaultClient{}
 
-	err := mongo.EntityWithID(TableClient, bson.ObjectIdHex(clientID), &client)
-	if err != nil {
-		return nil
+	client := new(DefaultClient)
+	if err := mongo.EntityWithID(TableClient, bson.ObjectIdHex(clientID), client); err == nil {
+		return client
 	}
-	return &client
+	return nil
 }
 
 // FindClientWithCredential returns client with client_id and client_secret.
-func (m *DefaultMongoStore) FindClientWithCredential(clientID string, clientSecret string) IClient {
+func (d *DefaultMongoStore) FindClientWithCredential(clientID string, clientSecret string) IClient {
 	/* Condition validation */
 	if len(clientID) == 0 || len(clientSecret) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(clientSecret) {
 		return nil
 	}
-	client := DefaultClient{}
 
-	err := mongo.EntityWithCriteria(TableClient, bson.M{"_id": bson.ObjectIdHex(clientID), "client_secret": bson.ObjectIdHex(clientSecret)}, &client)
-	if err != nil {
-		return nil
+	client := new(DefaultClient)
+	if err := mongo.EntityWithCriteria(TableClient, bson.M{"_id": bson.ObjectIdHex(clientID), "client_secret": bson.ObjectIdHex(clientSecret)}, client); err == nil {
+		return client
 	}
-	return &client
+	return nil
 }
 
 // FindAccessToken returns access_token.
-func (m *DefaultMongoStore) FindAccessToken(token string) IToken {
-	return m.parseToken(token)
+func (d *DefaultMongoStore) FindAccessToken(token string) IToken {
+	return d.parseToken(token)
 }
 
 // FindAccessTokenWithCredential returns access_token associated with client_id and user_id.
-func (m *DefaultMongoStore) FindAccessTokenWithCredential(clientID string, userID string) IToken {
-	return m.queryTokenWithCredential(TableAccessToken, clientID, userID)
+func (d *DefaultMongoStore) FindAccessTokenWithCredential(clientID string, userID string) IToken {
+	return d.queryTokenWithCredential(TableAccessToken, clientID, userID)
 }
 
 // CreateAccessToken returns new access_token.
-func (m *DefaultMongoStore) CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
-	return m.createToken(TableAccessToken, clientID, userID, createdTime, expiredTime)
+func (d *DefaultMongoStore) CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
+	return d.createToken(TableAccessToken, clientID, userID, createdTime, expiredTime)
 }
 
 // DeleteAccessToken deletes access_token.
-func (m *DefaultMongoStore) DeleteAccessToken(token IToken) {
-	m.deleteToken(TableAccessToken, token)
+func (d *DefaultMongoStore) DeleteAccessToken(token IToken) {
+	d.deleteToken(TableAccessToken, token)
 }
 
 // FindRefreshToken returns refresh_token.
-func (m *DefaultMongoStore) FindRefreshToken(token string) IToken {
-	return m.parseToken(token)
+func (d *DefaultMongoStore) FindRefreshToken(token string) IToken {
+	return d.parseToken(token)
 }
 
 // FindRefreshTokenWithCredential returns refresh_token associated with client_id and user_id.
-func (m *DefaultMongoStore) FindRefreshTokenWithCredential(clientID string, userID string) IToken {
-	return m.queryTokenWithCredential(TableRefreshToken, clientID, userID)
+func (d *DefaultMongoStore) FindRefreshTokenWithCredential(clientID string, userID string) IToken {
+	return d.queryTokenWithCredential(TableRefreshToken, clientID, userID)
 }
 
 // CreateRefreshToken returns new refresh_token.
-func (m *DefaultMongoStore) CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
-	return m.createToken(TableRefreshToken, clientID, userID, createdTime, expiredTime)
+func (d *DefaultMongoStore) CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
+	return d.createToken(TableRefreshToken, clientID, userID, createdTime, expiredTime)
 }
 
 // DeleteRefreshToken deletes refresh_token.
-func (m *DefaultMongoStore) DeleteRefreshToken(token IToken) {
-	m.deleteToken(TableRefreshToken, token)
+func (d *DefaultMongoStore) DeleteRefreshToken(token IToken) {
+	d.deleteToken(TableRefreshToken, token)
 }
 
-//func (m *MongoDBTokenStore) FindAuthorizationCode(authorizationCode string) {
+//func (d *MongoDBTokenStore) FindAuthorizationCode(authorizationCode string) {
 //}
-//func (m *MongoDBTokenStore) SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time) {
+//func (d *MongoDBTokenStore) SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time) {
 //}
 
 // Parse Token
-func (m *DefaultMongoStore) parseToken(token string) IToken {
+func (d *DefaultMongoStore) parseToken(token string) IToken {
 	/* Condition validation */
 	if len(token) == 0 {
 		return nil
@@ -182,21 +169,21 @@ func (m *DefaultMongoStore) parseToken(token string) IToken {
 }
 
 // Find token with credential
-func (m *DefaultMongoStore) queryTokenWithCredential(table string, clientID string, userID string) IToken {
+func (d *DefaultMongoStore) queryTokenWithCredential(table string, clientID string, userID string) IToken {
 	/* Condition validation */
 	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
 		return nil
 	}
 
-	accessToken := DefaultToken{}
-	if err := mongo.EntityWithCriteria(table, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, &accessToken); err != nil {
+	token := new(DefaultToken)
+	if err := mongo.EntityWithCriteria(table, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, token); err != nil {
 		return nil
 	}
-	return &accessToken
+	return token
 }
 
 // Create token
-func (m *DefaultMongoStore) createToken(table string, clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
+func (d *DefaultMongoStore) createToken(table string, clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken {
 	/* Condition validation */
 	if len(clientID) == 0 || len(userID) == 0 || !bson.IsObjectIdHex(clientID) || !bson.IsObjectIdHex(userID) {
 		return nil
@@ -206,18 +193,18 @@ func (m *DefaultMongoStore) createToken(table string, clientID string, userID st
 		ID:      bson.NewObjectId(),
 		User:    bson.ObjectIdHex(userID),
 		Client:  bson.ObjectIdHex(clientID),
-		Created: createdTime,
-		Expired: expiredTime,
+		Created: createdTime.UTC(),
+		Expired: expiredTime.UTC(),
 	}
 
-	if err := mongo.SaveEntity(table, newToken.ID, newToken); err != nil {
-		return nil
+	if err := mongo.SaveEntity(table, newToken.ID, newToken); err == nil {
+		return newToken
 	}
-	return newToken
+	return nil
 }
 
 // Delete token
-func (m *DefaultMongoStore) deleteToken(table string, token IToken) {
+func (d *DefaultMongoStore) deleteToken(table string, token IToken) {
 	/* Condition validation */
 	if token == nil || len(token.ClientID()) == 0 || len(token.UserID()) == 0 || !bson.IsObjectIdHex(token.ClientID()) || !bson.IsObjectIdHex(token.UserID()) {
 		return

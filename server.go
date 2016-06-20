@@ -39,13 +39,16 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	logrus.SetOutput(os.Stderr)
 	logrus.SetLevel(level)
 
-	logrus.AddHook(&slackrus.SlackrusHook{
-		HookURL:        Cfg.SlackURL,     // "https://hooks.slack.com/services/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"
-		Channel:        Cfg.SlackChannel, // "#keywords"
-		Username:       Cfg.SlackUser,    // "Server"
-		IconEmoji:      Cfg.SlackIcon,    // ":ghost:"
-		AcceptedLevels: slackrus.LevelThreshold(level),
-	})
+	// Enable slack notification if neccessary
+	if len(Cfg.SlackURL) > 0 {
+		logrus.AddHook(&slackrus.SlackrusHook{
+			HookURL:        Cfg.SlackURL,     // "https://hooks.slack.com/services/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"
+			Channel:        Cfg.SlackChannel, // "#keywords"
+			Username:       Cfg.SlackUser,    // "Server"
+			IconEmoji:      Cfg.SlackIcon,    // ":ghost:"
+			AcceptedLevels: slackrus.LevelThreshold(level),
+		})
+	}
 
 	// Register components
 	objectFactory = instance
@@ -69,14 +72,14 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	return &server
 }
 
-// GroupRole binds user's roles to all url with same prefix.
-func (s *Server) GroupRole(groupPath string, roles ...string) {
-	s.router.GroupRole(s, groupPath, roles...)
+// GroupRoles binds user's roles to all url with same prefix.
+func (s *Server) GroupRoles(groupPath string, roles ...string) {
+	s.router.GroupRoles(groupPath, roles...)
 }
 
-// Bind an url pattern with user's roles.
-func (s *Server) BindRole(httpMethod string, urlPattern string, roles ...string) {
-	s.router.BindRole(httpMethod, urlPattern, roles...)
+// BindRoles an url pattern with user's roles.
+func (s *Server) BindRoles(httpMethod string, urlPattern string, roles ...string) {
+	s.router.BindRoles(httpMethod, urlPattern, roles...)
 }
 
 // GroupRoute routes all url with same prefix.

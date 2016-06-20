@@ -7,16 +7,16 @@ import (
 )
 
 // Shared mongo session
-var config *Config
-var session *mgo.Session
+var (
+	config  *Config
+	session *mgo.Session
+)
 
 // ConnectMongo creates session.
 func ConnectMongo() {
 	config = LoadConfigs()
 
 	if session == nil {
-		var err error
-
 		dialInfo := &mgo.DialInfo{
 			Addrs:    config.Addresses,
 			Timeout:  5 * time.Second,
@@ -26,8 +26,8 @@ func ConnectMongo() {
 		}
 
 		// Create a session which maintains a pool of socket connections
-		session, err = mgo.DialWithInfo(dialInfo)
-		if err != nil {
+		var err error
+		if session, err = mgo.DialWithInfo(dialInfo); err != nil {
 			panic(err)
 		}
 	}

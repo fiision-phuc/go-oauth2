@@ -4,10 +4,10 @@ package oauth2
 type IRouter interface {
 
 	// Group all same url's prefix with user's roles.
-	GroupRole(s *Server, groupPath string, roles ...string)
+	GroupRoles(groupPath string, roles ...string)
 
 	// Bind an url pattern with user's roles.
-	BindRole(httpMethod string, urlPattern string, roles ...string)
+	BindRoles(httpMethod string, urlPattern string, roles ...string)
 
 	// Group all same url's prefix.
 	GroupRoute(s *Server, groupPath string, function func(s *Server))

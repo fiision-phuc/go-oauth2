@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/utils"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 func Test_CreateConfig(t *testing.T) {
 	defer os.Remove(debug)
 	createConfig(debug)
 
-	if !utils.FileExisted(debug) {
+	if !util.FileExisted(debug) {
 		t.Errorf("Expected %s file had been created but found nil.", debug)
 	}
 }
