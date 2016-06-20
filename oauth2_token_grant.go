@@ -181,12 +181,12 @@ func (g *TokenGrant) passwordFlow(c *Request, s *Security) *util.Status {
 	}
 
 	/* Condition validation: Validate user's credentials */
-	if recordUser := TokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser == nil {
-		return util.Status400WithDescription("Invalid username or password parameter.")
-	} else {
+	if recordUser := TokenStore.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser != nil {
 		s.User = recordUser
+		return nil
 	}
-	return nil
+	return util.Status400WithDescription("Invalid username or password parameter.")
+
 }
 
 // useRefreshTokenFlow handle refresh token flow.
@@ -196,19 +196,25 @@ func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *util.Status {
 
 		/* Condition validation: Validate refresh_token */
 		refreshToken := TokenStore.FindRefreshToken(queryToken)
+
 		if refreshToken == nil || refreshToken.ClientID() != s.Client.ClientID() {
 			return util.Status400WithDescription("Invalid refresh_token parameter.")
 		} else if refreshToken.IsExpired() {
 			return util.Status400WithDescription("refresh_token is expired.")
 		}
-		TokenStore.DeleteRefreshToken(refreshToken)
-
 		s.User = TokenStore.FindUserWithID(refreshToken.UserID())
-		s.RefreshToken = refreshToken
 
 		// Delete current access token
 		accessToken := TokenStore.FindAccessTokenWithCredential(refreshToken.ClientID(), refreshToken.UserID())
 		TokenStore.DeleteAccessToken(accessToken)
+
+		// Delete current refresh token
+		TokenStore.DeleteRefreshToken(refreshToken)
+		refreshToken = nil
+
+		// Update security context
+		s.RefreshToken = nil
+		s.AccessToken = nil
 
 		// Delete current refresh token
 		return nil

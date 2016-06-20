@@ -38,9 +38,8 @@ func (d *DefaultMongoStore) FindUserWithClient(clientID string, clientSecret str
 	user := new(DefaultUser)
 	if err := mongo.EntityWithID(TableUser, bson.ObjectIdHex(clientID), user); err == nil && util.ComparePassword(user.Pass, clientSecret) {
 		return user
-	} else {
-		return nil
 	}
+	return nil
 }
 
 // FindUserWithCredential returns user associated with username and password.
@@ -67,7 +66,6 @@ func (d *DefaultMongoStore) FindClientWithID(clientID string) IClient {
 	client := new(DefaultClient)
 	if err := mongo.EntityWithID(TableClient, bson.ObjectIdHex(clientID), client); err == nil {
 		return client
-
 	}
 	return nil
 }

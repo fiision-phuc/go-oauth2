@@ -72,13 +72,13 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	return &server
 }
 
-// GroupRole binds user's roles to all url with same prefix.
-func (s *Server) GroupRole(groupPath string, roles ...string) {
+// GroupRoles binds user's roles to all url with same prefix.
+func (s *Server) GroupRoles(groupPath string, roles ...string) {
 	s.router.GroupRoles(groupPath, roles...)
 }
 
-// Bind an url pattern with user's roles.
-func (s *Server) BindRole(httpMethod string, urlPattern string, roles ...string) {
+// BindRoles an url pattern with user's roles.
+func (s *Server) BindRoles(httpMethod string, urlPattern string, roles ...string) {
 	s.router.BindRoles(httpMethod, urlPattern, roles...)
 }
 
