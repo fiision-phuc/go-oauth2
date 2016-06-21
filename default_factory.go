@@ -45,13 +45,11 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 
 	case POST, PATCH:
 		if contentType := context.Header["content-type"]; contentType == "application/x-www-form-urlencoded" {
-			err := request.ParseForm()
-			if err == nil {
+			if err := request.ParseForm(); err == nil {
 				params = request.Form
 			}
 		} else if strings.HasPrefix(contentType, "multipart/form-data; boundary") {
-			err := request.ParseMultipartForm(Cfg.MultipartSize)
-			if err == nil {
+			if err := request.ParseMultipartForm(Cfg.MultipartSize); err == nil {
 				params = request.MultipartForm.Value
 			}
 		}
