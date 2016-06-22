@@ -200,6 +200,34 @@ func Test_CreateSecurityContext_NoAccessToken(t *testing.T) {
 	defer ts.Close()
 	http.Get(ts.URL)
 }
+func Test_CreateSecurityContext_WithBasicAuth(t *testing.T) {
+	defer teardown()
+	setup()
+
+	// Create test server
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context := objectFactory.CreateRequestContext(r, w)
+		security := objectFactory.CreateSecurityContext(context)
+
+		if security == nil {
+			t.Error(test.ExpectedNotNil)
+		} else {
+			if security.Client == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+			if security.User == nil {
+				t.Error(test.ExpectedNotNil)
+			}
+		}
+	}))
+	defer ts.Close()
+
+	// Send token as query param
+	request, _ := http.NewRequest("Get", ts.URL, nil)
+	request.SetBasicAuth(clientID.Hex(), clientSecret.Hex())
+
+	http.DefaultClient.Do(request)
+}
 func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
 	defer teardown()
 	setup()

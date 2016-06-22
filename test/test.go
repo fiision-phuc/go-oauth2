@@ -9,4 +9,6 @@ const (
 	ExpectedBoolButFoundBool     = "Expected \"%t\" but found \"%t\"."
 	ExpectedNumberButFoundNumber = "Expected \"%d\" but found \"%d\"."
 	ExpectedStringButFoundString = "Expected \"%s\" but found \"%s\"."
+
+	InvalidParameter = "Invalid \"%s\" parameter."
 )

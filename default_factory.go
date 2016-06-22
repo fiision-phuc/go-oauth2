@@ -75,26 +75,36 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 	tokenString := c.Header["authorization"]
 
 	/* Condition validation: Validate existing of authorization header */
-	if isBearer := bearerFinder.MatchString(tokenString); !isBearer {
-		tokenString = c.QueryParams["access_token"]
-		if len(tokenString) <= 0 {
-			return nil
-		}
-		delete(c.QueryParams, "access_token")
-	} else {
+	if isBearer := bearerFinder.MatchString(tokenString); isBearer {
 		tokenString = tokenString[7:]
+	} else {
+		if tokenString = c.QueryParams["access_token"]; len(tokenString) > 0 {
+			delete(c.QueryParams, "access_token")
+		}
 	}
 
 	/* Condition validation: Validate expiration time */
 	if accessToken := TokenStore.FindAccessToken(tokenString); accessToken != nil && !accessToken.IsExpired() {
 		client := TokenStore.FindClientWithID(accessToken.ClientID())
 		user := TokenStore.FindUserWithID(accessToken.UserID())
-		securityContext := &Security{
+		return &Security{
 			Client:      client,
 			User:        user,
 			AccessToken: accessToken,
 		}
-		return securityContext
+	}
+
+	/* Condition validation: If everything is not work out, try to look for basic auth */
+	if username, password, ok := c.BasicAuth(); ok {
+		client := TokenStore.FindClientWithCredential(username, password)
+		user := TokenStore.FindUserWithClient(username, password)
+
+		if client != nil && user != nil {
+			return &Security{
+				Client: client,
+				User:   user,
+			}
+		}
 	}
 	return nil
 }
