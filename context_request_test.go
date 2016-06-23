@@ -14,8 +14,9 @@ import (
 )
 
 func Test_BindForm(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -39,8 +40,9 @@ func Test_BindForm(t *testing.T) {
 }
 
 func Test_BindJSON(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -67,8 +69,9 @@ func Test_BindJSON(t *testing.T) {
 }
 
 func Test_OutputHeader(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -86,8 +89,9 @@ func Test_OutputHeader(t *testing.T) {
 }
 
 func Test_OutputError(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -101,15 +105,17 @@ func Test_OutputError(t *testing.T) {
 
 	if response.StatusCode != 400 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 400, response.StatusCode)
-	}
-	if string(bytes) != "{\"status\":400,\"error\":\"Bad Request\",\"error_description\":\"Bad Request\"}" {
-		t.Errorf(test.ExpectedStringButFoundString, "{\"status\":400,\"error\":\"Bad Request\",\"error_description\":\"Bad Request\"}", string(bytes))
+	} else {
+		if string(bytes) != "{\"status\":400,\"error\":\"Bad Request\",\"error_description\":\"Bad Request\"}" {
+			t.Errorf(test.ExpectedStringButFoundString, "{\"status\":400,\"error\":\"Bad Request\",\"error_description\":\"Bad Request\"}", string(bytes))
+		}
 	}
 }
 
 func Test_OutputRedirect(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -128,8 +134,9 @@ func Test_OutputRedirect(t *testing.T) {
 }
 
 func Test_OutputText(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

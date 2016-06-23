@@ -59,7 +59,7 @@ func Test_LoadConfig(t *testing.T) {
 	// Validate allow methods
 	allowMethods := []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK}
 	if !reflect.DeepEqual(allowMethods, config.AllowMethods) {
-		t.Errorf("Expected '%s' but found '%s'.", allowMethods, config.AllowMethods)
+		t.Errorf(test.ExpectedStringButFoundString, allowMethods, config.AllowMethods)
 	}
 	if methodsValidation == nil {
 		t.Error(test.ExpectedNotNil)

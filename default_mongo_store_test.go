@@ -9,15 +9,16 @@ import (
 )
 
 func Test_DefaultMongoStore_FindUserWithID(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	user := TokenStore.FindUserWithID(userID.Hex())
+	user := TokenStore.FindUserWithID(u.UserID.Hex())
 	if user == nil {
-		t.Errorf(test.ExpectedStringButFoundString, user1, user)
+		t.Errorf(test.ExpectedStringButFoundString, u.User1, user)
 	} else {
-		if user.UserID() != userID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, userID.Hex(), user.UserID())
+		if user.UserID() != u.UserID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.UserID.Hex(), user.UserID())
 		}
 		if user.Username() != "admin" {
 			t.Errorf(test.ExpectedStringButFoundString, "admin", user.Username())
@@ -29,18 +30,19 @@ func Test_DefaultMongoStore_FindUserWithID(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindUserWithClient(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	user := TokenStore.FindUserWithClient(clientID.Hex(), clientSecret.Hex())
+	user := TokenStore.FindUserWithClient(u.ClientID.Hex(), u.ClientSecret.Hex())
 	if user == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		if user.UserID() != clientID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientID.Hex(), user.UserID())
+		if user.UserID() != u.ClientID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientID.Hex(), user.UserID())
 		}
-		if user.Username() != clientID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientID.Hex(), user.Username())
+		if user.Username() != u.ClientID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientID.Hex(), user.Username())
 		}
 		if !reflect.DeepEqual(user.UserRoles(), []string{"r_device"}) {
 			t.Errorf(test.ExpectedStringButFoundString, []string{"r_device"}, user.UserRoles())
@@ -49,15 +51,16 @@ func Test_DefaultMongoStore_FindUserWithClient(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindUserWithCredential(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	user := TokenStore.FindUserWithCredential("admin", "admin")
 	if user == nil {
-		t.Errorf(test.ExpectedStringButFoundString, user1, user)
+		t.Errorf(test.ExpectedStringButFoundString, u.User1, user)
 	} else {
-		if user.UserID() != userID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, userID.Hex(), user.UserID())
+		if user.UserID() != u.UserID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.UserID.Hex(), user.UserID())
 		}
 		if user.Username() != "admin" {
 			t.Errorf(test.ExpectedStringButFoundString, "admin", user.Username())
@@ -69,18 +72,19 @@ func Test_DefaultMongoStore_FindUserWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindClientWithID(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	client := TokenStore.FindClientWithID(clientID.Hex())
+	client := TokenStore.FindClientWithID(u.ClientID.Hex())
 	if client == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		if client.ClientID() != clientID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientID.Hex(), client.ClientID())
+		if client.ClientID() != u.ClientID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientID.Hex(), client.ClientID())
 		}
-		if client.ClientSecret() != clientSecret.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientSecret.Hex(), client.ClientSecret())
+		if client.ClientSecret() != u.ClientSecret.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientSecret.Hex(), client.ClientSecret())
 		}
 		if !reflect.DeepEqual(client.GrantTypes(), []string{AuthorizationCodeGrant, PasswordGrant, RefreshTokenGrant}) {
 			t.Errorf(test.ExpectedStringButFoundString, []string{AuthorizationCodeGrant, PasswordGrant, RefreshTokenGrant}, client.GrantTypes())
@@ -92,18 +96,19 @@ func Test_DefaultMongoStore_FindClientWithID(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindClientWithCredential(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	client := TokenStore.FindClientWithCredential(clientID.Hex(), clientSecret.Hex())
+	client := TokenStore.FindClientWithCredential(u.ClientID.Hex(), u.ClientSecret.Hex())
 	if client == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		if client.ClientID() != clientID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientID.Hex(), client.ClientID())
+		if client.ClientID() != u.ClientID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientID.Hex(), client.ClientID())
 		}
-		if client.ClientSecret() != clientSecret.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientSecret.Hex(), client.ClientSecret())
+		if client.ClientSecret() != u.ClientSecret.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientSecret.Hex(), client.ClientSecret())
 		}
 		if !reflect.DeepEqual(client.GrantTypes(), []string{AuthorizationCodeGrant, PasswordGrant, RefreshTokenGrant}) {
 			t.Errorf(test.ExpectedStringButFoundString, []string{AuthorizationCodeGrant, PasswordGrant, RefreshTokenGrant}, client.GrantTypes())
@@ -115,18 +120,19 @@ func Test_DefaultMongoStore_FindClientWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_CreateAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	if token == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		if token.ClientID() != clientID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientID.Hex(), token.ClientID())
+		if token.ClientID() != u.ClientID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientID.Hex(), token.ClientID())
 		}
-		if token.UserID() != userID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, userID.Hex(), token.ClientID())
+		if token.UserID() != u.UserID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.UserID.Hex(), token.ClientID())
 		}
 		if token.IsExpired() {
 			t.Errorf(test.ExpectedBoolButFoundBool, false, token.IsExpired())
@@ -135,10 +141,11 @@ func Test_DefaultMongoStore_CreateAccessToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token1 := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token1 := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	token2 := TokenStore.FindAccessToken(token1.Token())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
@@ -156,11 +163,12 @@ func Test_DefaultMongoStore_FindAccessToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindAccessTokenWithCredential(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token1 := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
-	token2 := TokenStore.FindAccessTokenWithCredential(clientID.Hex(), userID.Hex())
+	token1 := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token2 := TokenStore.FindAccessTokenWithCredential(u.ClientID.Hex(), u.UserID.Hex())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -177,10 +185,11 @@ func Test_DefaultMongoStore_FindAccessTokenWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_DeleteAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token1 := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token1 := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	TokenStore.DeleteAccessToken(token1)
 
 	token2 := TokenStore.FindAccessTokenWithCredential(token1.ClientID(), token1.UserID())
@@ -190,18 +199,19 @@ func Test_DefaultMongoStore_DeleteAccessToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_CreateRefreshToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token := TokenStore.CreateRefreshToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token := TokenStore.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	if token == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		if token.ClientID() != clientID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, clientID.Hex(), token.ClientID())
+		if token.ClientID() != u.ClientID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.ClientID.Hex(), token.ClientID())
 		}
-		if token.UserID() != userID.Hex() {
-			t.Errorf(test.ExpectedStringButFoundString, userID.Hex(), token.ClientID())
+		if token.UserID() != u.UserID.Hex() {
+			t.Errorf(test.ExpectedStringButFoundString, u.UserID.Hex(), token.ClientID())
 		}
 		if token.IsExpired() {
 			t.Errorf(test.ExpectedBoolButFoundBool, false, token.IsExpired())
@@ -210,10 +220,11 @@ func Test_DefaultMongoStore_CreateRefreshToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindRefreshToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token1 := TokenStore.CreateRefreshToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token1 := TokenStore.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	token2 := TokenStore.FindRefreshToken(token1.Token())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
@@ -231,10 +242,11 @@ func Test_DefaultMongoStore_FindRefreshToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindRefreshTokenWithCredential(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token1 := TokenStore.CreateRefreshToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token1 := TokenStore.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	token2 := TokenStore.FindRefreshTokenWithCredential(token1.ClientID(), token1.UserID())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
@@ -252,10 +264,11 @@ func Test_DefaultMongoStore_FindRefreshTokenWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_DeleteRefreshToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
-	token1 := TokenStore.CreateRefreshToken(clientID.Hex(), userID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token1 := TokenStore.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	TokenStore.DeleteRefreshToken(token1)
 
 	token2 := TokenStore.FindRefreshTokenWithCredential(token1.ClientID(), token1.UserID())

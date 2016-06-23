@@ -97,7 +97,6 @@ func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute
 				if TokenStore != nil && security != nil && security.User != nil {
 					for _, role := range security.User.UserRoles() {
 						if roles.MatchString(role) {
-							//							return route, pathParams
 							break // If user is authorized, break the loop
 						}
 					}

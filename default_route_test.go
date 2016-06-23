@@ -40,8 +40,9 @@ func Test_BindHandlerWithPanic(t *testing.T) {
 }
 
 func Test_InvokeHandler(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 
@@ -58,8 +59,9 @@ func Test_InvokeHandler(t *testing.T) {
 }
 
 func Test_URLPattern(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}")
 	if route.URLPattern() != "/example/{userID}" {
@@ -68,8 +70,9 @@ func Test_URLPattern(t *testing.T) {
 }
 
 func Test_MatchURLPattern_InvalidHTTPMethod(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 	route.BindHandler(GET, func() {})
@@ -84,8 +87,9 @@ func Test_MatchURLPattern_InvalidHTTPMethod(t *testing.T) {
 }
 
 func Test_MatchURLPattern_InvalidHTTPMethodButInvalidPath(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 	route.BindHandler(GET, func() {})
@@ -100,8 +104,9 @@ func Test_MatchURLPattern_InvalidHTTPMethodButInvalidPath(t *testing.T) {
 }
 
 func Test_MatchURLPattern_ValidHTTPMethodAndValidPath(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 	route.BindHandler(GET, func() {})

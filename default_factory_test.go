@@ -15,8 +15,9 @@ import (
 )
 
 func Test_CreateRequestContext_GetRequest(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -50,8 +51,9 @@ func Test_CreateRequestContext_GetRequest(t *testing.T) {
 	http.Get(ts.URL)
 }
 func Test_CreateRequestContext_GetRequestWithQueryParams(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -76,8 +78,9 @@ func Test_CreateRequestContext_GetRequestWithQueryParams(t *testing.T) {
 	http.Get(fmt.Sprintf("%s?userID=1&profileID=2", ts.URL))
 }
 func Test_CreateRequestContext_PostFormRequest(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -94,8 +97,9 @@ func Test_CreateRequestContext_PostFormRequest(t *testing.T) {
 	http.Post(ts.URL, strings.ToUpper("application/x-www-form-urlencoded"), nil)
 }
 func Test_CreateRequestContext_PostFormRequestWithData(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -120,8 +124,9 @@ func Test_CreateRequestContext_PostFormRequestWithData(t *testing.T) {
 	http.Post(ts.URL, strings.ToUpper("application/x-www-form-urlencoded"), strings.NewReader("userID=1&profileID=2"))
 }
 func Test_CreateRequestContext_PostMultipartRequest(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -142,8 +147,9 @@ func Test_CreateRequestContext_PostMultipartRequest(t *testing.T) {
 	http.DefaultClient.Do(request)
 }
 func Test_CreateRequestContext_PostMultipartRequestWithData(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -185,8 +191,9 @@ func Test_CreateRequestContext_PostMultipartRequestWithData(t *testing.T) {
 }
 
 func Test_CreateSecurityContext_NoAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -201,8 +208,9 @@ func Test_CreateSecurityContext_NoAccessToken(t *testing.T) {
 	http.Get(ts.URL)
 }
 func Test_CreateSecurityContext_WithBasicAuth(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -224,13 +232,14 @@ func Test_CreateSecurityContext_WithBasicAuth(t *testing.T) {
 
 	// Send token as query param
 	request, _ := http.NewRequest("Get", ts.URL, nil)
-	request.SetBasicAuth(clientID.Hex(), clientSecret.Hex())
+	request.SetBasicAuth(u.ClientID.Hex(), u.ClientSecret.Hex())
 
 	http.DefaultClient.Do(request)
 }
 func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -258,14 +267,15 @@ func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now()
-	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as query param
 	http.Get(fmt.Sprintf("%s?access_token=%s", ts.URL, token.Token()))
 }
 func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -293,7 +303,7 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now().UTC()
-	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as authorization header
 	request, _ := http.NewRequest("POST", ts.URL, nil)
