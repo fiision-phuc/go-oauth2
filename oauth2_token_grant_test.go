@@ -10,11 +10,13 @@ import (
 
 	"github.com/phuc0302/go-oauth2/mongo"
 	"github.com/phuc0302/go-oauth2/test"
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -25,7 +27,7 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 	defer ts.Close()
 
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", nil)
-	status := parseError(response)
+	status := util.ParseStatus(response)
 	if status == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -38,8 +40,9 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 	}
 }
 func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -50,7 +53,7 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	defer ts.Close()
 
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s", AuthorizationCodeGrant)))
-	status := parseError(response)
+	status := util.ParseStatus(response)
 	if status == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -63,15 +66,16 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	}
 
 	// [Test 3] Missing client_secret
-	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, clientID.Hex())))
-	status = parseError(response)
+	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, u.ClientID.Hex())))
+	status = util.ParseStatus(response)
 	if status.Description != fmt.Sprintf("Invalid %s parameter.", "client_secret") {
 		t.Errorf(test.ExpectedInvalidParameter, "client_secret", status.Description)
 	}
 }
 func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -81,8 +85,8 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, clientID.Hex())))
-	status := parseError(response)
+	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, u.ClientID.Hex())))
+	status := util.ParseStatus(response)
 	if status == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -96,8 +100,9 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 }
 
 func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -109,10 +114,10 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s",
 		PasswordGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
 	)))
-	status := parseError(response)
+	status := util.ParseStatus(response)
 	if status == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -125,8 +130,9 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 	}
 }
 func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -138,11 +144,11 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s",
 		PasswordGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
 		"admin",
 	)))
-	status := parseError(response)
+	status := util.ParseStatus(response)
 	if status == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -155,8 +161,9 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 	}
 }
 func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -168,8 +175,8 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
 		PasswordGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
 		"admin",
 		"admin",
 	)))
@@ -190,8 +197,9 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 }
 
 func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Modify config
 	Cfg.GrantTypes = []string{
@@ -212,10 +220,10 @@ func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
 
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
 		PasswordGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
-		username,
-		password,
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
+		u.Username,
+		u.Password,
 	)))
 
 	token := parseResult(response)
@@ -229,8 +237,9 @@ func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
 }
 
 func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -243,19 +252,19 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 	// Send first request to get refresh token
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
 		PasswordGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
-		username,
-		password,
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
+		u.Username,
+		u.Password,
 	)))
 
 	// Send second request
 	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s",
 		RefreshTokenGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
 	)))
-	status := parseError(response)
+	status := util.ParseStatus(response)
 	if status == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -326,8 +335,9 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 //	}
 //}
 func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server
 	controller := new(TokenGrant)
@@ -340,18 +350,18 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 	// Send first request to get refresh token
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&username=%s&password=%s",
 		PasswordGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
-		username,
-		password,
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
+		u.Username,
+		u.Password,
 	)))
 	token1 := parseResult(response)
 
 	// Send second request
 	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s&client_secret=%s&refresh_token=%s",
 		RefreshTokenGrant,
-		clientID.Hex(),
-		clientSecret.Hex(),
+		u.ClientID.Hex(),
+		u.ClientSecret.Hex(),
 		token1.RefreshToken,
 	)))
 	token2 := parseResult(response)

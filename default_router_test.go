@@ -11,8 +11,9 @@ import (
 )
 
 func Test_GroupRoles(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	router, _ := objectFactory.CreateRouter().(*DefaultRouter)
 	if router == nil {
@@ -55,8 +56,9 @@ func Test_GroupRoles(t *testing.T) {
 }
 
 func Test_BindRole(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup router
 	router := objectFactory.CreateRouter()
@@ -92,8 +94,9 @@ func Test_BindRole(t *testing.T) {
 }
 
 func Test_GroupRoute(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	router := new(DefaultRouter)
 	router.GroupRoute(nil, "/user/profile", func(s *Server) {
@@ -125,8 +128,9 @@ func Test_GroupRoute(t *testing.T) {
 }
 
 func Test_BindRoute(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	if router, ok := objectFactory.CreateRouter().(*DefaultRouter); !ok {
 		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
@@ -146,8 +150,9 @@ func Test_BindRoute(t *testing.T) {
 }
 
 func Test_MatchRoute_InvalidPath(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup router
 	router := objectFactory.CreateRouter()
@@ -182,8 +187,9 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 }
 
 func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup router
 	router := objectFactory.CreateRouter()
@@ -217,8 +223,9 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 }
 
 func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup router
 	router := objectFactory.CreateRouter()
@@ -263,8 +270,9 @@ func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
 }
 
 func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup router
 	router := objectFactory.CreateRouter()
@@ -302,8 +310,9 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 }
 
 func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup router
 	router := objectFactory.CreateRouter()
@@ -333,7 +342,7 @@ func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
 	defer ts.Close()
 
 	now := time.Now()
-	token := TokenStore.CreateAccessToken(clientID.Hex(), userID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	http.Get(fmt.Sprintf("%s/private?access_token=%s", ts.URL, token.Token()))
 	http.Get(fmt.Sprintf("%s/private/1?access_token=%s", ts.URL, token.Token()))

@@ -14,8 +14,9 @@ import (
 )
 
 func Test_ServeHTTP_InvalidResource(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server & test server
 	server := DefaultServer(true)
@@ -34,8 +35,9 @@ func Test_ServeHTTP_InvalidResource(t *testing.T) {
 }
 
 func Test_ServeHTTP_ValidResource(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server & test server
 	server := DefaultServer(true)
@@ -54,8 +56,9 @@ func Test_ServeHTTP_ValidResource(t *testing.T) {
 }
 
 func Test_ServeHTTP_InvalidHTTPMethod(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server & test server
 	server := DefaultServer(true)
@@ -79,8 +82,9 @@ func Test_ServeHTTP_InvalidHTTPMethod(t *testing.T) {
 }
 
 func Test_ServeHTTP_InvalidURL(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server & test server
 	server := DefaultServer(true)
@@ -102,8 +106,9 @@ func Test_ServeHTTP_InvalidURL(t *testing.T) {
 }
 
 func Test_ServeHTTP_ValidURL(t *testing.T) {
-	defer teardown()
-	setup()
+	u := new(UnitTest)
+	defer u.Teardown()
+	u.Setup()
 
 	// Setup server & test server
 	server := DefaultServer(true)

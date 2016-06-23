@@ -1,6 +1,6 @@
 package test
 
-// Template error message
+// Template error message.
 const (
 	ExpectedInvalidParameter     = "Expected \"Invalid %s parameter.\" but found \"%s\"."
 	ExpectedNil                  = "Expected nil but found not nil."
