@@ -40,7 +40,7 @@ func Test_BindHandlerWithPanic(t *testing.T) {
 }
 
 func Test_InvokeHandler(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -59,7 +59,7 @@ func Test_InvokeHandler(t *testing.T) {
 }
 
 func Test_URLPattern(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -70,7 +70,7 @@ func Test_URLPattern(t *testing.T) {
 }
 
 func Test_MatchURLPattern_InvalidHTTPMethod(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -87,7 +87,7 @@ func Test_MatchURLPattern_InvalidHTTPMethod(t *testing.T) {
 }
 
 func Test_MatchURLPattern_InvalidHTTPMethodButInvalidPath(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -104,7 +104,7 @@ func Test_MatchURLPattern_InvalidHTTPMethodButInvalidPath(t *testing.T) {
 }
 
 func Test_MatchURLPattern_ValidHTTPMethodAndValidPath(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 

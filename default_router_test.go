@@ -11,7 +11,7 @@ import (
 )
 
 func Test_GroupRoles(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -56,7 +56,7 @@ func Test_GroupRoles(t *testing.T) {
 }
 
 func Test_BindRole(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -94,7 +94,7 @@ func Test_BindRole(t *testing.T) {
 }
 
 func Test_GroupRoute(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -128,7 +128,7 @@ func Test_GroupRoute(t *testing.T) {
 }
 
 func Test_BindRoute(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -150,7 +150,7 @@ func Test_BindRoute(t *testing.T) {
 }
 
 func Test_MatchRoute_InvalidPath(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -187,7 +187,7 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 }
 
 func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -223,7 +223,7 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 }
 
 func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -270,7 +270,7 @@ func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
 }
 
 func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -310,7 +310,7 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 }
 
 func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 

@@ -14,7 +14,7 @@ import (
 )
 
 func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -40,7 +40,7 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 	}
 }
 func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -73,7 +73,7 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	}
 }
 func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -100,7 +100,7 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 }
 
 func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -130,7 +130,7 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 	}
 }
 func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -161,7 +161,7 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 	}
 }
 func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -197,7 +197,7 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 }
 
 func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -237,7 +237,7 @@ func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
 }
 
 func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -335,7 +335,7 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 //	}
 //}
 func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
