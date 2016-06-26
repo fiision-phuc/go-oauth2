@@ -150,22 +150,25 @@ func (d *DefaultMongoStore) parseToken(token string) IToken {
 		return nil
 	}
 
-	tokenID, _ := jwtToken.Claims["_id"].(string)
-	userID, _ := jwtToken.Claims["user_id"].(string)
-	clientID, _ := jwtToken.Claims["client_id"].(string)
-	createdTime, _ := jwtToken.Claims["created_time"].(string)
-	expiredTime, _ := jwtToken.Claims["expired_time"].(string)
-	created, _ := time.Parse(time.RFC3339, createdTime)
-	expired, _ := time.Parse(time.RFC3339, expiredTime)
+	if claims, ok := jwtToken.Claims.(jwt.MapClaims); ok {
+		tokenID, _ := claims["_id"].(string)
+		userID, _ := claims["user_id"].(string)
+		clientID, _ := claims["client_id"].(string)
+		createdTime, _ := claims["created_time"].(string)
+		expiredTime, _ := claims["expired_time"].(string)
+		created, _ := time.Parse(time.RFC3339, createdTime)
+		expired, _ := time.Parse(time.RFC3339, expiredTime)
 
-	t := &DefaultToken{
-		ID:      bson.ObjectIdHex(tokenID),
-		User:    bson.ObjectIdHex(userID),
-		Client:  bson.ObjectIdHex(clientID),
-		Created: created,
-		Expired: expired,
+		t := &DefaultToken{
+			ID:      bson.ObjectIdHex(tokenID),
+			User:    bson.ObjectIdHex(userID),
+			Client:  bson.ObjectIdHex(clientID),
+			Created: created,
+			Expired: expired,
+		}
+		return t
 	}
-	return t
+	return nil
 }
 
 // Find token with credential
