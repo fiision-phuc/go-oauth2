@@ -88,25 +88,32 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 
 // MatchRoute matches a route with an url path.
 func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
-	for _, route := range r.routes {
+	// Validate user's authorized first
+	isAuthorized := true
+	for rule, roles := range r.userRoles {
+		if rule.MatchString(context.Path) {
+			isAuthorized = false
 
-		// Validate user's authorized first
-		for rule, roles := range r.userRoles {
-			if rule.MatchString(context.Path) {
-
-				if TokenStore != nil && security != nil && security.User != nil {
-					for _, role := range security.User.UserRoles() {
-						if roles.MatchString(role) {
-							break // If user is authorized, break the loop
-						}
+			if TokenStore != nil && security != nil && security.User != nil {
+				for _, role := range security.User.UserRoles() {
+					if roles.MatchString(role) {
+						isAuthorized = true
+						break // If user is authorized, break the loop
 					}
-				} else {
-					return nil, nil
 				}
+			} else {
+				return nil, nil
 			}
 		}
+	}
 
-		// Match route
+	/* Condition validation: Validate user's authorized */
+	if !isAuthorized {
+		return nil, nil
+	}
+
+	// Match route
+	for _, route := range r.routes {
 		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); ok {
 			return route, pathParams
 		}

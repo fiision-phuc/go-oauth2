@@ -14,7 +14,7 @@ import (
 )
 
 func Test_BindForm(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -40,7 +40,7 @@ func Test_BindForm(t *testing.T) {
 }
 
 func Test_BindJSON(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -69,7 +69,7 @@ func Test_BindJSON(t *testing.T) {
 }
 
 func Test_OutputHeader(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -89,7 +89,7 @@ func Test_OutputHeader(t *testing.T) {
 }
 
 func Test_OutputError(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -113,7 +113,7 @@ func Test_OutputError(t *testing.T) {
 }
 
 func Test_OutputRedirect(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -134,7 +134,7 @@ func Test_OutputRedirect(t *testing.T) {
 }
 
 func Test_OutputText(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 

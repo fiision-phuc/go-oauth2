@@ -14,7 +14,7 @@ import (
 )
 
 func Test_ServeHTTP_InvalidResource(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -35,7 +35,7 @@ func Test_ServeHTTP_InvalidResource(t *testing.T) {
 }
 
 func Test_ServeHTTP_ValidResource(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -56,7 +56,7 @@ func Test_ServeHTTP_ValidResource(t *testing.T) {
 }
 
 func Test_ServeHTTP_InvalidHTTPMethod(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -82,7 +82,7 @@ func Test_ServeHTTP_InvalidHTTPMethod(t *testing.T) {
 }
 
 func Test_ServeHTTP_InvalidURL(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -106,7 +106,7 @@ func Test_ServeHTTP_InvalidURL(t *testing.T) {
 }
 
 func Test_ServeHTTP_ValidURL(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 

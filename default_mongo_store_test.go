@@ -9,7 +9,7 @@ import (
 )
 
 func Test_DefaultMongoStore_FindUserWithID(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -30,7 +30,7 @@ func Test_DefaultMongoStore_FindUserWithID(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindUserWithClient(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -51,7 +51,7 @@ func Test_DefaultMongoStore_FindUserWithClient(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindUserWithCredential(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -72,7 +72,7 @@ func Test_DefaultMongoStore_FindUserWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindClientWithID(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -96,7 +96,7 @@ func Test_DefaultMongoStore_FindClientWithID(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindClientWithCredential(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -120,7 +120,7 @@ func Test_DefaultMongoStore_FindClientWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_CreateAccessToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -141,7 +141,7 @@ func Test_DefaultMongoStore_CreateAccessToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindAccessToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -163,7 +163,7 @@ func Test_DefaultMongoStore_FindAccessToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindAccessTokenWithCredential(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -185,7 +185,7 @@ func Test_DefaultMongoStore_FindAccessTokenWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_DeleteAccessToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -199,7 +199,7 @@ func Test_DefaultMongoStore_DeleteAccessToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_CreateRefreshToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -220,7 +220,7 @@ func Test_DefaultMongoStore_CreateRefreshToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindRefreshToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -242,7 +242,7 @@ func Test_DefaultMongoStore_FindRefreshToken(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_FindRefreshTokenWithCredential(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 
@@ -264,7 +264,7 @@ func Test_DefaultMongoStore_FindRefreshTokenWithCredential(t *testing.T) {
 }
 
 func Test_DefaultMongoStore_DeleteRefreshToken(t *testing.T) {
-	u := new(UnitTest)
+	u := new(TestUnit)
 	defer u.Teardown()
 	u.Setup()
 

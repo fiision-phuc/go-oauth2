@@ -27,15 +27,12 @@ var (
 
 	// Factory
 	objectFactory IFactory
-
 	// Global jwt
 	privateKey *rsa.PrivateKey
-
 	// Global validation
 	redirectPaths     map[int]string
 	grantsValidation  *regexp.Regexp
 	methodsValidation *regexp.Regexp
-
 	// Define finder
 	bearerFinder = regexp.MustCompile("^(B|b)earer\\s.+$")
 	globsFinder  = regexp.MustCompile(`\*\*`)

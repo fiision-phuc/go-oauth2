@@ -15,8 +15,8 @@ import (
 	"github.com/phuc0302/go-oauth2/util"
 )
 
-// UnitTest describes an implementation for OAuth2 unit test.
-type UnitTest struct {
+// TestUnit describes an implementation for OAuth2 unit test.
+type TestUnit struct {
 	Session  *mgo.Session
 	Database *mgo.Database
 
@@ -35,7 +35,7 @@ type UnitTest struct {
 }
 
 // Setup initializes environment.
-func (u *UnitTest) Setup() {
+func (u *TestUnit) Setup() {
 	mongo.ConnectMongo()
 
 	u.Session, u.Database = mongo.GetMonotonicSession()
@@ -106,7 +106,7 @@ func (u *UnitTest) Setup() {
 }
 
 // Teardown cleans up environment.
-func (u *UnitTest) Teardown() {
+func (u *TestUnit) Teardown() {
 	os.Remove(mongo.ConfigFile)
 	os.Remove(debug)
 
@@ -115,16 +115,6 @@ func (u *UnitTest) Teardown() {
 	u.Database.DropDatabase()
 	u.Session.Close()
 }
-
-//func parseError(response *http.Response) *util.Status {
-//	data, _ := ioutil.ReadAll(response.Body)
-//	response.Body.Close()
-
-//	status := util.Status{}
-//	json.Unmarshal(data, &status)
-
-//	return &status
-//}
 
 func parseResult(response *http.Response) *TokenResponse {
 	data, _ := ioutil.ReadAll(response.Body)
