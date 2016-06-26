@@ -30,11 +30,13 @@ func (t *DefaultToken) Token() string {
 	// Set some claims
 	createdTime, _ := t.Created.MarshalText()
 	expiredTime, _ := t.Expired.MarshalText()
-	token.Claims["_id"] = t.ID.Hex()
-	token.Claims["user_id"] = t.User.Hex()
-	token.Claims["client_id"] = t.Client.Hex()
-	token.Claims["created_time"] = string(createdTime)
-	token.Claims["expired_time"] = string(expiredTime)
+	token.Claims = jwt.MapClaims{
+		"_id":          t.ID.Hex(),
+		"user_id":      t.User.Hex(),
+		"client_id":    t.Client.Hex(),
+		"created_time": string(createdTime),
+		"expired_time": string(expiredTime),
+	}
 
 	// Generate token
 	tokenString, _ := token.SignedString(privateKey)
