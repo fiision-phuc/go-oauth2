@@ -31,13 +31,13 @@ func AllEntitiesWithSortDescriptions(tableName string, sortDescriptions []string
 }
 
 // AllEntitiesWithCriteria returns an entity collection base on criterion sort by id.
-func AllEntitiesWithCriteria(tableName string, criterion map[string]interface{}, list interface{}) error {
+func AllEntitiesWithCriteria(tableName string, criterion bson.M, list interface{}) error {
 	err := AllEntitiesWithCriteriaAndSortDescriptions(tableName, criterion, []string{"_id"}, list)
 	return err
 }
 
 // AllEntitiesWithCriteriaAndSortDescriptions returns an entity collection base on criterion sort by id.
-func AllEntitiesWithCriteriaAndSortDescriptions(tableName string, criterion map[string]interface{}, sortDescriptions []string, list interface{}) error {
+func AllEntitiesWithCriteriaAndSortDescriptions(tableName string, criterion bson.M, sortDescriptions []string, list interface{}) error {
 	/* Condition validation */
 	if len(tableName) == 0 {
 		return fmt.Errorf("Invalid table name.")
@@ -73,7 +73,7 @@ func EntityWithID(tableName string, entityID bson.ObjectId, entity interface{}) 
 }
 
 // EntityWithCriteria finds entity with creteria.
-func EntityWithCriteria(tableName string, criterion map[string]interface{}, entity interface{}) error {
+func EntityWithCriteria(tableName string, criterion bson.M, entity interface{}) error {
 	/* Condition validation */
 	if len(tableName) == 0 {
 		return fmt.Errorf("Invalid table name.")
@@ -125,7 +125,7 @@ func DeleteEntity(tableName string, entityID bson.ObjectId) error {
 }
 
 // DeleteEntityWithCriteria deletes a record from collection with creteria.
-func DeleteEntityWithCriteria(tableName string, criterion map[string]interface{}) error {
+func DeleteEntityWithCriteria(tableName string, criterion bson.M) error {
 	/* Condition validation */
 	if len(tableName) == 0 {
 		return fmt.Errorf("Invalid table name.")

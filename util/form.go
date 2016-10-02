@@ -59,14 +59,42 @@ func BindForm(values map[string]string, inputForm interface{}) error {
 					}
 					break
 
-				case reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128:
-					f, err := strconv.ParseFloat(input, 128)
+				case reflect.Float32:
+					f, err := strconv.ParseFloat(input, 32)
+					if err == nil {
+						property.Set(reflect.ValueOf(float32(f)))
+					}
+					break
+
+				case reflect.Float64:
+					f, err := strconv.ParseFloat(input, 64)
 					if err == nil {
 						property.Set(reflect.ValueOf(f))
 					}
 					break
 
-				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				case reflect.Int, reflect.Int32:
+					integer, err := strconv.ParseInt(input, 10, 32)
+					if err == nil {
+						property.Set(reflect.ValueOf(int(integer)))
+					}
+					break
+
+				case reflect.Int8:
+					integer, err := strconv.ParseInt(input, 10, 0)
+					if err == nil {
+						property.Set(reflect.ValueOf(int8(integer)))
+					}
+					break
+
+				case reflect.Int16:
+					integer, err := strconv.ParseInt(input, 10, 16)
+					if err == nil {
+						property.Set(reflect.ValueOf(int16(integer)))
+					}
+					break
+
+				case reflect.Int64:
 					integer, err := strconv.ParseInt(input, 10, 64)
 					if err == nil {
 						property.Set(reflect.ValueOf(integer))
@@ -79,7 +107,28 @@ func BindForm(values map[string]string, inputForm interface{}) error {
 					}
 					break
 
-				case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				case reflect.Uint, reflect.Uint32:
+					unsignInteger, err := strconv.ParseUint(input, 10, 32)
+					if err == nil {
+						property.Set(reflect.ValueOf(uint(unsignInteger)))
+					}
+					break
+
+				case reflect.Uint8:
+					unsignInteger, err := strconv.ParseUint(input, 10, 8)
+					if err == nil {
+						property.Set(reflect.ValueOf(uint8(unsignInteger)))
+					}
+					break
+
+				case reflect.Uint16:
+					unsignInteger, err := strconv.ParseUint(input, 10, 16)
+					if err == nil {
+						property.Set(reflect.ValueOf(uint16(unsignInteger)))
+					}
+					break
+
+				case reflect.Uint64:
 					unsignInteger, err := strconv.ParseUint(input, 10, 64)
 					if err == nil {
 						property.Set(reflect.ValueOf(unsignInteger))

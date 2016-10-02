@@ -7,6 +7,7 @@ type TestStruct struct {
 	ValueBool   bool    `bool`
 	ValueFloat  float64 `float`
 	ValueInt    int64   `int`
+	ValueInt8   int8    `int8`
 	ValueUInt   uint64  `uint`
 
 	ValueInvalid int `invalid_int`
@@ -28,6 +29,7 @@ func Test_BindForm(t *testing.T) {
 		"bool":        "FaLSE",
 		"float":       "1234.94502",
 		"int":         "-100",
+		"int8":        "1",
 		"uint":        "200",
 		"invalid_int": "abcdef",
 	}
@@ -53,7 +55,9 @@ func Test_BindForm(t *testing.T) {
 	if testStruct.ValueInt != -100 {
 		t.Errorf("Expected %d but found %d.", -100, testStruct.ValueInt)
 	}
-
+	if testStruct.ValueInt8 != 1 {
+		t.Errorf("Expected %d but found %d.", 1, testStruct.ValueInt8)
+	}
 	if testStruct.ValueUInt != 200 {
 		t.Errorf("Expected %d but found %d.", 200, testStruct.ValueUInt)
 	}

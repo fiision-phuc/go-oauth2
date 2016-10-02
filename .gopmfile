@@ -1,0 +1,7 @@
+[deps]
+github.com/Sirupsen/logrus = tag:v0.10.0
+github.com/dgrijalva/jwt-go = tag:v3.0.0
+github.com/johntdyer/slackrus = 
+golang.org/x/crypto = 
+gopkg.in/mgo.v2 = tag:r2016.08.01
+
