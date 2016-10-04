@@ -7,6 +7,19 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// Count returns number of entities.
+func Count(tableName string) (int, error) {
+	/* Condition validation */
+	if len(tableName) == 0 {
+		return 0, fmt.Errorf("Invalid table name.")
+	}
+	session, database := GetMonotonicSession()
+	defer session.Close()
+
+	collection := database.C(tableName)
+	return collection.Count()
+}
+
 // AllEntities returns an entity collection sort by id.
 func AllEntities(tableName string, list interface{}) error {
 	err := AllEntitiesWithSortDescriptions(tableName, []string{"_id"}, list)
