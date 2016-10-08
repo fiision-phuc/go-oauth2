@@ -3,6 +3,8 @@ package oauth2
 import (
 	"reflect"
 	"regexp"
+
+	"github.com/phuc0302/go-oauth2/inject"
 )
 
 // DefaultRoute describes a default route component implementation.
@@ -30,7 +32,7 @@ func (r *DefaultRoute) BindHandler(method string, handler interface{}) {
 
 // InvokeHandler invokes handler.
 func (r *DefaultRoute) InvokeHandler(c *Request, s *Security) {
-	invoker := CreateInvoker()
+	invoker := inject.CreateInvoker()
 	handler := r.handlers[c.request.Method]
 
 	// Call handler

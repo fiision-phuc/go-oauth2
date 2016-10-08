@@ -1,1 +1,1 @@
-package oauth2
+package inject

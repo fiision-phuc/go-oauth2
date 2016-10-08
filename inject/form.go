@@ -1,10 +1,7 @@
-package util
+package inject
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -139,15 +136,4 @@ func BindForm(values map[string]string, inputForm interface{}) error {
 		}
 	}
 	return nil
-}
-
-// ParseStatus parses data into status object.
-func ParseStatus(response *http.Response) *Status {
-	data, _ := ioutil.ReadAll(response.Body)
-	response.Body.Close()
-
-	status := Status{}
-	json.Unmarshal(data, &status)
-
-	return &status
 }

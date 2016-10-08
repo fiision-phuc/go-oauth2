@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/phuc0302/go-oauth2/inject"
 	"github.com/phuc0302/go-oauth2/util"
 )
 
@@ -29,7 +30,7 @@ func (c *Request) BasicAuth() (username string, password string, ok bool) {
 
 // BindForm converts urlencode/multipart form to object.
 func (c *Request) BindForm(inputForm interface{}) error {
-	return util.BindForm(c.QueryParams, inputForm)
+	return inject.BindForm(c.QueryParams, inputForm)
 }
 
 // BindJSON converts json data to object.
