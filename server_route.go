@@ -7,15 +7,15 @@ import (
 	"github.com/phuc0302/go-oauth2/inject"
 )
 
-// DefaultRoute describes a default route component implementation.
-type DefaultRoute struct {
+// Route describes a default route component implementation.
+type Route struct {
 	path     string
 	regex    *regexp.Regexp
 	handlers map[string]interface{}
 }
 
 // BindHandler binds handler with specific http method.
-func (r *DefaultRoute) BindHandler(method string, handler interface{}) {
+func (r *Route) BindHandler(method string, handler interface{}) {
 	/* Condition validation: only accept function */
 	if reflect.TypeOf(handler).Kind() != reflect.Func {
 		panic("Request handler must be a function type.")
@@ -31,7 +31,7 @@ func (r *DefaultRoute) BindHandler(method string, handler interface{}) {
 }
 
 // InvokeHandler invokes handler.
-func (r *DefaultRoute) InvokeHandler(c *Request, s *Security) {
+func (r *Route) InvokeHandler(c *Request, s *Security) {
 	invoker := inject.CreateInvoker()
 	handler := r.handlers[c.request.Method]
 
@@ -46,12 +46,12 @@ func (r *DefaultRoute) InvokeHandler(c *Request, s *Security) {
 }
 
 // URLPattern returns registered url pattern.
-func (r *DefaultRoute) URLPattern() string {
+func (r *Route) URLPattern() string {
 	return r.path
 }
 
 // MatchURLPattern matchs url pattern.
-func (r *DefaultRoute) MatchURLPattern(method string, urlPath string) (bool, map[string]string) {
+func (r *Route) MatchURLPattern(method string, urlPath string) (bool, map[string]string) {
 	if matches := r.regex.FindStringSubmatch(urlPath); len(matches) > 0 && matches[0] == urlPath {
 		if handler := r.handlers[method]; handler != nil {
 			var params map[string]string

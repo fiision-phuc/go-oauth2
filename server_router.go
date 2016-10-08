@@ -10,15 +10,15 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// DefaultRouter descripts a default router component implementation.
-type DefaultRouter struct {
-	routes    []IRoute
+// Router descripts a default router component implementation.
+type Router struct {
+	routes    []*Route
 	groups    []string
 	userRoles map[*regexp.Regexp]*regexp.Regexp
 }
 
 // GroupRoles groups all same url's prefix with user's roles.
-func (r *DefaultRouter) GroupRoles(groupPath string, roles ...string) {
+func (r *Router) GroupRoles(groupPath string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
 	if TokenStore == nil {
 		return
@@ -40,7 +40,7 @@ func (r *DefaultRouter) GroupRoles(groupPath string, roles ...string) {
 }
 
 // BindRoles binds an url pattern with user's roles.
-func (r *DefaultRouter) BindRoles(httpMethod string, urlPattern string, roles ...string) {
+func (r *Router) BindRoles(httpMethod string, urlPattern string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
 	if TokenStore == nil || len(r.routes) == 0 {
 		return
@@ -48,14 +48,14 @@ func (r *DefaultRouter) BindRoles(httpMethod string, urlPattern string, roles ..
 }
 
 // GroupRoute groups all same url's prefix.
-func (r *DefaultRouter) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
+func (r *Router) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
 	r.groups = append(r.groups, httprouter.CleanPath(groupPath))
 	function(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
 
 // BindRoute binds an url pattern with a handler.
-func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler interface{}) {
+func (r *Router) BindRoute(httpMethod string, urlPattern string, handler interface{}) {
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
@@ -87,7 +87,7 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 }
 
 // MatchRoute matches a route with an url path.
-func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
+func (r *Router) MatchRoute(context *Request, security *Security) (*Route, map[string]string) {
 	// Validate user's authorized first
 	isAuthorized := true
 	for rule, roles := range r.userRoles {

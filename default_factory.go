@@ -110,7 +110,7 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 }
 
 // CreateRoute creates new route component.
-func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
+func (d *DefaultFactory) CreateRoute(urlPattern string) *Route {
 	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
@@ -123,7 +123,7 @@ func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
 	}
 
-	route := DefaultRoute{
+	route := Route{
 		path:     urlPattern,
 		handlers: map[string]interface{}{},
 		regex:    regexp.MustCompile(regexPattern),
@@ -132,8 +132,8 @@ func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 }
 
 // CreateRouter creates new router component.
-func (d *DefaultFactory) CreateRouter() IRouter {
-	return &DefaultRouter{}
+func (d *DefaultFactory) CreateRouter() *Router {
+	return new(Router)
 }
 
 // CreateStore creates new store component.

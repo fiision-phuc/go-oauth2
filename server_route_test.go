@@ -7,7 +7,7 @@ import (
 )
 
 func Test_BindHandler(t *testing.T) {
-	route := DefaultRoute{}
+	route := Route{}
 	route.BindHandler(GET, func() {})
 
 	if route.handlers == nil {
@@ -28,7 +28,7 @@ func Test_BindHandler(t *testing.T) {
 	t.Errorf(test.ExpectedPanic)
 }
 func Test_BindHandlerWithPanic(t *testing.T) {
-	route := DefaultRoute{}
+	route := Route{}
 
 	defer func() {
 		if r := recover(); r != nil {

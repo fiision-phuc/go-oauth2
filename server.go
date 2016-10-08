@@ -12,7 +12,7 @@ import (
 // Server describes server object.
 type Server struct {
 	sandbox bool
-	router  IRouter
+	router  *Router
 }
 
 // DefaultServer returns a server with build in components.

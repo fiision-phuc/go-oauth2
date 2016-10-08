@@ -15,7 +15,7 @@ func Test_GroupRoles(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	router, _ := objectFactory.CreateRouter().(*DefaultRouter)
+	router := new(Router)
 	if router == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -61,7 +61,7 @@ func Test_BindRole(t *testing.T) {
 	u.Setup()
 
 	// Setup router
-	router := objectFactory.CreateRouter()
+	router := new(Router)
 
 	router.BindRoute(GET, "/", func() {})
 	router.GroupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
@@ -98,7 +98,7 @@ func Test_GroupRoute(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	router := new(DefaultRouter)
+	router := new(Router)
 	router.GroupRoute(nil, "/user/profile", func(s *Server) {
 		router.BindRoute(GET, "", func() {})
 		router.BindRoute(GET, "/{profileID}", func() {})
@@ -112,15 +112,14 @@ func Test_GroupRoute(t *testing.T) {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
 		} else {
 			r := router.routes[1]
-			route, _ := r.(*DefaultRoute)
 
-			if route.path != "/user/profile/{profileID}" {
-				t.Errorf(test.ExpectedStringButFoundString, "/user/profile/{profileID}", route.path)
+			if r.path != "/user/profile/{profileID}" {
+				t.Errorf(test.ExpectedStringButFoundString, "/user/profile/{profileID}", r.path)
 			}
-			if route.handlers[GET] == nil {
+			if r.handlers[GET] == nil {
 				t.Error(test.ExpectedNotNil)
 			}
-			if route.handlers[POST] == nil {
+			if r.handlers[POST] == nil {
 				t.Error(test.ExpectedNotNil)
 			}
 		}
@@ -132,20 +131,18 @@ func Test_BindRoute(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	if router, ok := objectFactory.CreateRouter().(*DefaultRouter); !ok {
-		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
-	} else {
-		// [Test 1] First bind
-		router.BindRoute(GET, "/", func() {})
-		if len(router.routes) != 1 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 1, len(router.routes))
-		}
+	router := objectFactory.CreateRouter()
 
-		// [Test 2] Second bind
-		router.BindRoute(GET, "/sample", func() {})
-		if len(router.routes) != 2 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
-		}
+	// [Test 1] First bind
+	router.BindRoute(GET, "/", func() {})
+	if len(router.routes) != 1 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 1, len(router.routes))
+	}
+
+	// [Test 2] Second bind
+	router.BindRoute(GET, "/sample", func() {})
+	if len(router.routes) != 2 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
 	}
 }
 
