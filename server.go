@@ -25,9 +25,9 @@ func DefaultServer(isSandbox bool) *Server {
 func CreateServer(instance IFactory, isSandbox bool) *Server {
 	// Load config file
 	if isSandbox {
-		Cfg = loadConfig(debug)
+		Cfg = LoadConfig(debug)
 	} else {
-		Cfg = loadConfig(release)
+		Cfg = LoadConfig(release)
 	}
 
 	// Setup logger

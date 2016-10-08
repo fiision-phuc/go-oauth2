@@ -12,7 +12,7 @@ import (
 
 func Test_CreateConfig(t *testing.T) {
 	defer os.Remove(debug)
-	createConfig(debug)
+	CreateConfig(debug)
 
 	if !util.FileExisted(debug) {
 		t.Errorf("Expected %s file had been created but found nil.", debug)
@@ -21,7 +21,7 @@ func Test_CreateConfig(t *testing.T) {
 
 func Test_LoadConfig(t *testing.T) {
 	defer os.Remove(debug)
-	config := loadConfig(debug)
+	config := LoadConfig(debug)
 
 	// Validate basic information
 	if config.Host != "localhost" {

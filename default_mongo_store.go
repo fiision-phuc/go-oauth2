@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/phuc0302/go-oauth2/mongo"
+	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/util"
 	"gopkg.in/mgo.v2/bson"
 )

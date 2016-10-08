@@ -11,7 +11,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/phuc0302/go-oauth2/mongo"
+	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/util"
 )
 
@@ -47,7 +47,7 @@ func (u *TestUnit) Setup() {
 	u.CreatedTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
 
 	// Define global variables
-	Cfg = loadConfig(debug)
+	Cfg = LoadConfig(debug)
 	objectFactory = &DefaultFactory{}
 	TokenStore = objectFactory.CreateStore()
 

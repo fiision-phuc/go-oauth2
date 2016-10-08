@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/phuc0302/go-oauth2/mongo"
+	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/test"
 	"github.com/phuc0302/go-oauth2/util"
 )

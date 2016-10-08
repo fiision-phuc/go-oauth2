@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/util"
 )
 
 func Test_CreateRequestContext_GetRequest(t *testing.T) {
@@ -23,8 +23,8 @@ func Test_CreateRequestContext_GetRequest(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
 
-		if context.Path != util.FormatPath(r.URL.Path) {
-			t.Errorf(test.ExpectedStringButFoundString, util.FormatPath(r.URL.Path), context.Path)
+		if context.Path != httprouter.CleanPath(r.URL.Path) {
+			t.Errorf(test.ExpectedStringButFoundString, httprouter.CleanPath(r.URL.Path), context.Path)
 		}
 		if context.Header == nil {
 			t.Error(test.ExpectedNotNil)

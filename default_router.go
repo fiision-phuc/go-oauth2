@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/phuc0302/go-oauth2/util"
+	"github.com/julienschmidt/httprouter"
 )
 
 // DefaultRouter descripts a default router component implementation.
@@ -49,7 +49,7 @@ func (r *DefaultRouter) BindRoles(httpMethod string, urlPattern string, roles ..
 
 // GroupRoute groups all same url's prefix.
 func (r *DefaultRouter) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
-	r.groups = append(r.groups, util.FormatPath(groupPath))
+	r.groups = append(r.groups, httprouter.CleanPath(groupPath))
 	function(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
@@ -64,11 +64,11 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 		}
 
 		if len(urlPattern) > 0 {
-			buffer.WriteString(util.FormatPath(urlPattern))
+			buffer.WriteString(httprouter.CleanPath(urlPattern))
 		}
 		urlPattern = buffer.String()
 	} else {
-		urlPattern = util.FormatPath(urlPattern)
+		urlPattern = httprouter.CleanPath(urlPattern)
 	}
 	logrus.Infof("%s -> %s", httpMethod, urlPattern)
 

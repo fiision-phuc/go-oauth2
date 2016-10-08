@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/phuc0302/go-oauth2/mongo"
+	"github.com/phuc0302/go-mongo"
 )
 
 // DefaultFactory describes a default factory object.

@@ -5,12 +5,13 @@ import (
 	"os"
 	"strings"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/phuc0302/go-oauth2/util"
 )
 
 // ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	request.URL.Path = util.FormatPath(request.URL.Path)
+	request.URL.Path = httprouter.CleanPath(request.URL.Path)
 	request.Method = strings.ToUpper(request.Method)
 
 	// Create request context
