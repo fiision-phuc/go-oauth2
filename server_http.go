@@ -41,24 +41,11 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 		}
 	}
 
-	//	// Create context
-	//	context := objectFactory.CreateRequestContext(request, response)
-	//	security := objectFactory.CreateSecurityContext(context)
-
+	// Handle request
 	var match mux.RouteMatch
-	//	var handler http.Handler
 	if matched := router.Match(request, &match); matched {
-		//		fmt.Println(match.Vars["name"])
 		match.Handler.ServeHTTP(response, request)
 		return
 	}
-
-	//	if route, pathParams := s.routerOld.MatchRoute(context, security); route != nil {
-	//		context.PathParams = pathParams
-
-	//		route.InvokeHandler(context, security)
-	//		return
-	//	}
-
 	panic(util.Status503())
 }
