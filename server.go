@@ -6,13 +6,17 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/gorilla/mux"
 	"github.com/johntdyer/slackrus"
 )
+
+var router = new(mux.Router)
 
 // Server describes server object.
 type Server struct {
 	sandbox bool
-	router  *Router
+
+	routerOld *Router
 }
 
 // DefaultServer returns a server with build in components.
@@ -56,8 +60,8 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 
 	// Create server
 	server := Server{
-		sandbox: isSandbox,
-		router:  objectFactory.CreateRouter(),
+		sandbox:   isSandbox,
+		routerOld: objectFactory.CreateRouter(),
 	}
 
 	// Pre-define oauth2 urls
@@ -74,73 +78,21 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 
 // GroupRoles binds user's roles to all url with same prefix.
 func (s *Server) GroupRoles(groupPath string, roles ...string) {
-	s.router.GroupRoles(groupPath, roles...)
+	s.routerOld.GroupRoles(groupPath, roles...)
 }
 
 // BindRoles an url pattern with user's roles.
 func (s *Server) BindRoles(httpMethod string, urlPattern string, roles ...string) {
-	s.router.BindRoles(httpMethod, urlPattern, roles...)
+	s.routerOld.BindRoles(httpMethod, urlPattern, roles...)
 }
 
 // GroupRoute routes all url with same prefix.
 func (s *Server) GroupRoute(urlGroup string, function func(s *Server)) {
-	s.router.GroupRoute(s, urlGroup, function)
+	s.routerOld.GroupRoute(s, urlGroup, function)
 }
 
-// Copy routes copy request to registered handler.
-func (s *Server) Copy(urlPattern string, handler interface{}) {
-	s.router.BindRoute(COPY, urlPattern, handler)
-}
-
-// Delete routes delete request to registered handler.
-func (s *Server) Delete(urlPattern string, handler interface{}) {
-	s.router.BindRoute(DELETE, urlPattern, handler)
-}
-
-// Get routes get request to registered handler.
-func (s *Server) Get(urlPattern string, handler interface{}) {
-	s.router.BindRoute(GET, urlPattern, handler)
-}
-
-// Head routes head request to registered handler.
-func (s *Server) Head(urlPattern string, handler interface{}) {
-	s.router.BindRoute(HEAD, urlPattern, handler)
-}
-
-// Link routes link request to registered handler.
-func (s *Server) Link(urlPattern string, handler interface{}) {
-	s.router.BindRoute(LINK, urlPattern, handler)
-}
-
-// Options routes options request to registered handler.
-func (s *Server) Options(urlPattern string, handler interface{}) {
-	s.router.BindRoute(OPTIONS, urlPattern, handler)
-}
-
-// Patch routes patch request to registered handler.
-func (s *Server) Patch(urlPattern string, handler interface{}) {
-	s.router.BindRoute(PATCH, urlPattern, handler)
-}
-
-// Post routes post request to registered handler.
-func (s *Server) Post(urlPattern string, handler interface{}) {
-	s.router.BindRoute(POST, urlPattern, handler)
-}
-
-// Purge routes purge request to registered handler.
-func (s *Server) Purge(urlPattern string, handler interface{}) {
-	s.router.BindRoute(PURGE, urlPattern, handler)
-}
-
-// Put routes put request to registered handler.
-func (s *Server) Put(urlPattern string, handler interface{}) {
-	s.router.BindRoute(PUT, urlPattern, handler)
-}
-
-// Unlink routes unlink request to registered handler.
-func (s *Server) Unlink(urlPattern string, handler interface{}) {
-	s.router.BindRoute(UNLINK, urlPattern, handler)
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Server's listener.
 
 // Run will start server on http port.
 func (s *Server) Run() {
@@ -170,4 +122,106 @@ func (s *Server) RunTLS(certFile string, keyFile string) {
 
 	logrus.Infof("listening on %s\n", address)
 	logrus.Fatal(server.ListenAndServeTLS(certFile, keyFile))
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Server's routing apis.
+
+// Copy routes copy request to registered handler.
+func (s *Server) Copy(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Copy)
+}
+
+// Delete routes delete request to registered handler.
+func (s *Server) Delete(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Delete)
+}
+
+// Get routes get request to registered handler.
+func (s *Server) Get(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Get)
+}
+
+// Head routes head request to registered handler.
+func (s *Server) Head(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Head)
+}
+
+// Link routes link request to registered handler.
+func (s *Server) Link(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Link)
+}
+
+// Options routes options request to registered handler.
+func (s *Server) Options(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Options)
+}
+
+// Patch routes patch request to registered handler.
+func (s *Server) Patch(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Patch)
+}
+
+// Post routes post request to registered handler.
+func (s *Server) Post(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Unlink)
+}
+
+// Purge routes purge request to registered handler.
+func (s *Server) Purge(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Unlink)
+}
+
+// Put routes put request to registered handler.
+func (s *Server) Put(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Unlink)
+}
+
+// Unlink routes unlink request to registered handler.
+func (s *Server) Unlink(urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+	router.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
+		handler(context, security)
+	}).Methods(Unlink)
 }

@@ -23,17 +23,35 @@ const (
 
 // Define HTTP Methods.
 const (
-	COPY    = "COPY"
-	DELETE  = "DELETE"
-	GET     = "GET"
-	HEAD    = "HEAD"
-	LINK    = "LINK"
-	OPTIONS = "OPTIONS"
-	PATCH   = "PATCH"
-	POST    = "POST"
-	PURGE   = "PURGE"
-	PUT     = "PUT"
-	UNLINK  = "UNLINK"
+	Copy    = "copy"
+	Delete  = "delete"
+	Get     = "get"
+	Head    = "head"
+	Link    = "link"
+	Options = "options"
+	Patch   = "patch"
+	Post    = "post"
+	Purge   = "purge"
+	Put     = "put"
+	Unlink  = "unlink"
+)
+
+// Define OAuth2 flows.
+const (
+	AuthorizationCodeGrant = "authorization_code" // For apps running on a web server
+	ClientCredentialsGrant = "client_credentials" // For application access
+	ImplicitGrant          = "implicit"           // For browser-based or mobile apps
+	PasswordGrant          = "password"           // For logging in with a username and password
+	RefreshTokenGrant      = "refresh_token"      // Should allow refresh token or not
+
+)
+
+// Define OAuth2 tables.
+const (
+	TableAccessToken  = "oauth_access_token"
+	TableClient       = "oauth_client"
+	TableRefreshToken = "oauth_refresh_token"
+	TableUser         = "oauth_user"
 )
 
 // Config describes a configuration object that will be used during application life time.
@@ -90,7 +108,7 @@ func CreateConfig(configFile string) {
 		ReadTimeout:   15,
 		WriteTimeout:  15,
 
-		AllowMethods: []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
+		AllowMethods: []string{Copy, Delete, Get, Head, Link, Options, Patch, Post, Purge, Put, Unlink},
 		RedirectPaths: map[string]int{
 			"/login": 401,
 		},

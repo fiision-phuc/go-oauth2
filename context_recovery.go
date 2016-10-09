@@ -5,13 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"reflect"
 	"runtime"
 	"strings"
-	"time"
-
-	"github.com/phuc0302/go-oauth2/util"
 )
 
 var (
@@ -51,44 +48,44 @@ func RecoveryInternal(logger *log.Logger) {
 		logger.Println(string(cause))
 	}
 }
-func RecoveryRequest(c *Request, isDevelopment bool) {
-	if err := recover(); err != nil {
-		log := log_message{
-			Uri:         c.Path,
-			Method:      fmt.Sprintf("%s|%s", c.request.Proto, c.request.Method),
-			RequestTime: time.Now().UTC().Format(time.RFC822),
+func RecoveryRequest(request *http.Request, response http.ResponseWriter, isDevelopment bool) {
+	//	if err := recover(); err != nil {
+	//		log := log_message{
+	//			Uri:         c.Path,
+	//			Method:      fmt.Sprintf("%s|%s", c.request.Proto, c.request.Method),
+	//			RequestTime: time.Now().UTC().Format(time.RFC822),
 
-			Trace: callStack(3),
+	//			Trace: callStack(3),
 
-			Body: &log_body{
-				ContentType:   c.Header["content-type"],
-				RequestBody:   c.QueryParams,
-				RequestParams: c.PathParams,
-			},
+	//			Body: &log_body{
+	//				ContentType:   c.Header["content-type"],
+	//				RequestBody:   c.QueryParams,
+	//				RequestParams: c.PathParams,
+	//			},
 
-			Request: &log_request{
-				UserAgent:     c.request.UserAgent(),
-				HttpReferer:   c.request.Referer(),
-				RemoteAddress: c.request.RemoteAddr,
-			},
-		}
+	//			Request: &log_request{
+	//				UserAgent:     c.request.UserAgent(),
+	//				HttpReferer:   c.request.Referer(),
+	//				RemoteAddress: c.request.RemoteAddr,
+	//			},
+	//		}
 
-		// Define status error
-		var httpError *util.Status
-		if status, ok := reflect.ValueOf(err).Interface().(util.Status); ok {
-			httpError = &status
-		} else {
-			httpError = util.Status500()
-			httpError.Description = fmt.Sprintf("%s", err)
-		}
+	//		// Define status error
+	//		var httpError *util.Status
+	//		if status, ok := reflect.ValueOf(err).Interface().(util.Status); ok {
+	//			httpError = &status
+	//		} else {
+	//			httpError = util.Status500()
+	//			httpError.Description = fmt.Sprintf("%s", err)
+	//		}
 
-		// Should include stack trace or not
-		if isDevelopment {
-			httpError.StackTrace = log
-		}
+	//		// Should include stack trace or not
+	//		if isDevelopment {
+	//			httpError.StackTrace = log
+	//		}
 
-		c.OutputError(httpError)
-	}
+	//		c.OutputError(httpError)
+	//	}
 }
 
 // MARK: Private functions

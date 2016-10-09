@@ -317,7 +317,7 @@ func Test_CreateRoute(t *testing.T) {
 	objectFactory = &DefaultFactory{}
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 
-	route.BindHandler(GET, func() {})
+	route.BindHandler(Get, func() {})
 
 	if route.path != "/example/{userID}/profile/{profileID}" {
 		t.Errorf(test.ExpectedStringButFoundString, "/example/{userID}/profile/{profileID}", route.path)

@@ -39,11 +39,11 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 	var params url.Values
 	switch context.request.Method {
 
-	case GET:
+	case Get:
 		params = request.URL.Query()
 		break
 
-	case POST, PATCH:
+	case Post, Patch:
 		if contentType := context.Header["content-type"]; contentType == "application/x-www-form-urlencoded" {
 			if err := request.ParseForm(); err == nil {
 				params = request.Form

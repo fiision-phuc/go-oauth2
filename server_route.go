@@ -3,8 +3,6 @@ package oauth2
 import (
 	"reflect"
 	"regexp"
-
-	"github.com/phuc0302/go-oauth2/inject"
 )
 
 // Route describes a default route component implementation.
@@ -32,17 +30,17 @@ func (r *Route) BindHandler(method string, handler interface{}) {
 
 // InvokeHandler invokes handler.
 func (r *Route) InvokeHandler(c *Request, s *Security) {
-	invoker := inject.CreateInvoker()
-	handler := r.handlers[c.request.Method]
+	//	invoker := inject.CreateInvoker()
+	//	handler := r.handlers[c.request.Method]
 
-	// Call handler
-	invoker.Map(c)
-	invoker.Map(s)
+	//	// Call handler
+	//	invoker.Map(c)
+	//	invoker.Map(s)
 
-	/* Condition validation: Validate error */
-	if _, err := invoker.Invoke(handler); err != nil {
-		panic(err)
-	}
+	//	/* Condition validation: Validate error */
+	//	if _, err := invoker.Invoke(handler); err != nil {
+	//		panic(err)
+	//	}
 }
 
 // URLPattern returns registered url pattern.
