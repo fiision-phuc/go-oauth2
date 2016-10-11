@@ -12,6 +12,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// ContextHandler is an alias for function to handle request context & security context.
+type ContextHandler interface {
+	ServeContext(requestContext *Request, securityContext *Security)
+}
+
 // Router describes a router's implementation.
 type Router struct {
 	groups []string
@@ -26,6 +31,7 @@ func CreateRouter() *Router {
 		mux: new(mux.Router),
 	}
 	return &router
+	http.Handler
 }
 
 // GroupRoles groups all same url's prefix with user's roles.
@@ -60,13 +66,14 @@ func (r *Router) BindRoles(httpMethod string, urlPattern string, roles ...string
 
 // GroupRoute groups all same url's prefix.
 func (r *Router) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
+	subMux := r.mux.PathPrefix(groupPath).Subrouter()
 	r.groups = append(r.groups, httprouter.CleanPath(groupPath))
 	function(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
 
 // BindRoute binds an url pattern with a handler.
-func (r *Router) BindRoute(httpMethod string, urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
+func (r *Router) BindRoute(httpMethod string, urlPattern string, handler ContextHandler) {
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
@@ -108,38 +115,3 @@ func (r *Router) BindRoute(httpMethod string, urlPattern string, handler func(re
 		handler(context, security)
 	}).Methods(httpMethod)
 }
-
-//// MatchRoute matches a route with an url path.
-//func (r *Router) MatchRoute(context *Request, security *Security) (*Route, map[string]string) {
-//	// Validate user's authorized first
-//	isAuthorized := true
-//	for rule, roles := range r.userRoles {
-//		if rule.MatchString(context.Path) {
-//			isAuthorized = false
-
-//			if TokenStore != nil && security != nil && security.User != nil {
-//				for _, role := range security.User.UserRoles() {
-//					if roles.MatchString(role) {
-//						isAuthorized = true
-//						break // If user is authorized, break the loop
-//					}
-//				}
-//			} else {
-//				return nil, nil
-//			}
-//		}
-//	}
-
-//	/* Condition validation: Validate user's authorized */
-//	if !isAuthorized {
-//		return nil, nil
-//	}
-
-//	// Match route
-//	for _, route := range r.routes {
-//		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); ok {
-//			return route, pathParams
-//		}
-//	}
-//	return nil, nil
-//}
