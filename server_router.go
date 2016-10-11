@@ -3,23 +3,34 @@ package oauth2
 import (
 	"bytes"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
 )
 
-// Router descripts a default router component implementation.
+// Router describes a router's implementation.
 type Router struct {
-	routes    []*Route
-	groups    []string
-	userRoles map[*regexp.Regexp]*regexp.Regexp
+	groups []string
+
+	mux   *mux.Router
+	roles map[*regexp.Regexp]*regexp.Regexp
+}
+
+// CreateRouter creates a router object.
+func CreateRouter() *Router {
+	router := Router{
+		mux: new(mux.Router),
+	}
+	return &router
 }
 
 // GroupRoles groups all same url's prefix with user's roles.
 func (r *Router) GroupRoles(groupPath string, roles ...string) {
-	/* Condition validation: Ignore role validation if there is no token store */
+	/* Condition validation: ignore role validation if there is no token store */
 	if TokenStore == nil {
 		return
 	}
@@ -33,16 +44,16 @@ func (r *Router) GroupRoles(groupPath string, roles ...string) {
 	})
 
 	// Define validator
-	if r.userRoles == nil {
-		r.userRoles = make(map[*regexp.Regexp]*regexp.Regexp)
+	if r.roles == nil {
+		r.roles = make(map[*regexp.Regexp]*regexp.Regexp)
 	}
-	r.userRoles[regexp.MustCompile(groupPath)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+	r.roles[regexp.MustCompile(groupPath)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 }
 
 // BindRoles binds an url pattern with user's roles.
 func (r *Router) BindRoles(httpMethod string, urlPattern string, roles ...string) {
-	/* Condition validation: Ignore role validation if there is no token store */
-	if TokenStore == nil || len(r.routes) == 0 {
+	/* Condition validation: ignore role validation if there is no token store */
+	if TokenStore == nil {
 		return
 	}
 }
@@ -55,7 +66,7 @@ func (r *Router) GroupRoute(s *Server, groupPath string, function func(s *Server
 }
 
 // BindRoute binds an url pattern with a handler.
-func (r *Router) BindRoute(httpMethod string, urlPattern string, handler interface{}) {
+func (r *Router) BindRoute(httpMethod string, urlPattern string, handler func(requestContext *Request, securityContext *Security)) {
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
@@ -64,59 +75,71 @@ func (r *Router) BindRoute(httpMethod string, urlPattern string, handler interfa
 		}
 
 		if len(urlPattern) > 0 {
-			buffer.WriteString(httprouter.CleanPath(urlPattern))
+			buffer.WriteString(urlPattern)
 		}
 		urlPattern = buffer.String()
-	} else {
-		urlPattern = httprouter.CleanPath(urlPattern)
 	}
 	logrus.Infof("%s -> %s", httpMethod, urlPattern)
 
-	// Look for existing one before create new
-	for _, route := range r.routes {
-		if route.URLPattern() == urlPattern {
-			route.BindHandler(httpMethod, handler)
-			return
-		}
-	}
+	// Register route
+	r.mux.HandleFunc(urlPattern, func(response http.ResponseWriter, request *http.Request) {
+		context := objectFactory.CreateRequestContext(request, response)
+		security := objectFactory.CreateSecurityContext(context)
 
-	// Create new route
-	newRoute := objectFactory.CreateRoute(urlPattern)
-	newRoute.BindHandler(httpMethod, handler)
-	r.routes = append(r.routes, newRoute)
-}
+		// Validate user's authorized first
+		isAuthorized := true
+		for rule, roles := range r.roles {
+			if rule.MatchString(context.Path) {
+				isAuthorized = false
 
-// MatchRoute matches a route with an url path.
-func (r *Router) MatchRoute(context *Request, security *Security) (*Route, map[string]string) {
-	// Validate user's authorized first
-	isAuthorized := true
-	for rule, roles := range r.userRoles {
-		if rule.MatchString(context.Path) {
-			isAuthorized = false
-
-			if TokenStore != nil && security != nil && security.User != nil {
-				for _, role := range security.User.UserRoles() {
-					if roles.MatchString(role) {
-						isAuthorized = true
-						break // If user is authorized, break the loop
+				if TokenStore != nil && security != nil && security.User != nil {
+					for _, role := range security.User.UserRoles() {
+						if roles.MatchString(role) {
+							isAuthorized = true
+							break // If user is authorized, break the loop
+						}
 					}
+				} else {
+					//					return nil, nil
 				}
-			} else {
-				return nil, nil
 			}
 		}
-	}
-
-	/* Condition validation: Validate user's authorized */
-	if !isAuthorized {
-		return nil, nil
-	}
-
-	// Match route
-	for _, route := range r.routes {
-		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); ok {
-			return route, pathParams
-		}
-	}
-	return nil, nil
+		fmt.Println(isAuthorized)
+		handler(context, security)
+	}).Methods(httpMethod)
 }
+
+//// MatchRoute matches a route with an url path.
+//func (r *Router) MatchRoute(context *Request, security *Security) (*Route, map[string]string) {
+//	// Validate user's authorized first
+//	isAuthorized := true
+//	for rule, roles := range r.userRoles {
+//		if rule.MatchString(context.Path) {
+//			isAuthorized = false
+
+//			if TokenStore != nil && security != nil && security.User != nil {
+//				for _, role := range security.User.UserRoles() {
+//					if roles.MatchString(role) {
+//						isAuthorized = true
+//						break // If user is authorized, break the loop
+//					}
+//				}
+//			} else {
+//				return nil, nil
+//			}
+//		}
+//	}
+
+//	/* Condition validation: Validate user's authorized */
+//	if !isAuthorized {
+//		return nil, nil
+//	}
+
+//	// Match route
+//	for _, route := range r.routes {
+//		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); ok {
+//			return route, pathParams
+//		}
+//	}
+//	return nil, nil
+//}

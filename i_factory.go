@@ -13,8 +13,8 @@ type IFactory interface {
 	// Create new security context.
 	CreateSecurityContext(requestContext *Request) *Security
 
-	// Create new route component.
-	CreateRoute(urlPattern string) *Route
+	//	// Create new route component.
+	//	CreateRoute(urlPattern string) *Route
 
 	// Create new router component.
 	CreateRouter() *Router
