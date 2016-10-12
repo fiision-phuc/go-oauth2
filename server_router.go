@@ -9,13 +9,10 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	"github.com/julienschmidt/httprouter"
 )
 
 // ContextHandler is an alias for function to handle request context & security context.
-type ContextHandler interface {
-	ServeContext(requestContext *Request, securityContext *Security)
-}
+type ContextHandler func(requestContext *Request, securityContext *Security)
 
 // Router describes a router's implementation.
 type Router struct {
@@ -31,7 +28,6 @@ func CreateRouter() *Router {
 		mux: new(mux.Router),
 	}
 	return &router
-	http.Handler
 }
 
 // GroupRoles groups all same url's prefix with user's roles.
@@ -66,8 +62,8 @@ func (r *Router) BindRoles(httpMethod string, urlPattern string, roles ...string
 
 // GroupRoute groups all same url's prefix.
 func (r *Router) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
-	subMux := r.mux.PathPrefix(groupPath).Subrouter()
-	r.groups = append(r.groups, httprouter.CleanPath(groupPath))
+	//	subMux := r.mux.PathPrefix(groupPath).Subrouter()
+	r.groups = append(r.groups, groupPath)
 	function(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
