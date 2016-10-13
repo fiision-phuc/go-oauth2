@@ -10,15 +10,17 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// DefaultRouter descripts a default router component implementation.
-type DefaultRouter struct {
-	routes    []IRoute
-	groups    []string
-	userRoles map[*regexp.Regexp]*regexp.Regexp
+/// Router descripts a default router component implementation.
+type router struct {
+	groups []string
+	routes []IRoute
+	roles  map[*regexp.Regexp]*regexp.Regexp
 }
 
-// GroupRoles groups all same url's prefix with user's roles.
-func (r *DefaultRouter) GroupRoles(groupPath string, roles ...string) {
+// groupRoles groups prefix url's with user's roles.
+//
+// @param groupPath:
+func (r *router) groupRoles(groupPath string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
 	if TokenStore == nil {
 		return
@@ -33,29 +35,33 @@ func (r *DefaultRouter) GroupRoles(groupPath string, roles ...string) {
 	})
 
 	// Define validator
-	if r.userRoles == nil {
-		r.userRoles = make(map[*regexp.Regexp]*regexp.Regexp)
+	if r.roles == nil {
+		r.roles = make(map[*regexp.Regexp]*regexp.Regexp)
 	}
-	r.userRoles[regexp.MustCompile(groupPath)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+	r.roles[regexp.MustCompile(groupPath)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 }
 
 // BindRoles binds an url pattern with user's roles.
-func (r *DefaultRouter) BindRoles(httpMethod string, urlPattern string, roles ...string) {
-	/* Condition validation: Ignore role validation if there is no token store */
-	if TokenStore == nil || len(r.routes) == 0 {
-		return
-	}
-}
+//func (r *DefaultRouter) BindRoles(httpMethod string, urlPattern string, roles ...string) {
+//	/* Condition validation: Ignore role validation if there is no token store */
+//	if TokenStore == nil || len(r.routes) == 0 {
+//		return
+//	}
+//}
 
-// GroupRoute groups all same url's prefix.
-func (r *DefaultRouter) GroupRoute(s *Server, groupPath string, function func(s *Server)) {
-	r.groups = append(r.groups, httprouter.CleanPath(groupPath))
-	function(s)
+// groupRoute generates path's prefix for following urls.
+//
+// @param s
+// @param pathPrefix
+// @param handler
+func (r *router) groupRoute(s *Server, pathPrefix string, handler GroupHandler) {
+	r.groups = append(r.groups, pathPrefix)
+	handler(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
 
 // BindRoute binds an url pattern with a handler.
-func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler interface{}) {
+func (r *router) BindRoute(httpMethod string, path string, handler interface{}) {
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
@@ -63,34 +69,34 @@ func (r *DefaultRouter) BindRoute(httpMethod string, urlPattern string, handler 
 			buffer.WriteString(path)
 		}
 
-		if len(urlPattern) > 0 {
-			buffer.WriteString(httprouter.CleanPath(urlPattern))
+		if len(path) > 0 {
+			buffer.WriteString(httprouter.CleanPath(path))
 		}
-		urlPattern = buffer.String()
+		path = buffer.String()
 	} else {
-		urlPattern = httprouter.CleanPath(urlPattern)
+		path = httprouter.CleanPath(path)
 	}
-	logrus.Infof("%s -> %s", httpMethod, urlPattern)
+	logrus.Infof("%s -> %s", httpMethod, path)
 
 	// Look for existing one before create new
 	for _, route := range r.routes {
-		if route.URLPattern() == urlPattern {
+		if route.URLPattern() == path {
 			route.BindHandler(httpMethod, handler)
 			return
 		}
 	}
 
 	// Create new route
-	newRoute := objectFactory.CreateRoute(urlPattern)
+	newRoute := objectFactory.CreateRoute(path)
 	newRoute.BindHandler(httpMethod, handler)
 	r.routes = append(r.routes, newRoute)
 }
 
 // MatchRoute matches a route with an url path.
-func (r *DefaultRouter) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
+func (r *router) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
 	// Validate user's authorized first
 	isAuthorized := true
-	for rule, roles := range r.userRoles {
+	for rule, roles := range r.roles {
 		if rule.MatchString(context.Path) {
 			isAuthorized = false
 

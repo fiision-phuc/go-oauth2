@@ -132,8 +132,8 @@ func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
 }
 
 // CreateRouter creates new router component.
-func (d *DefaultFactory) CreateRouter() IRouter {
-	return &DefaultRouter{}
+func (d *DefaultFactory) CreateRouter() router {
+	return router{}
 }
 
 // CreateStore creates new store component.

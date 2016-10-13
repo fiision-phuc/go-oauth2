@@ -17,7 +17,7 @@ type IFactory interface {
 	CreateRoute(urlPattern string) IRoute
 
 	// Create new router component.
-	CreateRouter() IRouter
+	CreateRouter() router
 
 	// Create new store component.
 	CreateStore() IStore

@@ -12,7 +12,7 @@ import (
 // Server describes server object.
 type Server struct {
 	sandbox bool
-	router  IRouter
+	router  *router
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	// Create server
 	server := Server{
 		sandbox: isSandbox,
-		router:  instance.CreateRouter(),
+		router:  new(router),
 	}
 
 	// Setup OAuth2.0
@@ -76,7 +76,7 @@ func DefaultServer(isSandbox bool) *Server {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GroupRoles binds user's roles to all url with same prefix.
 func (s *Server) GroupRoles(groupPath string, roles ...string) {
-	s.router.GroupRoles(groupPath, roles...)
+	s.router.groupRoles(groupPath, roles...)
 }
 
 //// BindRoles an url pattern with user's roles.
@@ -86,7 +86,7 @@ func (s *Server) GroupRoles(groupPath string, roles ...string) {
 
 // GroupRoute routes all url with same prefix.
 func (s *Server) GroupRoute(urlPrefix string, handler GroupHandler) {
-	s.router.GroupRoute(s, urlPrefix, handler)
+	s.router.groupRoute(s, urlPrefix, handler)
 }
 
 // Copy routes copy request to registered handler.

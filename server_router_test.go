@@ -64,16 +64,16 @@ func Test_BindRole(t *testing.T) {
 	router := objectFactory.CreateRouter()
 
 	router.BindRoute(Get, "/", func() {})
-	router.GroupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
+	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Post, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoute(nil, "/private", func(s *Server) {
+	router.groupRoute(nil, "/private", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoles("/private**", "r_admin")
+	router.groupRoles("/private**", "r_admin")
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -98,8 +98,8 @@ func Test_GroupRoute(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	router := new(DefaultRouter)
-	router.GroupRoute(nil, "/user/profile", func(s *Server) {
+	router := new(router)
+	router.groupRoute(nil, "/user/profile", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 		router.BindRoute(Post, "/{profileID}", func() {})
@@ -158,16 +158,16 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 	router := objectFactory.CreateRouter()
 
 	router.BindRoute(Get, "/", func() {})
-	router.GroupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
+	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Post, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoute(nil, "/private", func(s *Server) {
+	router.groupRoute(nil, "/private", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoles("/private**", "r_admin")
+	router.groupRoles("/private**", "r_admin")
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -195,15 +195,15 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 	router := objectFactory.CreateRouter()
 
 	router.BindRoute(Get, "/", func() {})
-	router.GroupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
+	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoute(nil, "/private", func(s *Server) {
+	router.groupRoute(nil, "/private", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoles("/private**", "r_admin")
+	router.groupRoles("/private**", "r_admin")
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -231,16 +231,16 @@ func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
 	router := objectFactory.CreateRouter()
 
 	router.BindRoute(Get, "/", func() {})
-	router.GroupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
+	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Post, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoute(nil, "/private", func(s *Server) {
+	router.groupRoute(nil, "/private", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoles("/private**", "r_admin")
+	router.groupRoles("/private**", "r_admin")
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -278,16 +278,16 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 	router := objectFactory.CreateRouter()
 
 	router.BindRoute(Get, "/", func() {})
-	router.GroupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
+	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Post, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoute(nil, "/private", func(s *Server) {
+	router.groupRoute(nil, "/private", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoles("/private**", "r_admin")
+	router.groupRoles("/private**", "r_admin")
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -318,16 +318,16 @@ func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
 	router := objectFactory.CreateRouter()
 
 	router.BindRoute(Get, "/", func() {})
-	router.GroupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
+	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Post, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoute(nil, "/private", func(s *Server) {
+	router.groupRoute(nil, "/private", func(s *Server) {
 		router.BindRoute(Get, "", func() {})
 		router.BindRoute(Get, "/{profileID}", func() {})
 	})
-	router.GroupRoles("/private**", "r_admin")
+	router.groupRoles("/private**", "r_admin")
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
