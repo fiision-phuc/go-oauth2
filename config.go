@@ -15,27 +15,6 @@ import (
 	"github.com/phuc0302/go-oauth2/util"
 )
 
-// Define configuration file's name.
-const (
-	debug   = "oauth2.debug.cfg"
-	release = "oauth2.release.cfg"
-)
-
-// Define HTTP Methods.
-const (
-	COPY    = "COPY"
-	DELETE  = "DELETE"
-	GET     = "GET"
-	HEAD    = "HEAD"
-	LINK    = "LINK"
-	OPTIONS = "OPTIONS"
-	PATCH   = "PATCH"
-	POST    = "POST"
-	PURGE   = "PURGE"
-	PUT     = "PUT"
-	UNLINK  = "UNLINK"
-)
-
 // Config describes a configuration object that will be used during application life time.
 type Config struct {
 
@@ -90,7 +69,7 @@ func CreateConfig(configFile string) {
 		ReadTimeout:   15,
 		WriteTimeout:  15,
 
-		AllowMethods: []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
+		AllowMethods: []string{Copy, Delete, Get, Head, Link, Options, Patch, Post, Purge, Put, Unlink},
 		RedirectPaths: map[string]int{
 			"/login": 401,
 		},

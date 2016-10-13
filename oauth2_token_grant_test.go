@@ -22,7 +22,7 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -48,7 +48,7 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -81,7 +81,7 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -108,7 +108,7 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -138,7 +138,7 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -169,7 +169,7 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -214,7 +214,7 @@ func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -245,7 +245,7 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -343,7 +343,7 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 

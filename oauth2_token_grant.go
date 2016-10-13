@@ -15,7 +15,7 @@ type TokenGrant struct {
 }
 
 // HandleForm validates authentication form.
-func (g *TokenGrant) HandleForm(c *Request) {
+func (g *TokenGrant) HandleForm(c *Request, s *Security) {
 	security := new(Security)
 
 	if err := g.validateForm(c, security); err == nil {

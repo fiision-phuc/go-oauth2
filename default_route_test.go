@@ -8,12 +8,12 @@ import (
 
 func Test_BindHandler(t *testing.T) {
 	route := DefaultRoute{}
-	route.BindHandler(GET, func() {})
+	route.BindHandler(Get, func() {})
 
 	if route.handlers == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		if route.handlers[GET] == nil {
+		if route.handlers[Get] == nil {
 			t.Error(test.ExpectedNotNil)
 		}
 	}
@@ -24,7 +24,7 @@ func Test_BindHandler(t *testing.T) {
 			/* Expected panic */
 		}
 	}()
-	route.BindHandler(POST, "")
+	route.BindHandler(Post, "")
 	t.Errorf(test.ExpectedPanic)
 }
 func Test_BindHandlerWithPanic(t *testing.T) {
@@ -35,7 +35,7 @@ func Test_BindHandlerWithPanic(t *testing.T) {
 			/* Expected panic */
 		}
 	}()
-	route.BindHandler(POST, "")
+	route.BindHandler(Post, "")
 	t.Errorf(test.ExpectedPanic)
 }
 
@@ -51,7 +51,7 @@ func Test_InvokeHandler(t *testing.T) {
 			/* Expected panic */
 		}
 	}()
-	route.BindHandler(GET, func() {
+	route.BindHandler(Get, func() {
 		panic("Test if func had been invoked or not.")
 	})
 	route.InvokeHandler(nil, nil)
@@ -75,9 +75,9 @@ func Test_MatchURLPattern_InvalidHTTPMethod(t *testing.T) {
 	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
-	route.BindHandler(GET, func() {})
+	route.BindHandler(Get, func() {})
 
-	isMatched, pathParams := route.MatchURLPattern(POST, "/example/1")
+	isMatched, pathParams := route.MatchURLPattern(Post, "/example/1")
 	if isMatched {
 		t.Errorf(test.ExpectedBoolButFoundBool, false, isMatched)
 	}
@@ -92,9 +92,9 @@ func Test_MatchURLPattern_InvalidHTTPMethodButInvalidPath(t *testing.T) {
 	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
-	route.BindHandler(GET, func() {})
+	route.BindHandler(Get, func() {})
 
-	isMatched, pathParams := route.MatchURLPattern(GET, "/example/1/profile")
+	isMatched, pathParams := route.MatchURLPattern(Get, "/example/1/profile")
 	if isMatched {
 		t.Errorf(test.ExpectedBoolButFoundBool, false, isMatched)
 	}
@@ -109,9 +109,9 @@ func Test_MatchURLPattern_ValidHTTPMethodAndValidPath(t *testing.T) {
 	u.Setup()
 
 	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
-	route.BindHandler(GET, func() {})
+	route.BindHandler(Get, func() {})
 
-	isMatched, pathParams := route.MatchURLPattern(GET, "/example/1/profile/1")
+	isMatched, pathParams := route.MatchURLPattern(Get, "/example/1/profile/1")
 	if !isMatched {
 		t.Errorf(test.ExpectedBoolButFoundBool, true, isMatched)
 	}

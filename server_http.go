@@ -12,7 +12,7 @@ import (
 // ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	request.URL.Path = httprouter.CleanPath(request.URL.Path)
-	request.Method = strings.ToUpper(request.Method)
+	request.Method = strings.ToLower(request.Method)
 
 	// Create request context
 	context := objectFactory.CreateRequestContext(request, response)
@@ -25,7 +25,7 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 	defer RecoveryRequest(context, s.sandbox)
 
 	// Should redirect request to static folder or not?
-	if request.Method == GET && len(Cfg.StaticFolders) > 0 {
+	if request.Method == Get && len(Cfg.StaticFolders) > 0 {
 		for prefix, folder := range Cfg.StaticFolders {
 
 			if strings.HasPrefix(context.Path, prefix) {
