@@ -74,6 +74,35 @@ func DefaultServer(isSandbox bool) *Server {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// Run will start server on http port.
+func (s *Server) Run() {
+	address := fmt.Sprintf("%s:%d", Cfg.Host, Cfg.Port)
+	server := &http.Server{
+		Addr:           address,
+		ReadTimeout:    Cfg.ReadTimeout,
+		WriteTimeout:   Cfg.WriteTimeout,
+		MaxHeaderBytes: Cfg.HeaderSize,
+		Handler:        s,
+	}
+	logrus.Infof("listening on %s", address)
+	logrus.Fatal(server.ListenAndServe())
+}
+
+// RunTLS will start server on https port.
+func (s *Server) RunTLS(certFile string, keyFile string) {
+	address := fmt.Sprintf("%s:%d", Cfg.Host, Cfg.TLSPort)
+	server := &http.Server{
+		Addr:           address,
+		ReadTimeout:    Cfg.ReadTimeout,
+		WriteTimeout:   Cfg.WriteTimeout,
+		MaxHeaderBytes: Cfg.HeaderSize,
+		Handler:        s,
+	}
+	logrus.Infof("listening on %s\n", address)
+	logrus.Fatal(server.ListenAndServeTLS(certFile, keyFile))
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // GroupRoles binds user's roles to all url with same prefix.
 func (s *Server) GroupRoles(groupPath string, roles ...string) {
 	s.router.groupRoles(groupPath, roles...)
@@ -142,35 +171,4 @@ func (s *Server) Put(urlPattern string, handler ContextHandler) {
 // Unlink routes unlink request to registered handler.
 func (s *Server) Unlink(urlPattern string, handler ContextHandler) {
 	s.router.BindRoute(Unlink, urlPattern, handler)
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Run will start server on http port.
-func (s *Server) Run() {
-	address := fmt.Sprintf("%s:%d", Cfg.Host, Cfg.Port)
-	server := &http.Server{
-		Addr:           address,
-		ReadTimeout:    Cfg.ReadTimeout,
-		WriteTimeout:   Cfg.WriteTimeout,
-		MaxHeaderBytes: Cfg.HeaderSize,
-		Handler:        s,
-	}
-
-	logrus.Infof("listening on %s", address)
-	logrus.Fatal(server.ListenAndServe())
-}
-
-// RunTLS will start server on https port.
-func (s *Server) RunTLS(certFile string, keyFile string) {
-	address := fmt.Sprintf("%s:%d", Cfg.Host, Cfg.TLSPort)
-	server := &http.Server{
-		Addr:           address,
-		ReadTimeout:    Cfg.ReadTimeout,
-		WriteTimeout:   Cfg.WriteTimeout,
-		MaxHeaderBytes: Cfg.HeaderSize,
-		Handler:        s,
-	}
-
-	logrus.Infof("listening on %s\n", address)
-	logrus.Fatal(server.ListenAndServeTLS(certFile, keyFile))
 }
