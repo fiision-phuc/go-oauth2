@@ -6,114 +6,98 @@ import (
 	"github.com/phuc0302/go-oauth2/test"
 )
 
-func Test_BindHandler(t *testing.T) {
-	route := DefaultRoute{}
-	route.BindHandler(Get, func() {})
-
+func Test_bindHandler(t *testing.T) {
+	// [Test 1] Create new route empty string
+	route := createRoute("")
+	route.bindHandler(Get, func(request *Request, security *Security) {})
 	if route.handlers == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
+		if route.path != "" {
+			t.Errorf(test.ExpectedStringButFoundString, "", route.path)
+		}
 		if route.handlers[Get] == nil {
 			t.Error(test.ExpectedNotNil)
 		}
 	}
 
-	// [Test 2] Expected panic if not a func
+	// [Test 2] Create new route with non empty string
+	route = createRoute("/example/{userID}")
+	route.bindHandler(Get, func(request *Request, security *Security) {})
+	if route.path != "/example/{userID}" {
+		t.Errorf(test.ExpectedStringButFoundString, "/example/{userID}", route.path)
+	}
+	matched, params := route.match(Get, "/example/1")
+	if !matched {
+		t.Errorf(test.ExpectedBoolButFoundBool, true, matched)
+	}
+	if len(params) != 1 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 1, len(params))
+	} else {
+		if params["userID"] != "1" {
+			t.Errorf(test.ExpectedStringButFoundString, "1", params["userID"])
+		}
+	}
+}
+func Test_bindHandlerWithPanic(t *testing.T) {
+	route := createRoute("")
+
 	defer func() {
 		if r := recover(); r != nil {
 			/* Expected panic */
 		}
 	}()
-	route.BindHandler(Post, "")
+	route.bindHandler(Post, nil)
 	t.Errorf(test.ExpectedPanic)
 }
-func Test_BindHandlerWithPanic(t *testing.T) {
-	route := DefaultRoute{}
 
+func Test_invokeHandler(t *testing.T) {
+	route := createRoute("/example/{userID}/profile/{profileID}")
 	defer func() {
 		if r := recover(); r != nil {
 			/* Expected panic */
 		}
 	}()
-	route.BindHandler(Post, "")
-	t.Errorf(test.ExpectedPanic)
-}
-
-func Test_InvokeHandler(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
-	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
-
-	defer func() {
-		if r := recover(); r != nil {
-			/* Expected panic */
-		}
-	}()
-	route.BindHandler(Get, func() {
+	route.bindHandler(Get, func(request *Request, security *Security) {
 		panic("Test if func had been invoked or not.")
 	})
-	route.InvokeHandler(nil, nil)
+	route.invokeHandler(nil, nil)
 	t.Errorf(test.ExpectedPanic)
 }
 
-func Test_URLPattern(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
+func Test_match_InvalidHTTPMethod(t *testing.T) {
+	route := createRoute("/example/{userID}/profile/{profileID}")
+	route.bindHandler(Get, func(request *Request, security *Security) {})
 
-	route := objectFactory.CreateRoute("/example/{userID}")
-	if route.URLPattern() != "/example/{userID}" {
-		t.Errorf(test.ExpectedStringButFoundString, "/example/{userID}", route.URLPattern())
-	}
-}
-
-func Test_MatchURLPattern_InvalidHTTPMethod(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
-	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
-	route.BindHandler(Get, func() {})
-
-	isMatched, pathParams := route.MatchURLPattern(Post, "/example/1")
-	if isMatched {
-		t.Errorf(test.ExpectedBoolButFoundBool, false, isMatched)
+	matched, pathParams := route.match(Post, "/example/1")
+	if matched {
+		t.Errorf(test.ExpectedBoolButFoundBool, false, matched)
 	}
 	if pathParams != nil {
 		t.Error(test.ExpectedNil)
 	}
 }
 
-func Test_MatchURLPattern_InvalidHTTPMethodButInvalidPath(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
+func Test_match_InvalidHTTPMethodAndInvalidPath(t *testing.T) {
+	route := createRoute("/example/{userID}/profile/{profileID}")
+	route.bindHandler(Get, func(request *Request, security *Security) {})
 
-	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
-	route.BindHandler(Get, func() {})
-
-	isMatched, pathParams := route.MatchURLPattern(Get, "/example/1/profile")
-	if isMatched {
-		t.Errorf(test.ExpectedBoolButFoundBool, false, isMatched)
+	matched, pathParams := route.match(Get, "/example/1/profile")
+	if matched {
+		t.Errorf(test.ExpectedBoolButFoundBool, false, matched)
 	}
 	if pathParams != nil {
 		t.Error(test.ExpectedNil)
 	}
 }
 
-func Test_MatchURLPattern_ValidHTTPMethodAndValidPath(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
+func Test_match_ValidHTTPMethodAndValidPath(t *testing.T) {
+	route := createRoute("/example/{userID}/profile/{profileID}")
+	route.bindHandler(Get, func(request *Request, security *Security) {})
 
-	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
-	route.BindHandler(Get, func() {})
-
-	isMatched, pathParams := route.MatchURLPattern(Get, "/example/1/profile/1")
-	if !isMatched {
-		t.Errorf(test.ExpectedBoolButFoundBool, true, isMatched)
+	matched, pathParams := route.match(Get, "/example/1/profile/1")
+	if !matched {
+		t.Errorf(test.ExpectedBoolButFoundBool, true, matched)
 	}
 	if pathParams == nil {
 		t.Error(test.ExpectedNotNil)

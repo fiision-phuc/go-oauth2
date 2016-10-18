@@ -1,10 +1,8 @@
 package oauth2
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strings"
 
 	"github.com/phuc0302/go-mongo"
@@ -111,24 +109,25 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 
 // CreateRoute creates new route component.
 func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
-	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
-		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
-	})
-	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
-		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
-	})
-	if len(regexPattern) == 1 && regexPattern == "/" {
-		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
-	} else {
-		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
-	}
+	return nil
+	//	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
+	//		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
+	//	})
+	//	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
+	//		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
+	//	})
+	//	if len(regexPattern) == 1 && regexPattern == "/" {
+	//		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
+	//	} else {
+	//		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
+	//	}
 
-	route := DefaultRoute{
-		path:     urlPattern,
-		handlers: map[string]interface{}{},
-		regex:    regexp.MustCompile(regexPattern),
-	}
-	return &route
+	//	route := route{
+	//		path:     urlPattern,
+	//		handlers: map[string]ContextHandler{},
+	//		regex:    regexp.MustCompile(regexPattern),
+	//	}
+	//	return &route
 }
 
 // CreateRouter creates new router component.

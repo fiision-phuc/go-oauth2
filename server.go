@@ -120,55 +120,55 @@ func (s *Server) GroupRoute(urlPrefix string, handler GroupHandler) {
 
 // Copy routes copy request to registered handler.
 func (s *Server) Copy(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Copy, urlPattern, handler)
+	s.router.bindRoute(Copy, urlPattern, handler)
 }
 
 // Delete routes delete request to registered handler.
 func (s *Server) Delete(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Delete, urlPattern, handler)
+	s.router.bindRoute(Delete, urlPattern, handler)
 }
 
 // Get routes get request to registered handler.
 func (s *Server) Get(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Get, urlPattern, handler)
+	s.router.bindRoute(Get, urlPattern, handler)
 }
 
 // Head routes head request to registered handler.
 func (s *Server) Head(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Head, urlPattern, handler)
+	s.router.bindRoute(Head, urlPattern, handler)
 }
 
 // Link routes link request to registered handler.
 func (s *Server) Link(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Link, urlPattern, handler)
+	s.router.bindRoute(Link, urlPattern, handler)
 }
 
 // Options routes options request to registered handler.
 func (s *Server) Options(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Options, urlPattern, handler)
+	s.router.bindRoute(Options, urlPattern, handler)
 }
 
 // Patch routes patch request to registered handler.
 func (s *Server) Patch(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Patch, urlPattern, handler)
+	s.router.bindRoute(Patch, urlPattern, handler)
 }
 
 // Post routes post request to registered handler.
 func (s *Server) Post(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Post, urlPattern, handler)
+	s.router.bindRoute(Post, urlPattern, handler)
 }
 
 // Purge routes purge request to registered handler.
 func (s *Server) Purge(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Purge, urlPattern, handler)
+	s.router.bindRoute(Purge, urlPattern, handler)
 }
 
 // Put routes put request to registered handler.
 func (s *Server) Put(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Put, urlPattern, handler)
+	s.router.bindRoute(Put, urlPattern, handler)
 }
 
 // Unlink routes unlink request to registered handler.
 func (s *Server) Unlink(urlPattern string, handler ContextHandler) {
-	s.router.BindRoute(Unlink, urlPattern, handler)
+	s.router.bindRoute(Unlink, urlPattern, handler)
 }

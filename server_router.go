@@ -10,27 +10,27 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/// Router descripts a default router component implementation.
+/// router describes a router component implementation.
 type router struct {
 	groups []string
-	routes []IRoute
+	routes []*route
 	roles  map[*regexp.Regexp]*regexp.Regexp
 }
 
 // groupRoles groups prefix url's with user's roles.
 //
-// @param groupPath:
-func (r *router) groupRoles(groupPath string, roles ...string) {
+// @param pathPrefix:
+func (r *router) groupRoles(pathPrefix string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
 	if TokenStore == nil {
 		return
 	}
 
 	// Format pattern
-	groupPath = pathFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
+	pathPrefix = pathFinder.ReplaceAllStringFunc(pathPrefix, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
-	groupPath = globsFinder.ReplaceAllStringFunc(groupPath, func(m string) string {
+	pathPrefix = globsFinder.ReplaceAllStringFunc(pathPrefix, func(m string) string {
 		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
 	})
 
@@ -38,7 +38,7 @@ func (r *router) groupRoles(groupPath string, roles ...string) {
 	if r.roles == nil {
 		r.roles = make(map[*regexp.Regexp]*regexp.Regexp)
 	}
-	r.roles[regexp.MustCompile(groupPath)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
+	r.roles[regexp.MustCompile(pathPrefix)] = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 }
 
 // BindRoles binds an url pattern with user's roles.
@@ -60,8 +60,8 @@ func (r *router) groupRoute(s *Server, pathPrefix string, handler GroupHandler) 
 	r.groups = r.groups[:len(r.groups)-1]
 }
 
-// BindRoute binds an url pattern with a handler.
-func (r *router) BindRoute(httpMethod string, path string, handler interface{}) {
+// bindRoute binds a path with a handler.
+func (r *router) bindRoute(method string, path string, handler ContextHandler) {
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
@@ -76,24 +76,24 @@ func (r *router) BindRoute(httpMethod string, path string, handler interface{}) 
 	} else {
 		path = httprouter.CleanPath(path)
 	}
-	logrus.Infof("%s -> %s", httpMethod, path)
+	logrus.Infof("%07s -> %s", strings.ToUpper(method), path)
 
 	// Look for existing one before create new
 	for _, route := range r.routes {
-		if route.URLPattern() == path {
-			route.BindHandler(httpMethod, handler)
+		if route.path == path {
+			route.BindHandler(method, handler)
 			return
 		}
 	}
 
 	// Create new route
-	newRoute := objectFactory.CreateRoute(path)
-	newRoute.BindHandler(httpMethod, handler)
+	newRoute := createRoute(path)
+	newRoute.BindHandler(method, handler)
 	r.routes = append(r.routes, newRoute)
 }
 
-// MatchRoute matches a route with an url path.
-func (r *router) MatchRoute(context *Request, security *Security) (IRoute, map[string]string) {
+// matchRoute matches a route with a path.
+func (r *router) matchRoute(context *Request, security *Security) (*route, map[string]string) {
 	// Validate user's authorized first
 	isAuthorized := true
 	for rule, roles := range r.roles {
