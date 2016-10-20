@@ -18,8 +18,6 @@ type router struct {
 }
 
 // groupRoles groups prefix url's with user's roles.
-//
-// @param pathPrefix:
 func (r *router) groupRoles(pathPrefix string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
 	if TokenStore == nil {
@@ -50,10 +48,6 @@ func (r *router) groupRoles(pathPrefix string, roles ...string) {
 //}
 
 // groupRoute generates path's prefix for following urls.
-//
-// @param s
-// @param pathPrefix
-// @param handler
 func (r *router) groupRoute(s *Server, pathPrefix string, handler GroupHandler) {
 	r.groups = append(r.groups, pathPrefix)
 	handler(s)
@@ -76,19 +70,19 @@ func (r *router) bindRoute(method string, path string, handler ContextHandler) {
 	} else {
 		path = httprouter.CleanPath(path)
 	}
-	logrus.Infof("%07s -> %s", strings.ToUpper(method), path)
+	logrus.Infof("%-6s -> %s", strings.ToUpper(method), path)
 
 	// Look for existing one before create new
 	for _, route := range r.routes {
 		if route.path == path {
-			route.BindHandler(method, handler)
+			route.bindHandler(method, handler)
 			return
 		}
 	}
 
 	// Create new route
 	newRoute := createRoute(path)
-	newRoute.BindHandler(method, handler)
+	newRoute.bindHandler(method, handler)
 	r.routes = append(r.routes, newRoute)
 }
 
@@ -120,7 +114,7 @@ func (r *router) matchRoute(context *Request, security *Security) (*route, map[s
 
 	// Match route
 	for _, route := range r.routes {
-		if ok, pathParams := route.MatchURLPattern(context.request.Method, context.Path); ok {
+		if ok, pathParams := route.match(context.request.Method, context.Path); ok {
 			return route, pathParams
 		}
 	}
