@@ -20,9 +20,9 @@ type TestUnit struct {
 	Session  *mgo.Session
 	Database *mgo.Database
 
-	Client IClient
-	User1  IUser
-	User2  IUser
+	Client Client
+	User1  User
+	User2  User
 	//	ExpiredAccessToken  IToken
 	//	ExpiredRefreshToken IToken
 
@@ -49,7 +49,7 @@ func (u *TestUnit) Setup() {
 	// Define global variables
 	Cfg = LoadConfig(debug)
 	objectFactory = &DefaultFactory{}
-	TokenStore = objectFactory.CreateStore()
+	store = objectFactory.CreateStore()
 
 	// Generate test data
 	u.Client = &DefaultClient{

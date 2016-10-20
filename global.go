@@ -58,7 +58,7 @@ var (
 	Cfg Config
 
 	// Global public token store's instance.
-	TokenStore IStore
+	store TokenStore
 
 	// Global internal object factory's instance.
 	objectFactory IFactory

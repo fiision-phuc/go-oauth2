@@ -47,7 +47,7 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 
 	// Register global components
 	objectFactory = instance
-	TokenStore = instance.CreateStore()
+	store = instance.CreateStore()
 
 	// Create server
 	server := Server{
@@ -56,7 +56,7 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	}
 
 	// Setup OAuth2.0
-	if TokenStore != nil {
+	if store != nil {
 		//	grantAuthorization := new(AuthorizationGrant)
 		tokenGrant := new(TokenGrant)
 

@@ -7,7 +7,7 @@ type DefaultFactory struct {
 }
 
 // CreateStore creates new store component.
-func (d *DefaultFactory) CreateStore() IStore {
+func (d *DefaultFactory) CreateStore() TokenStore {
 	mongo.ConnectMongo()
 	return &DefaultMongoStore{}
 }

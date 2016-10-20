@@ -1,13 +1,15 @@
 package oauth2
 
+import "net/http"
+
 // IFactory describes a factory component's characteristic.
 type IFactory interface {
 
-	//	// Create new request context.
-	//	CreateRequestContext(request *http.Request, response http.ResponseWriter) *Request
+	// Create new request context.
+	CreateRequestContext(request *http.Request, response http.ResponseWriter) *Request
 
-	//	// Create new security context.
-	//	CreateSecurityContext(requestContext *Request) *Security
+	// Create new security context.
+	CreateSecurityContext(requestContext *Request) *Security
 
 	//	// Create new route component.
 	//	CreateRoute(urlPattern string) IRoute
@@ -16,5 +18,5 @@ type IFactory interface {
 	//	CreateRouter() ServerRouter
 
 	// Create new store component.
-	CreateStore() IStore
+	CreateStore() TokenStore
 }

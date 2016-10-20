@@ -3,8 +3,8 @@ package oauth2
 import "time"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// IClient describes a client's characteristic.
-type IClient interface {
+// Client describes a client's characteristic.
+type Client interface {
 
 	// Return client's ID.
 	ClientID() string
@@ -20,38 +20,25 @@ type IClient interface {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// IStore describes a token storage's characteristic.
-type IStore interface {
+// User describes an user's characteristic.
+type User interface {
 
-	// User
-	FindUserWithID(userID string) IUser
-	FindUserWithClient(clientID string, clientSecret string) IUser
-	FindUserWithCredential(username string, password string) IUser
+	// Return user's ID.
+	UserID() string
 
-	// Client
-	FindClientWithID(clientID string) IClient
-	FindClientWithCredential(clientID string, clientSecret string) IClient
+	// Return user's username.
+	Username() string
 
-	// Access Token
-	FindAccessToken(token string) IToken
-	FindAccessTokenWithCredential(clientID string, userID string) IToken
-	CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken
-	DeleteAccessToken(token IToken)
+	// Return user's password.
+	Password() string
 
-	// Refresh Token
-	FindRefreshToken(token string) IToken
-	FindRefreshTokenWithCredential(clientID string, userID string) IToken
-	CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) IToken
-	DeleteRefreshToken(token IToken)
-
-	//	// Authorization code
-	//	FindAuthorizationCode(authorizationCode string)
-	//	SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time)
+	// Return user's roles.
+	UserRoles() []string
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// IToken describes a token's characteristic, it can be either access token or refresh token.
-type IToken interface {
+// Token describes a token's characteristic, it can be either access token or refresh token.
+type Token interface {
 
 	// Return client's ID.
 	ClientID() string
@@ -73,20 +60,33 @@ type IToken interface {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// IUser describes an user's characteristic.
-type IUser interface {
+// TokenStore describes a token store's characteristic.
+type TokenStore interface {
 
-	// Return user's ID.
-	UserID() string
+	// User
+	FindUserWithID(userID string) User
+	FindUserWithClient(clientID string, clientSecret string) User
+	FindUserWithCredential(username string, password string) User
 
-	// Return user's username.
-	Username() string
+	// Client
+	FindClientWithID(clientID string) Client
+	FindClientWithCredential(clientID string, clientSecret string) Client
 
-	// Return user's password.
-	Password() string
+	// Access Token
+	FindAccessToken(token string) Token
+	FindAccessTokenWithCredential(clientID string, userID string) Token
+	CreateAccessToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) Token
+	DeleteAccessToken(token Token)
 
-	// Return user's roles.
-	UserRoles() []string
+	// Refresh Token
+	FindRefreshToken(token string) Token
+	FindRefreshTokenWithCredential(clientID string, userID string) Token
+	CreateRefreshToken(clientID string, userID string, createdTime time.Time, expiredTime time.Time) Token
+	DeleteRefreshToken(token Token)
+
+	//	// Authorization code
+	//	FindAuthorizationCode(authorizationCode string)
+	//	SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

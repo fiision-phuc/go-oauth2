@@ -21,7 +21,7 @@ type ServerRouter struct {
 // groupRoles groups prefix url's with user's roles.
 func (r *ServerRouter) groupRoles(pathPrefix string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
-	if TokenStore == nil {
+	if store == nil {
 		return
 	}
 
@@ -95,7 +95,7 @@ func (r *ServerRouter) matchRoute(context *Request, security *Security) (*Server
 		if rule.MatchString(context.Path) {
 			isAuthorized = false
 
-			if TokenStore != nil && security != nil && security.User != nil {
+			if store != nil && security != nil && security.User != nil {
 				for _, role := range security.User.UserRoles() {
 					if roles.MatchString(role) {
 						isAuthorized = true

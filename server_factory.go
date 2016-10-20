@@ -76,9 +76,9 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 	}
 
 	/* Condition validation: Validate expiration time */
-	if accessToken := TokenStore.FindAccessToken(tokenString); accessToken != nil && !accessToken.IsExpired() {
-		client := TokenStore.FindClientWithID(accessToken.ClientID())
-		user := TokenStore.FindUserWithID(accessToken.UserID())
+	if accessToken := store.FindAccessToken(tokenString); accessToken != nil && !accessToken.IsExpired() {
+		client := store.FindClientWithID(accessToken.ClientID())
+		user := store.FindUserWithID(accessToken.UserID())
 		return &Security{
 			Client:      client,
 			User:        user,
@@ -88,8 +88,8 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 
 	/* Condition validation: If everything is not work out, try to look for basic auth */
 	if username, password, ok := c.BasicAuth(); ok {
-		client := TokenStore.FindClientWithCredential(username, password)
-		user := TokenStore.FindUserWithClient(username, password)
+		client := store.FindClientWithCredential(username, password)
+		user := store.FindUserWithClient(username, password)
 
 		if client != nil && user != nil {
 			return &Security{
@@ -101,31 +101,31 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 	return nil
 }
 
-// CreateRoute creates new route component.
-func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
-	return nil
-	//	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
-	//		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
-	//	})
-	//	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
-	//		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
-	//	})
-	//	if len(regexPattern) == 1 && regexPattern == "/" {
-	//		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
-	//	} else {
-	//		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
-	//	}
+//// CreateRoute creates new route component.
+//func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
+//	return nil
+//	//	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
+//	//		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
+//	//	})
+//	//	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
+//	//		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
+//	//	})
+//	//	if len(regexPattern) == 1 && regexPattern == "/" {
+//	//		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
+//	//	} else {
+//	//		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
+//	//	}
 
-	//	route := route{
-	//		path:     urlPattern,
-	//		handlers: map[string]ContextHandler{},
-	//		regex:    regexp.MustCompile(regexPattern),
-	//	}
-	//	return &route
-}
+//	//	route := route{
+//	//		path:     urlPattern,
+//	//		handlers: map[string]ContextHandler{},
+//	//		regex:    regexp.MustCompile(regexPattern),
+//	//	}
+//	//	return &route
+//}
 
-// CreateRouter creates new router component.
-func (d *DefaultFactory) CreateRouter() ServerRouter {
-	return nil
-	//	return ServerRouter{}
-}
+//// CreateRouter creates new router component.
+//func (d *DefaultFactory) CreateRouter() ServerRouter {
+//	return nil
+//	//	return ServerRouter{}
+//}
