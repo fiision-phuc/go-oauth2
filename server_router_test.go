@@ -13,7 +13,7 @@ import (
 )
 
 func Test_GroupRoles(t *testing.T) {
-	r := new(router)
+	r := new(ServerRouter)
 	if r.roles != nil {
 		t.Error(test.ExpectedNil)
 	}
@@ -54,7 +54,7 @@ func Test_BindRole(t *testing.T) {
 	u.Setup()
 
 	// Setup router
-	r := new(router)
+	r := new(ServerRouter)
 	r.bindRoute(Get, "/", func(request *Request, security *Security) {})
 	r.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		r.bindRoute(Get, "", func(request *Request, security *Security) {})
@@ -69,6 +69,8 @@ func Test_BindRole(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		request.URL.Path = httprouter.CleanPath(request.URL.Path)
+		request.Method = strings.ToLower(request.Method)
 		context := objectFactory.CreateRequestContext(request, writer)
 		security := objectFactory.CreateSecurityContext(context)
 
@@ -86,7 +88,7 @@ func Test_BindRole(t *testing.T) {
 }
 
 func Test_GroupRoute(t *testing.T) {
-	router := new(router)
+	router := new(ServerRouter)
 	router.groupRoute(nil, "/user/profile", func(s *Server) {
 		router.bindRoute(Get, "", func(request *Request, security *Security) {})
 		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
@@ -141,7 +143,7 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 	u.Setup()
 
 	// Setup router
-	router := new(router)
+	router := new(ServerRouter)
 	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.bindRoute(Get, "", func(request *Request, security *Security) {})
@@ -156,6 +158,8 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = httprouter.CleanPath(r.URL.Path)
+		r.Method = strings.ToLower(r.Method)
 		context := objectFactory.CreateRequestContext(r, w)
 		Security := objectFactory.CreateSecurityContext(context)
 
@@ -177,7 +181,7 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 	u.Setup()
 
 	// Setup router
-	router := new(router)
+	router := new(ServerRouter)
 	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.bindRoute(Get, "", func(request *Request, security *Security) {})
@@ -191,6 +195,8 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = httprouter.CleanPath(r.URL.Path)
+		r.Method = strings.ToLower(r.Method)
 		context := objectFactory.CreateRequestContext(r, w)
 		Security := objectFactory.CreateSecurityContext(context)
 
@@ -212,7 +218,7 @@ func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
 	u.Setup()
 
 	// Setup router
-	router := new(router)
+	router := new(ServerRouter)
 	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.bindRoute(Get, "", func(request *Request, security *Security) {})
@@ -261,7 +267,7 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 	u.Setup()
 
 	// Setup router
-	router := new(router)
+	router := new(ServerRouter)
 	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.bindRoute(Get, "", func(request *Request, security *Security) {})
@@ -276,6 +282,8 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = httprouter.CleanPath(r.URL.Path)
+		r.Method = strings.ToLower(r.Method)
 		context := objectFactory.CreateRequestContext(r, w)
 		Security := objectFactory.CreateSecurityContext(context)
 
@@ -301,7 +309,7 @@ func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
 	u.Setup()
 
 	// Setup router
-	router := new(router)
+	router := new(ServerRouter)
 	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
 		router.bindRoute(Get, "", func(request *Request, security *Security) {})

@@ -313,27 +313,27 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 	client.Do(request)
 }
 
-func Test_CreateRoute(t *testing.T) {
-	objectFactory = &DefaultFactory{}
-	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
+//func Test_CreateRoute(t *testing.T) {
+//	objectFactory = &DefaultFactory{}
+//	route := objectFactory.CreateRoute("/example/{userID}/profile/{profileID}")
 
-	route.BindHandler(Get, func() {})
-	if route == nil {
-		t.Error(test.ExpectedNotNil)
-	} else {
-		defaultRoute, ok := route.(*route)
-		if ok {
-			if defaultRoute.path != "/example/{userID}/profile/{profileID}" {
-				t.Errorf(test.ExpectedStringButFoundString, "/example/{userID}/profile/{profileID}", defaultRoute.path)
-			}
-			if defaultRoute.regex == nil {
-				t.Error(test.ExpectedNotNil)
-			}
-		} else {
-			t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
-		}
-	}
-}
+//	route.BindHandler(Get, func() {})
+//	if route == nil {
+//		t.Error(test.ExpectedNotNil)
+//	} else {
+//		defaultRoute, ok := route.(*route)
+//		if ok {
+//			if defaultRoute.path != "/example/{userID}/profile/{profileID}" {
+//				t.Errorf(test.ExpectedStringButFoundString, "/example/{userID}/profile/{profileID}", defaultRoute.path)
+//			}
+//			if defaultRoute.regex == nil {
+//				t.Error(test.ExpectedNotNil)
+//			}
+//		} else {
+//			t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
+//		}
+//	}
+//}
 
 //func Test_CreateRouter(t *testing.T) {
 //	objectFactory = &DefaultFactory{}

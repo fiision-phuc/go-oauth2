@@ -10,15 +10,16 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/// router describes a router component implementation.
-type router struct {
+/// ServerRouter describes a router component implementation.
+type ServerRouter struct {
 	groups []string
-	routes []*route
-	roles  map[*regexp.Regexp]*regexp.Regexp
+	routes []*ServerRoute
+
+	roles map[*regexp.Regexp]*regexp.Regexp
 }
 
 // groupRoles groups prefix url's with user's roles.
-func (r *router) groupRoles(pathPrefix string, roles ...string) {
+func (r *ServerRouter) groupRoles(pathPrefix string, roles ...string) {
 	/* Condition validation: Ignore role validation if there is no token store */
 	if TokenStore == nil {
 		return
@@ -48,14 +49,14 @@ func (r *router) groupRoles(pathPrefix string, roles ...string) {
 //}
 
 // groupRoute generates path's prefix for following urls.
-func (r *router) groupRoute(s *Server, pathPrefix string, handler GroupHandler) {
+func (r *ServerRouter) groupRoute(s *Server, pathPrefix string, handler GroupHandler) {
 	r.groups = append(r.groups, pathPrefix)
 	handler(s)
 	r.groups = r.groups[:len(r.groups)-1]
 }
 
 // bindRoute binds a path with a handler.
-func (r *router) bindRoute(method string, path string, handler ContextHandler) {
+func (r *ServerRouter) bindRoute(method string, path string, handler ContextHandler) {
 	// Format url pattern before assigned to route
 	if len(r.groups) > 0 {
 		var buffer bytes.Buffer
@@ -87,7 +88,7 @@ func (r *router) bindRoute(method string, path string, handler ContextHandler) {
 }
 
 // matchRoute matches a route with a path.
-func (r *router) matchRoute(context *Request, security *Security) (*route, map[string]string) {
+func (r *ServerRouter) matchRoute(context *Request, security *Security) (*ServerRoute, map[string]string) {
 	// Validate user's authorized first
 	isAuthorized := true
 	for rule, roles := range r.roles {

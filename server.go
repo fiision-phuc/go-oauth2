@@ -12,7 +12,7 @@ import (
 // Server describes server object.
 type Server struct {
 	sandbox bool
-	router  *router
+	router  *ServerRouter
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ func CreateServer(instance IFactory, isSandbox bool) *Server {
 	// Create server
 	server := Server{
 		sandbox: isSandbox,
-		router:  new(router),
+		router:  new(ServerRouter),
 	}
 
 	// Setup OAuth2.0

@@ -7,8 +7,8 @@ import (
 	"github.com/phuc0302/go-oauth2/inject"
 )
 
-// route describes a route component implementation.
-type route struct {
+// ServerRoute describes a route component implementation.
+type ServerRoute struct {
 	path  string
 	regex *regexp.Regexp
 
@@ -17,7 +17,7 @@ type route struct {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // createRoute creates new route component.
-func createRoute(path string) *route {
+func createRoute(path string) *ServerRoute {
 	regexPattern := pathFinder.ReplaceAllStringFunc(path, func(m string) string {
 		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
 	})
@@ -31,7 +31,7 @@ func createRoute(path string) *route {
 		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
 	}
 
-	route := &route{
+	route := &ServerRoute{
 		path:     path,
 		handlers: map[string]ContextHandler{},
 		regex:    regexp.MustCompile(regexPattern),
@@ -41,7 +41,7 @@ func createRoute(path string) *route {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // bindHandler binds handler with specific http method.
-func (r *route) bindHandler(method string, handler ContextHandler) {
+func (r *ServerRoute) bindHandler(method string, handler ContextHandler) {
 	/* Condition validation: only accept function */
 	if handler == nil {
 		panic("Request handler must not be nil.")
@@ -57,7 +57,7 @@ func (r *route) bindHandler(method string, handler ContextHandler) {
 }
 
 // invokeHandler invokes handler.
-func (r *route) invokeHandler(c *Request, s *Security) {
+func (r *ServerRoute) invokeHandler(c *Request, s *Security) {
 	invoker := inject.CreateInvoker()
 	handler := r.handlers[c.request.Method]
 
@@ -72,7 +72,7 @@ func (r *route) invokeHandler(c *Request, s *Security) {
 }
 
 // match matchs path.
-func (r *route) match(method string, path string) (bool, map[string]string) {
+func (r *ServerRoute) match(method string, path string) (bool, map[string]string) {
 	if matches := r.regex.FindStringSubmatch(path); len(matches) > 0 && matches[0] == path {
 		if handler := r.handlers[method]; handler != nil {
 			// Find path params if there is any

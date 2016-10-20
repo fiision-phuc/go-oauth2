@@ -11,14 +11,15 @@ import (
 
 // ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	//	defer RecoveryRequest(request, response, s.sandbox)
 	request.URL.Path = httprouter.CleanPath(request.URL.Path)
 	request.Method = strings.ToLower(request.Method)
+
+	// Define recovery
+	//	defer RecoveryRequest(request, response, s.sandbox)
 
 	/* Condition validation: validate request method */
 	if !methodsValidation.MatchString(request.Method) {
 		panic(util.Status405())
-		return
 		//		context.OutputError(util.Status405())
 	}
 
@@ -37,12 +38,11 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 					}
 				}
 				panic(util.Status404())
-				return
 			}
 		}
 	}
 
-	//	// Handle request
+	// Handle request
 	//	var match mux.RouteMatch
 	//	if matched := router.Match(request, &match); matched {
 	//		match.Handler.ServeHTTP(response, request)
