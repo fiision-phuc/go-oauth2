@@ -1,7 +1,6 @@
 package oauth2
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/phuc0302/go-oauth2/inject"
@@ -15,31 +14,6 @@ type ServerRoute struct {
 	handlers map[string]ContextHandler
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// createRoute creates new route component.
-func createRoute(path string) *ServerRoute {
-	regexPattern := pathFinder.ReplaceAllStringFunc(path, func(m string) string {
-		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
-	})
-	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
-		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
-	})
-
-	if len(regexPattern) == 1 && regexPattern == "/" {
-		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
-	} else {
-		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
-	}
-
-	route := &ServerRoute{
-		path:     path,
-		handlers: map[string]ContextHandler{},
-		regex:    regexp.MustCompile(regexPattern),
-	}
-	return route
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // bindHandler binds handler with specific http method.
 func (r *ServerRoute) bindHandler(method string, handler ContextHandler) {
 	/* Condition validation: only accept function */

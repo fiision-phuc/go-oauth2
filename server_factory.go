@@ -1,13 +1,15 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 )
 
-// CreateRequestContext creates new request context.
-func (d *DefaultFactory) CreateRequestContext(request *http.Request, response http.ResponseWriter) *Request {
+// createRequestContext creates new request context.
+func createRequestContext(request *http.Request, response http.ResponseWriter) *Request {
 	context := &Request{
 		Path:     request.URL.Path,
 		request:  request,
@@ -62,8 +64,8 @@ func (d *DefaultFactory) CreateRequestContext(request *http.Request, response ht
 	return context
 }
 
-// CreateSecurityContext creates new security context.
-func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
+// createSecurityContext creates new security context.
+func createSecurityContext(c *Request) *Security {
 	tokenString := c.Header["authorization"]
 
 	/* Condition validation: Validate existing of authorization header */
@@ -101,31 +103,30 @@ func (d *DefaultFactory) CreateSecurityContext(c *Request) *Security {
 	return nil
 }
 
-//// CreateRoute creates new route component.
-//func (d *DefaultFactory) CreateRoute(urlPattern string) IRoute {
-//	return nil
-//	//	regexPattern := pathFinder.ReplaceAllStringFunc(urlPattern, func(m string) string {
-//	//		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
-//	//	})
-//	//	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
-//	//		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
-//	//	})
-//	//	if len(regexPattern) == 1 && regexPattern == "/" {
-//	//		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
-//	//	} else {
-//	//		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
-//	//	}
+// createRoute creates new route component.
+func createRoute(path string) *ServerRoute {
+	regexPattern := pathFinder.ReplaceAllStringFunc(path, func(m string) string {
+		return fmt.Sprintf(`(?P<%s>[^/#?]+)`, m[1:len(m)-1])
+	})
+	regexPattern = globsFinder.ReplaceAllStringFunc(regexPattern, func(m string) string {
+		return fmt.Sprintf(`(?P<_%d>[^#?]*)`, 0)
+	})
 
-//	//	route := route{
-//	//		path:     urlPattern,
-//	//		handlers: map[string]ContextHandler{},
-//	//		regex:    regexp.MustCompile(regexPattern),
-//	//	}
-//	//	return &route
-//}
+	if len(regexPattern) == 1 && regexPattern == "/" {
+		regexPattern = fmt.Sprintf("^%s?$", regexPattern)
+	} else {
+		regexPattern = fmt.Sprintf("^%s/?$", regexPattern)
+	}
 
-//// CreateRouter creates new router component.
-//func (d *DefaultFactory) CreateRouter() ServerRouter {
-//	return nil
-//	//	return ServerRouter{}
-//}
+	route := &ServerRoute{
+		path:     path,
+		handlers: make(map[string]ContextHandler),
+		regex:    regexp.MustCompile(regexPattern),
+	}
+	return route
+}
+
+// createRouter creates new router component.
+func createRouter() *ServerRouter {
+	return new(ServerRouter)
+}

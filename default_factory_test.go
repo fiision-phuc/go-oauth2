@@ -21,7 +21,7 @@ func Test_CreateRequestContext_GetRequest(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		if context.Path != httprouter.CleanPath(r.URL.Path) {
 			t.Errorf(test.ExpectedStringButFoundString, httprouter.CleanPath(r.URL.Path), context.Path)
@@ -57,7 +57,7 @@ func Test_CreateRequestContext_GetRequestWithQueryParams(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		if context.QueryParams == nil {
 			t.Error(test.ExpectedNotNil)
@@ -84,7 +84,7 @@ func Test_CreateRequestContext_PostFormRequest(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		if context.Header["content-type"] != "application/x-www-form-urlencoded" {
 			t.Errorf(test.ExpectedStringButFoundString, "application/x-www-form-urlencoded", context.Header["content-type"])
@@ -103,7 +103,7 @@ func Test_CreateRequestContext_PostFormRequestWithData(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		if context.Header["content-type"] != "application/x-www-form-urlencoded" {
 			t.Errorf(test.ExpectedStringButFoundString, "application/x-www-form-urlencoded", context.Header["content-type"])
@@ -130,7 +130,7 @@ func Test_CreateRequestContext_PostMultipartRequest(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		if context.Header["content-type"] != "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p" {
 			t.Errorf(test.ExpectedStringButFoundString, "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p", context.Header["content-type"])
@@ -153,7 +153,7 @@ func Test_CreateRequestContext_PostMultipartRequestWithData(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		if context.Header["content-type"] != "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p" {
 			t.Errorf(test.ExpectedStringButFoundString, "multipart/form-data; boundary=gc0p4jq0m2yt08ju534c0p", context.Header["content-type"])
@@ -197,8 +197,8 @@ func Test_CreateSecurityContext_NoAccessToken(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		security := objectFactory.CreateSecurityContext(context)
+		context := createRequestContext(r, w)
+		security := createSecurityContext(context)
 
 		if security != nil {
 			t.Error(test.ExpectedNil)
@@ -214,8 +214,8 @@ func Test_CreateSecurityContext_WithBasicAuth(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		security := objectFactory.CreateSecurityContext(context)
+		context := createRequestContext(r, w)
+		security := createSecurityContext(context)
 
 		if security == nil {
 			t.Error(test.ExpectedNotNil)
@@ -243,8 +243,8 @@ func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		security := objectFactory.CreateSecurityContext(context)
+		context := createRequestContext(r, w)
+		security := createSecurityContext(context)
 
 		if security == nil {
 			t.Error(test.ExpectedNotNil)
@@ -267,7 +267,7 @@ func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now()
-	token := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as query param
 	http.Get(fmt.Sprintf("%s?access_token=%s", ts.URL, token.Token()))
@@ -279,8 +279,8 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		security := objectFactory.CreateSecurityContext(context)
+		context := createRequestContext(r, w)
+		security := createSecurityContext(context)
 
 		if security == nil {
 			t.Error(test.ExpectedNotNil)
@@ -303,7 +303,7 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now().UTC()
-	token := TokenStore.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as authorization header
 	request, _ := http.NewRequest("POST", ts.URL, nil)
