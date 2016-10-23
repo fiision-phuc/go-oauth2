@@ -4,12 +4,82 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/johntdyer/slackrus"
+	"github.com/julienschmidt/httprouter"
+	"github.com/phuc0302/go-mongo"
 )
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// CreateServer returns a server with custom components.
+func CreateServer(tokenStore TokenStore, isSandbox bool) *Server {
+	// Load config file
+	if isSandbox {
+		Cfg = LoadConfig(debug)
+	} else {
+		Cfg = LoadConfig(release)
+	}
+
+	// Setup logger
+	level, err := logrus.ParseLevel(Cfg.LogLevel)
+	if err != nil {
+		level = logrus.DebugLevel
+	}
+	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetOutput(os.Stderr)
+	logrus.SetLevel(level)
+
+	// Setup slack notification if neccessary
+	if len(Cfg.SlackURL) > 0 {
+		logrus.AddHook(&slackrus.SlackrusHook{
+			HookURL:        Cfg.SlackURL,     // "https://hooks.slack.com/services/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"
+			Channel:        Cfg.SlackChannel, // "#Oauth2.0"
+			Username:       Cfg.SlackUser,    // "Server"
+			IconEmoji:      Cfg.SlackIcon,    // ":ghost:"
+			AcceptedLevels: slackrus.LevelThreshold(level),
+		})
+	}
+
+	// Register global components
+	store = tokenStore
+
+	// Create server
+	server := Server{
+		sandbox: isSandbox,
+		router:  new(ServerRouter),
+	}
+
+	// Setup OAuth2.0
+	if store != nil {
+		//	grantAuthorization := new(AuthorizationGrant)
+		tokenGrant := new(TokenGrant)
+
+		//	server.Get("/authorize", grantAuthorization.HandleForm)
+		server.Get("/token", tokenGrant.HandleForm)
+		server.Post("/token", tokenGrant.HandleForm)
+	}
+	return &server
+}
+
+// DefaultServer returns a server with build in components.
+func DefaultServer(isSandbox bool) *Server {
+	mongo.ConnectMongo()
+	tokenStore := new(DefaultMongoStore)
+	return CreateServer(tokenStore, isSandbox)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // createRequestContext creates new request context.
 func createRequestContext(request *http.Request, response http.ResponseWriter) *Request {
+	// Standardize request
+	request.URL.Path = httprouter.CleanPath(request.URL.Path)
+	request.Method = strings.ToLower(request.Method)
+
+	// Create request instance
 	context := &Request{
 		Path:     request.URL.Path,
 		request:  request,
@@ -103,6 +173,7 @@ func createSecurityContext(c *Request) *Security {
 	return nil
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // createRoute creates new route component.
 func createRoute(path string) *ServerRoute {
 	regexPattern := pathFinder.ReplaceAllStringFunc(path, func(m string) string {

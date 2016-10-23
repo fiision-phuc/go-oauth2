@@ -60,9 +60,6 @@ var (
 	// Global public token store's instance.
 	store TokenStore
 
-	// Global internal object factory's instance.
-	objectFactory IFactory
-
 	// Global internal private key.
 	privateKey *rsa.PrivateKey
 

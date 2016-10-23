@@ -344,13 +344,3 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 //		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
 //	}
 //}
-
-func Test_CreateStore(t *testing.T) {
-	objectFactory = &DefaultFactory{}
-	store := objectFactory.CreateStore()
-
-	_, ok := store.(*DefaultMongoStore)
-	if !ok {
-		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
-	}
-}

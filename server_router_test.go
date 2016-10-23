@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/phuc0302/go-oauth2/test"
 )
 
@@ -69,8 +67,6 @@ func Test_BindRole(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		request.URL.Path = httprouter.CleanPath(request.URL.Path)
-		request.Method = strings.ToLower(request.Method)
 		context := createRequestContext(request, writer)
 		security := createSecurityContext(context)
 
@@ -115,27 +111,25 @@ func Test_GroupRoute(t *testing.T) {
 	}
 }
 
-//func Test_BindRoute(t *testing.T) {
-//	u := new(TestUnit)
-//	defer u.Teardown()
-//	u.Setup()
+func Test_BindRoute(t *testing.T) {
+	//	u := new(TestUnit)
+	//	defer u.Teardown()
+	//	u.Setup()
 
-//	if router, ok := objectFactory.CreateRouter().(*DefaultRouter); !ok {
-//		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
-//	} else {
-//		// [Test 1] First bind
-//		router.BindRoute(Get, "/", func() {})
-//		if len(router.routes) != 1 {
-//			t.Errorf(test.ExpectedNumberButFoundNumber, 1, len(router.routes))
-//		}
+	router := createRouter()
 
-//		// [Test 2] Second bind
-//		router.BindRoute(Get, "/sample", func() {})
-//		if len(router.routes) != 2 {
-//			t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
-//		}
-//	}
-//}
+	// [Test 1] First bind
+	router.BindRoute(Get, "/", func() {})
+	if len(router.routes) != 1 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 1, len(router.routes))
+	}
+
+	// [Test 2] Second bind
+	router.BindRoute(Get, "/sample", func() {})
+	if len(router.routes) != 2 {
+		t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
+	}
+}
 
 func Test_MatchRoute_InvalidPath(t *testing.T) {
 	u := new(TestUnit)
@@ -158,8 +152,6 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = httprouter.CleanPath(r.URL.Path)
-		r.Method = strings.ToLower(r.Method)
 		context := createRequestContext(r, w)
 		Security := createSecurityContext(context)
 
@@ -195,8 +187,6 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = httprouter.CleanPath(r.URL.Path)
-		r.Method = strings.ToLower(r.Method)
 		context := createRequestContext(r, w)
 		Security := createSecurityContext(context)
 
@@ -233,8 +223,6 @@ func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = httprouter.CleanPath(r.URL.Path)
-		r.Method = strings.ToLower(r.Method)
 		context := createRequestContext(r, w)
 		Security := createSecurityContext(context)
 
@@ -282,8 +270,6 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = httprouter.CleanPath(r.URL.Path)
-		r.Method = strings.ToLower(r.Method)
 		context := createRequestContext(r, w)
 		Security := createSecurityContext(context)
 
@@ -324,8 +310,6 @@ func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
 
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = httprouter.CleanPath(r.URL.Path)
-		r.Method = strings.ToLower(r.Method)
 		context := createRequestContext(r, w)
 		Security := createSecurityContext(context)
 

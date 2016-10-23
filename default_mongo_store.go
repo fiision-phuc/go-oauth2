@@ -129,6 +129,7 @@ func (d *DefaultMongoStore) DeleteRefreshToken(token Token) {
 //func (d *MongoDBTokenStore) SaveAuthorizationCode(authorizationCode string, clientID string, expires time.Time) {
 //}
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // Parse Token
 func (d *DefaultMongoStore) parseToken(token string) Token {
 	/* Condition validation */

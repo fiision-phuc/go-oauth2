@@ -5,35 +5,33 @@ import (
 	"os"
 	"strings"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/phuc0302/go-oauth2/util"
 )
 
 // ServeHTTP handle HTTP request and HTTP response.
-func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	request.URL.Path = httprouter.CleanPath(request.URL.Path)
-	request.Method = strings.ToLower(request.Method)
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	request := createRequestContext(r, w)
+	security := createSecurityContext(request)
 
-	// Define recovery
-	//	defer RecoveryRequest(request, response, s.sandbox)
+	// Handle error
+	defer recovery(request, s.sandbox)
 
 	/* Condition validation: validate request method */
-	if !methodsValidation.MatchString(request.Method) {
+	if !methodsValidation.MatchString(r.Method) {
 		panic(util.Status405())
-		//		context.OutputError(util.Status405())
 	}
 
 	// Should redirect request to static folder or not?
-	if request.Method == Get && len(Cfg.StaticFolders) > 0 {
+	if request.request.Method == Get && len(Cfg.StaticFolders) > 0 {
 		for prefix, folder := range Cfg.StaticFolders {
-			if path := request.URL.Path; strings.HasPrefix(path, prefix) {
+			if path := request.Path; strings.HasPrefix(path, prefix) {
 				path = strings.Replace(path, prefix, folder, 1)
 
 				if file, err := os.Open(path); err == nil {
 					defer file.Close()
 
 					if info, _ := file.Stat(); !info.IsDir() {
-						http.ServeContent(response, request, path, info.ModTime(), file)
+						http.ServeContent(w, r, path, info.ModTime(), file)
 						return
 					}
 				}
@@ -42,11 +40,13 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 		}
 	}
 
-	// Handle request
-	//	var match mux.RouteMatch
-	//	if matched := router.Match(request, &match); matched {
-	//		match.Handler.ServeHTTP(response, request)
-	//		return
-	//	}
+	// Find route to handle request
+	if route, pathParams := s.router.matchRoute(request, security); route != nil {
+		if pathParams != nil {
+			request.PathParams = pathParams
+		}
+		route.invokeHandler(request, security)
+		return
+	}
 	panic(util.Status503())
 }

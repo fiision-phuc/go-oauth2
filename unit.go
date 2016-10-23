@@ -48,8 +48,7 @@ func (u *TestUnit) Setup() {
 
 	// Define global variables
 	Cfg = LoadConfig(debug)
-	objectFactory = &DefaultFactory{}
-	store = objectFactory.CreateStore()
+	store = new(DefaultMongoStore)
 
 	// Generate test data
 	u.Client = &DefaultClient{
