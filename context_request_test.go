@@ -25,7 +25,7 @@ func Test_BindForm(t *testing.T) {
 			ProfileID int64  `profileID`
 		}
 
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.BindForm(&form)
 
 		if form.UserID != "1" {
@@ -46,7 +46,7 @@ func Test_BindJSON(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		status := util.Status{}
 		context.BindJSON(&status)
@@ -75,7 +75,7 @@ func Test_OutputHeader(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		context.OutputHeader("test-header", "test-header-value")
 		context.OutputError(util.Status200())
@@ -95,7 +95,7 @@ func Test_OutputError(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.OutputError(util.Status400())
 	}))
 	defer ts.Close()
@@ -119,7 +119,7 @@ func Test_OutputRedirect(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.OutputRedirect(util.Status301(), "https://www.google.com")
 	}))
 	defer ts.Close()
@@ -140,7 +140,7 @@ func Test_OutputText(t *testing.T) {
 
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.OutputText(util.Status200(), "Sample test!")
 	}))
 	defer ts.Close()

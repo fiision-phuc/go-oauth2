@@ -4,11 +4,11 @@ package oauth2
 type Security struct {
 
 	// Registered user. Always available.
-	User IUser
+	User User
 	// Registered client. Always available.
-	Client IClient
+	Client Client
 	// Access token that had been given to user. Always available.
-	AccessToken IToken
+	AccessToken Token
 	// Refresh token that had been given to user. Might not be available all the time.
-	RefreshToken IToken
+	RefreshToken Token
 }
