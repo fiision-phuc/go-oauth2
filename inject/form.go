@@ -49,7 +49,7 @@ func BindForm(values map[string]string, inputForm interface{}) error {
 				property.Set(value)
 
 			} else if dataType.Kind() == reflect.String {
-				input := strings.ToLower(value.String())
+				input := strings.TrimSpace(value.String())
 				validation := structField.Tag.Get("validation")
 
 				// Validation input value before inject
@@ -65,6 +65,8 @@ func BindForm(values map[string]string, inputForm interface{}) error {
 				switch propertyType.Kind() {
 
 				case reflect.Bool:
+					input = strings.ToLower(input)
+
 					if b, err := strconv.ParseBool(input); err == nil {
 						property.Set(reflect.ValueOf(b))
 						break

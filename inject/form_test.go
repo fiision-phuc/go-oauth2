@@ -3,16 +3,12 @@ package inject
 import "testing"
 
 type TestStruct struct {
-	String string `field:"string" validation:"^\\w+$"`
-
-	ValueString string  `string`
-	ValueBool   bool    `bool`
-	ValueFloat  float64 `float`
-	ValueInt    int64   `int`
-	ValueInt8   int8    `int8`
-	ValueUInt   uint64  `uint`
-
-	ValueInvalid int `invalid_int`
+	ValueString string  `field:"string" validation:"^\\w+(\\s\\w+)?$"`
+	ValueBool   bool    `field:"bool"`
+	ValueFloat  float64 `field:"float" validation:"^\\d+(\\.\\d+)?$"`
+	ValueInt    int64   `field:"int" validation:"^-?\\d+$"`
+	ValueInt8   int8    `field:"int8"`
+	ValueUInt   uint64  `field:"uint"`
 }
 
 func Test_BindForm(t *testing.T) {
@@ -25,8 +21,8 @@ func Test_BindForm(t *testing.T) {
 		"uint":        "200",
 		"invalid_int": "abcdef",
 	}
-	testStruct := TestStruct{}
-	err := BindForm(values, &testStruct)
+	testStruct := new(TestStruct)
+	err := BindForm(values, testStruct)
 
 	if err != nil {
 		t.Error("Expected error nil when sending valid input.")
@@ -52,9 +48,5 @@ func Test_BindForm(t *testing.T) {
 	}
 	if testStruct.ValueUInt != 200 {
 		t.Errorf("Expected %d but found %d.", 200, testStruct.ValueUInt)
-	}
-
-	if testStruct.ValueInvalid != 0 {
-		t.Errorf("Expected %d but found %d.", 0, testStruct.ValueInvalid)
 	}
 }
