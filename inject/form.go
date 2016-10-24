@@ -1,40 +1,41 @@
 package inject
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/phuc0302/go-oauth2/util"
 )
 
 // BindForm binds data into given form object.
 func BindForm(values map[string]string, inputForm interface{}) error {
 	/* Condition validation */
 	if values == nil || inputForm == nil {
-		return fmt.Errorf("Input must not be nil.")
+		panic(util.Status500WithDescription("InputForm must not be nil."))
 	}
 
-	// Dereference pointer
+	/* Condition validation: validate inputForm type */
 	reflector := reflect.ValueOf(inputForm)
 	if reflector.Kind() == reflect.Ptr {
 		reflector = reflector.Elem()
 	}
 	if reflector.Kind() != reflect.Struct {
-		return fmt.Errorf("Input must be struct type.")
+		panic(util.Status500WithDescription("InputForm must be struct."))
 	}
 
 	inputStruct := reflector.Type()
 	for idx := 0; idx < reflector.NumField(); idx++ {
 		property := reflector.Field(idx)
 		structField := inputStruct.Field(idx)
-		propertyTag := string(structField.Tag)
+		field := structField.Tag.Get("field")
 
-		if property.CanSet() && len(propertyTag) > 0 {
+		if property.CanSet() && len(field) > 0 {
+			data := values[field]
 			propertyType := property.Type()
-			data := values[propertyTag]
 
-			dataType := reflect.TypeOf(data)
 			value := reflect.ValueOf(data)
+			dataType := reflect.TypeOf(data)
 
 			/* Condition validation: Skip if value is not valid */
 			if !value.IsValid() {
@@ -43,8 +44,8 @@ func BindForm(values map[string]string, inputForm interface{}) error {
 
 			if dataType == propertyType && dataType.Kind() != reflect.String {
 				property.Set(value)
-
 			} else if dataType.Kind() == reflect.String {
+				validation := structField.Tag.Get("validation")
 				input := strings.ToLower(value.String())
 
 				switch propertyType.Kind() {

@@ -3,6 +3,8 @@ package inject
 import "testing"
 
 type TestStruct struct {
+	String string `field:"string" validation:"^\\w+$"`
+
 	ValueString string  `string`
 	ValueBool   bool    `bool`
 	ValueFloat  float64 `float`
@@ -14,16 +16,6 @@ type TestStruct struct {
 }
 
 func Test_BindForm(t *testing.T) {
-	err := BindForm(nil, nil)
-	if err == nil {
-		t.Error("Expected error when sending nil.")
-	}
-
-	err = BindForm(nil, "A string")
-	if err == nil {
-		t.Error("Expected error return when sending non struct type.")
-	}
-
 	values := map[string]string{
 		"string":      "A String",
 		"bool":        "FaLSE",
@@ -34,7 +26,7 @@ func Test_BindForm(t *testing.T) {
 		"invalid_int": "abcdef",
 	}
 	testStruct := TestStruct{}
-	err = BindForm(values, &testStruct)
+	err := BindForm(values, &testStruct)
 
 	if err != nil {
 		t.Error("Expected error nil when sending valid input.")
