@@ -13,7 +13,7 @@ import (
 // BindForm binds data into given form object.
 func BindForm(values map[string]string, inputForm interface{}) error {
 	/* Condition validation */
-	if values == nil || inputForm == nil {
+	if inputForm == nil {
 		panic(util.Status500WithDescription("InputForm must not be nil."))
 	}
 

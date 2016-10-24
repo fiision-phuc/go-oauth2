@@ -1,12 +1,8 @@
 package oauth2
 
-import (
-	"regexp"
+import "regexp"
 
-	"github.com/phuc0302/go-oauth2/inject"
-)
-
-// ServerRoute describes a route component implementation.
+// ServerRoute describes a route component.
 type ServerRoute struct {
 	path  string
 	regex *regexp.Regexp
@@ -32,17 +28,8 @@ func (r *ServerRoute) bindHandler(method string, handler ContextHandler) {
 
 // invokeHandler invokes handler.
 func (r *ServerRoute) invokeHandler(c *Request, s *Security) {
-	invoker := inject.CreateInvoker()
 	handler := r.handlers[c.request.Method]
-
-	// Call handler
-	invoker.Map(c)
-	invoker.Map(s)
-
-	/* Condition validation: Validate error */
-	if _, err := invoker.Invoke(handler); err != nil {
-		panic(err)
-	}
+	handler(c, s)
 }
 
 // match matchs path.

@@ -21,8 +21,8 @@ func Test_BindForm(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var form struct {
-			UserID    string `userID`
-			ProfileID int64  `profileID`
+			UserID    string `field:"userID"`
+			ProfileID int64  `field:"profileID"`
 		}
 
 		context := createRequestContext(r, w)

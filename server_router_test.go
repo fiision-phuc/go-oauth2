@@ -119,13 +119,13 @@ func Test_BindRoute(t *testing.T) {
 	router := createRouter()
 
 	// [Test 1] First bind
-	router.BindRoute(Get, "/", func() {})
+	router.bindRoute(Get, "/", func(c *Request, s *Security) {})
 	if len(router.routes) != 1 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 1, len(router.routes))
 	}
 
 	// [Test 2] Second bind
-	router.BindRoute(Get, "/sample", func() {})
+	router.bindRoute(Get, "/sample", func(c *Request, s *Security) {})
 	if len(router.routes) != 2 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
 	}
