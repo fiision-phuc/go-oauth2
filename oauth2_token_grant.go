@@ -15,8 +15,8 @@ type TokenGrant struct {
 }
 
 // HandleForm validates authentication form.
-func (g *TokenGrant) HandleForm(c *Request, s *Security) {
-	security := new(Security)
+func (g *TokenGrant) HandleForm(c *RequestContext, s *OAuthContext) {
+	security := new(OAuthContext)
 
 	if err := g.validateForm(c, security); err == nil {
 		g.finalizeToken(c, security)
@@ -26,7 +26,7 @@ func (g *TokenGrant) HandleForm(c *Request, s *Security) {
 }
 
 // validateForm validates general information
-func (g *TokenGrant) validateForm(c *Request, s *Security) *util.Status {
+func (g *TokenGrant) validateForm(c *RequestContext, s *OAuthContext) *util.Status {
 	// Bind
 	var inputForm struct {
 		GrantType    string `grant_type`
@@ -94,7 +94,7 @@ func (g *TokenGrant) validateForm(c *Request, s *Security) *util.Status {
 	return nil
 }
 
-func (t *TokenGrant) handleAuthorizationCodeGrant(c *Request, values url.Values, client Client) {
+func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, values url.Values, client Client) {
 	//	/* Condition validation: Validate redirect_uri */
 	//	if len(queryClient.RedirectURI) == 0 {
 	//		err := util.Status400WithDescription("Missing redirect_uri parameter.")
@@ -168,7 +168,7 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 }
 
 // passwordFlow implements user's authentication with user's credential.
-func (g *TokenGrant) passwordFlow(c *Request, s *Security) *util.Status {
+func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) *util.Status {
 	var passwordForm struct {
 		Username string `username`
 		Password string `password`
@@ -190,7 +190,7 @@ func (g *TokenGrant) passwordFlow(c *Request, s *Security) *util.Status {
 }
 
 // useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *util.Status {
+func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) *util.Status {
 	/* Condition validation: Validate refresh_token parameter */
 	if queryToken := c.QueryParams["refresh_token"]; len(queryToken) > 0 {
 
@@ -223,7 +223,7 @@ func (g *TokenGrant) refreshTokenFlow(c *Request, s *Security) *util.Status {
 }
 
 // finalizeToken summary and return result to client.
-func (g *TokenGrant) finalizeToken(c *Request, s *Security) {
+func (g *TokenGrant) finalizeToken(c *RequestContext, s *OAuthContext) {
 	now := time.Now()
 
 	// Generate access token if neccessary

@@ -88,7 +88,7 @@ func (r *ServerRouter) bindRoute(method string, path string, handler ContextHand
 }
 
 // matchRoute matches a route with a path.
-func (r *ServerRouter) matchRoute(context *Request, security *Security) (*ServerRoute, map[string]string) {
+func (r *ServerRouter) matchRoute(context *RequestContext, security *OAuthContext) (*ServerRoute, map[string]string) {
 	// Validate user's authorized first
 	isAuthorized := true
 	for rule, roles := range r.roles {

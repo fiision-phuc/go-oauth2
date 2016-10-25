@@ -74,14 +74,10 @@ func DefaultServer(isSandbox bool) *Server {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // createRequestContext creates new request context.
-func createRequestContext(request *http.Request, response http.ResponseWriter) *Request {
-	// Standardize request
-	request.URL.Path = httprouter.CleanPath(request.URL.Path)
-	request.Method = strings.ToLower(request.Method)
-
-	// Create request instance
-	context := &Request{
-		Path:     request.URL.Path,
+func createRequestContext(request *http.Request, response http.ResponseWriter) *RequestContext {
+	context := &RequestContext{
+		Path:     httprouter.CleanPath(request.URL.Path),
+		Method:   strings.ToLower(request.Method),
 		request:  request,
 		response: response,
 	}
@@ -101,13 +97,13 @@ func createRequestContext(request *http.Request, response http.ResponseWriter) *
 
 	// Parse body context if neccessary
 	var params url.Values
-	switch context.request.Method {
+	switch context.Method {
 
 	case Get:
 		params = request.URL.Query()
 		break
 
-	case Post, Patch:
+	case Patch, Post:
 		if contentType := context.Header["content-type"]; contentType == "application/x-www-form-urlencoded" {
 			if err := request.ParseForm(); err == nil {
 				params = request.Form
@@ -135,7 +131,7 @@ func createRequestContext(request *http.Request, response http.ResponseWriter) *
 }
 
 // createSecurityContext creates new security context.
-func createSecurityContext(c *Request) *Security {
+func createSecurityContext(c *RequestContext) *OAuthContext {
 	tokenString := c.Header["authorization"]
 
 	/* Condition validation: Validate existing of authorization header */
@@ -151,7 +147,7 @@ func createSecurityContext(c *Request) *Security {
 	if accessToken := store.FindAccessToken(tokenString); accessToken != nil && !accessToken.IsExpired() {
 		client := store.FindClientWithID(accessToken.ClientID())
 		user := store.FindUserWithID(accessToken.UserID())
-		return &Security{
+		return &OAuthContext{
 			Client:      client,
 			User:        user,
 			AccessToken: accessToken,
@@ -164,7 +160,7 @@ func createSecurityContext(c *Request) *Security {
 		user := store.FindUserWithClient(username, password)
 
 		if client != nil && user != nil {
-			return &Security{
+			return &OAuthContext{
 				Client: client,
 				User:   user,
 			}

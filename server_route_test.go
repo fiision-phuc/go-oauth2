@@ -9,7 +9,7 @@ import (
 func Test_bindHandler(t *testing.T) {
 	// [Test 1] Create new route empty string
 	route := createRoute("")
-	route.bindHandler(Get, func(request *Request, security *Security) {})
+	route.bindHandler(Get, func(request *RequestContext, security *OAuthContext) {})
 	if route.handlers == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -23,7 +23,7 @@ func Test_bindHandler(t *testing.T) {
 
 	// [Test 2] Create new route with non empty string
 	route = createRoute("/example/{userID}")
-	route.bindHandler(Get, func(request *Request, security *Security) {})
+	route.bindHandler(Get, func(request *RequestContext, security *OAuthContext) {})
 	if route.path != "/example/{userID}" {
 		t.Errorf(test.ExpectedStringButFoundString, "/example/{userID}", route.path)
 	}
@@ -58,7 +58,7 @@ func Test_invokeHandler(t *testing.T) {
 			/* Expected panic */
 		}
 	}()
-	route.bindHandler(Get, func(request *Request, security *Security) {
+	route.bindHandler(Get, func(request *RequestContext, security *OAuthContext) {
 		panic("Test if func had been invoked or not.")
 	})
 	route.invokeHandler(nil, nil)
@@ -67,7 +67,7 @@ func Test_invokeHandler(t *testing.T) {
 
 func Test_match_InvalidHTTPMethod(t *testing.T) {
 	route := createRoute("/example/{userID}/profile/{profileID}")
-	route.bindHandler(Get, func(request *Request, security *Security) {})
+	route.bindHandler(Get, func(request *RequestContext, security *OAuthContext) {})
 
 	matched, pathParams := route.match(Post, "/example/1")
 	if matched {
@@ -80,7 +80,7 @@ func Test_match_InvalidHTTPMethod(t *testing.T) {
 
 func Test_match_InvalidHTTPMethodAndInvalidPath(t *testing.T) {
 	route := createRoute("/example/{userID}/profile/{profileID}")
-	route.bindHandler(Get, func(request *Request, security *Security) {})
+	route.bindHandler(Get, func(request *RequestContext, security *OAuthContext) {})
 
 	matched, pathParams := route.match(Get, "/example/1/profile")
 	if matched {
@@ -93,7 +93,7 @@ func Test_match_InvalidHTTPMethodAndInvalidPath(t *testing.T) {
 
 func Test_match_ValidHTTPMethodAndValidPath(t *testing.T) {
 	route := createRoute("/example/{userID}/profile/{profileID}")
-	route.bindHandler(Get, func(request *Request, security *Security) {})
+	route.bindHandler(Get, func(request *RequestContext, security *OAuthContext) {})
 
 	matched, pathParams := route.match(Get, "/example/1/profile/1")
 	if !matched {

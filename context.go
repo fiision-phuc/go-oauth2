@@ -11,9 +11,26 @@ import (
 	"github.com/phuc0302/go-oauth2/util"
 )
 
-// Request describes a HTTP URL request scope.
-type Request struct {
-	Path        string
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// OAuthContext describes a user's oauth scope.
+type OAuthContext struct {
+
+	// Registered user. Always available.
+	User User
+	// Registered client. Always available.
+	Client Client
+	// Access token that had been given to user. Always available.
+	AccessToken Token
+	// Refresh token that had been given to user. Might not be available all the time.
+	RefreshToken Token
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// RequestContext describes a HTTP URL request scope.
+type RequestContext struct {
+	Method string
+	Path   string
+
 	Header      map[string]string
 	PathParams  map[string]string
 	QueryParams map[string]string
@@ -23,18 +40,18 @@ type Request struct {
 }
 
 // BasicAuth returns username & password.
-func (c *Request) BasicAuth() (username string, password string, ok bool) {
+func (c *RequestContext) BasicAuth() (username string, password string, ok bool) {
 	username, password, ok = c.request.BasicAuth()
 	return
 }
 
 // BindForm converts urlencode/multipart form to object.
-func (c *Request) BindForm(inputForm interface{}) error {
+func (c *RequestContext) BindForm(inputForm interface{}) error {
 	return inject.BindForm(c.QueryParams, inputForm)
 }
 
 // BindJSON converts json data to object.
-func (c *Request) BindJSON(jsonObject interface{}) error {
+func (c *RequestContext) BindJSON(jsonObject interface{}) error {
 	bytes, err := ioutil.ReadAll(c.request.Body)
 
 	/* Condition validation: Validate parse process */
@@ -47,7 +64,7 @@ func (c *Request) BindJSON(jsonObject interface{}) error {
 }
 
 // MultipartFile returns an uploaded file by name.
-func (c *Request) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
+func (c *RequestContext) MultipartFile(name string) (multipart.File, *multipart.FileHeader, error) {
 	return c.request.FormFile(name)
 }
 
@@ -82,15 +99,13 @@ func (c *Request) MultipartFile(name string) (multipart.File, *multipart.FileHea
 //	return nil
 //}
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // OutputHeader returns an additional header.
-func (c *Request) OutputHeader(headerName string, headerValue string) {
+func (c *RequestContext) OutputHeader(headerName string, headerValue string) {
 	c.response.Header().Set(headerName, headerValue)
 }
 
 // OutputError returns an error JSON.
-func (c *Request) OutputError(status *util.Status) {
+func (c *RequestContext) OutputError(status *util.Status) {
 	if redirectURL := redirectPaths[status.Code]; len(redirectURL) > 0 {
 		c.OutputRedirect(status, redirectURL)
 	} else {
@@ -104,12 +119,12 @@ func (c *Request) OutputError(status *util.Status) {
 }
 
 // OutputRedirect returns a redirect instruction.
-func (c *Request) OutputRedirect(status *util.Status, url string) {
+func (c *RequestContext) OutputRedirect(status *util.Status, url string) {
 	http.Redirect(c.response, c.request, url, status.Code)
 }
 
 // OutputJSON returns a JSON.
-func (c *Request) OutputJSON(status *util.Status, model interface{}) {
+func (c *RequestContext) OutputJSON(status *util.Status, model interface{}) {
 	c.response.Header().Set("Content-Type", "application/json")
 	c.response.WriteHeader(status.Code)
 
@@ -117,8 +132,8 @@ func (c *Request) OutputJSON(status *util.Status, model interface{}) {
 	c.response.Write(data)
 }
 
-// OutputHTML will render a HTML page.
-func (c *Request) OutputHTML(filePath string, model interface{}) {
+// OutputHTML returns a HTML page.
+func (c *RequestContext) OutputHTML(filePath string, model interface{}) {
 	tmpl, error := template.ParseFiles(filePath)
 	if error != nil {
 		c.OutputError(util.Status404())
@@ -128,7 +143,7 @@ func (c *Request) OutputHTML(filePath string, model interface{}) {
 }
 
 // OutputText returns a string.
-func (c *Request) OutputText(status *util.Status, data string) {
+func (c *RequestContext) OutputText(status *util.Status, data string) {
 	c.response.Header().Set("Content-Type", "text/plain")
 	c.response.WriteHeader(status.Code)
 	c.response.Write([]byte(data))

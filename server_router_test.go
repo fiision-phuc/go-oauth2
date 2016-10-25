@@ -53,15 +53,15 @@ func Test_BindRole(t *testing.T) {
 
 	// Setup router
 	r := createRouter()
-	r.bindRoute(Get, "/", func(request *Request, security *Security) {})
+	r.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
 	r.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
-		r.bindRoute(Get, "", func(request *Request, security *Security) {})
-		r.bindRoute(Post, "", func(request *Request, security *Security) {})
-		r.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		r.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		r.bindRoute(Post, "", func(request *RequestContext, security *OAuthContext) {})
+		r.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	r.groupRoute(nil, "/private", func(s *Server) {
-		r.bindRoute(Get, "", func(request *Request, security *Security) {})
-		r.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		r.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		r.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	r.groupRoles("/private**", "r_admin")
 
@@ -86,9 +86,9 @@ func Test_BindRole(t *testing.T) {
 func Test_GroupRoute(t *testing.T) {
 	router := createRouter()
 	router.groupRoute(nil, "/user/profile", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
-		router.bindRoute(Post, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Post, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 
 	if router.routes == nil {
@@ -119,13 +119,13 @@ func Test_BindRoute(t *testing.T) {
 	router := createRouter()
 
 	// [Test 1] First bind
-	router.bindRoute(Get, "/", func(c *Request, s *Security) {})
+	router.bindRoute(Get, "/", func(c *RequestContext, s *OAuthContext) {})
 	if len(router.routes) != 1 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 1, len(router.routes))
 	}
 
 	// [Test 2] Second bind
-	router.bindRoute(Get, "/sample", func(c *Request, s *Security) {})
+	router.bindRoute(Get, "/sample", func(c *RequestContext, s *OAuthContext) {})
 	if len(router.routes) != 2 {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 2, len(router.routes))
 	}
@@ -138,15 +138,15 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 
 	// Setup router
 	router := createRouter()
-	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
+	router.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Post, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Post, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoute(nil, "/private", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoles("/private**", "r_admin")
 
@@ -174,14 +174,14 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 
 	// Setup router
 	router := createRouter()
-	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
+	router.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoute(nil, "/private", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoles("/private**", "r_admin")
 
@@ -209,15 +209,15 @@ func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
 
 	// Setup router
 	router := createRouter()
-	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
+	router.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Post, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Post, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoute(nil, "/private", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoles("/private**", "r_admin")
 
@@ -256,15 +256,15 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 
 	// Setup router
 	router := createRouter()
-	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
+	router.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Post, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Post, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoute(nil, "/private", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoles("/private**", "r_admin")
 
@@ -296,15 +296,15 @@ func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
 
 	// Setup router
 	router := createRouter()
-	router.bindRoute(Get, "/", func(request *Request, security *Security) {})
+	router.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
 	router.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Post, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Post, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoute(nil, "/private", func(s *Server) {
-		router.bindRoute(Get, "", func(request *Request, security *Security) {})
-		router.bindRoute(Get, "/{profileID}", func(request *Request, security *Security) {})
+		router.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+		router.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
 	})
 	router.groupRoles("/private**", "r_admin")
 

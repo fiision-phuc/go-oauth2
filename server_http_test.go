@@ -20,7 +20,7 @@ func Test_ServeHTTP_InvalidResource(t *testing.T) {
 
 	// Setup server & test server
 	server := DefaultServer(true)
-	server.Get("/sample", func(c *Request, s *Security) {
+	server.Get("/sample", func(c *RequestContext, s *OAuthContext) {
 		c.OutputJSON(util.Status200(), map[string]string{"apple": "apple"})
 	})
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +41,7 @@ func Test_ServeHTTP_ValidResource(t *testing.T) {
 
 	// Setup server & test server
 	server := DefaultServer(true)
-	server.Get("/sample", func(c *Request, s *Security) {
+	server.Get("/sample", func(c *RequestContext, s *OAuthContext) {
 		c.OutputJSON(util.Status200(), map[string]string{"apple": "apple"})
 	})
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +62,7 @@ func Test_ServeHTTP_InvalidHTTPMethod(t *testing.T) {
 
 	// Setup server & test server
 	server := DefaultServer(true)
-	server.Get("/sample", func(c *Request, s *Security) {
+	server.Get("/sample", func(c *RequestContext, s *OAuthContext) {
 		c.OutputJSON(util.Status200(), map[string]string{"apple": "apple"})
 	})
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +88,7 @@ func Test_ServeHTTP_InvalidURL(t *testing.T) {
 
 	// Setup server & test server
 	server := DefaultServer(true)
-	server.Get("/sample", func(c *Request, s *Security) {
+	server.Get("/sample", func(c *RequestContext, s *OAuthContext) {
 		c.OutputJSON(util.Status200(), map[string]string{"apple": "apple"})
 	})
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +112,7 @@ func Test_ServeHTTP_ValidURL(t *testing.T) {
 
 	// Setup server & test server
 	server := DefaultServer(true)
-	server.Get("/sample", func(c *Request, s *Security) {
+	server.Get("/sample", func(c *RequestContext, s *OAuthContext) {
 		c.OutputJSON(util.Status200(), map[string]string{"apple": "apple"})
 	})
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -13,7 +13,7 @@ import (
 )
 
 // recovery recovers server from panic state.
-func recovery(c *Request, isDevelopment bool) {
+func recovery(c *RequestContext, isDevelopment bool) {
 	if err := recover(); err != nil {
 		// Cast err to http status
 		var status *util.Status

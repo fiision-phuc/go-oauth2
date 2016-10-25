@@ -80,5 +80,5 @@ var (
 )
 
 // Type alias
-type ContextHandler func(request *Request, security *Security)
+type ContextHandler func(request *RequestContext, security *OAuthContext)
 type GroupHandler func(server *Server)
