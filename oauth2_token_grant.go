@@ -27,18 +27,18 @@ func (g *TokenGrant) HandleForm(c *RequestContext, s *OAuthContext) {
 
 // validateForm validates general information
 func (g *TokenGrant) validateForm(c *RequestContext, s *OAuthContext) *util.Status {
+	// If client_id and client_secret are not include, try to look at the authorization header
+	if c.QueryParams != nil && len(c.QueryParams["client_id"]) == 0 && len(c.QueryParams["client_secret"]) == 0 {
+		c.QueryParams["client_id"], c.QueryParams["client_secret"], _ = c.request.BasicAuth()
+	}
+
 	// Bind
 	var inputForm struct {
-		GrantType    string `grant_type`
-		ClientID     string `client_id`
-		ClientSecret string `client_secret`
+		GrantType    string `field:"grant_type" validation:"^\\w+?$"`
+		ClientID     string `field:"client_id" validation:"^[0-9a-fA-F]{24}$"`
+		ClientSecret string `field:"client_secret" validation:"^[0-9a-fA-F]{24}$"`
 	}
-	c.BindForm(&inputForm)
-
-	// If client_id and client_secret are not include, try to look at the authorization header
-	if len(inputForm.ClientID) == 0 && len(inputForm.ClientSecret) == 0 {
-		inputForm.ClientID, inputForm.ClientSecret, _ = c.request.BasicAuth()
-	}
+	err := c.BindForm(&inputForm)
 
 	/* Condition validation: Validate grant_type */
 	if !grantsValidation.MatchString(inputForm.GrantType) {

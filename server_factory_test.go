@@ -198,7 +198,7 @@ func Test_CreateSecurityContext_NoAccessToken(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		security := createSecurityContext(context)
+		security := createOAuthContext(context)
 
 		if security != nil {
 			t.Error(test.ExpectedNil)
@@ -215,7 +215,7 @@ func Test_CreateSecurityContext_WithBasicAuth(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		security := createSecurityContext(context)
+		security := createOAuthContext(context)
 
 		if security == nil {
 			t.Error(test.ExpectedNotNil)
@@ -244,7 +244,7 @@ func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		security := createSecurityContext(context)
+		security := createOAuthContext(context)
 
 		if security == nil {
 			t.Error(test.ExpectedNotNil)
@@ -280,7 +280,7 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		security := createSecurityContext(context)
+		security := createOAuthContext(context)
 
 		if security == nil {
 			t.Error(test.ExpectedNotNil)

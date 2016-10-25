@@ -11,7 +11,7 @@ import (
 // ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	request := createRequestContext(r, w)
-	security := createSecurityContext(request)
+	security := createOAuthContext(request)
 
 	// Handle error
 	defer recovery(request, s.sandbox)

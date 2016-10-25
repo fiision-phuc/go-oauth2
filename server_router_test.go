@@ -68,7 +68,7 @@ func Test_BindRole(t *testing.T) {
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		context := createRequestContext(request, writer)
-		security := createSecurityContext(context)
+		security := createOAuthContext(context)
 
 		route, pathParams := r.matchRoute(context, security)
 		if route != nil {
@@ -153,7 +153,7 @@ func Test_MatchRoute_InvalidPath(t *testing.T) {
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		Security := createSecurityContext(context)
+		Security := createOAuthContext(context)
 
 		route, pathParams := router.matchRoute(context, Security)
 		if route != nil {
@@ -188,7 +188,7 @@ func Test_MatchRoute_InvalidHTTPMethod(t *testing.T) {
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		Security := createSecurityContext(context)
+		Security := createOAuthContext(context)
 
 		route, pathParams := router.matchRoute(context, Security)
 		if route != nil {
@@ -224,7 +224,7 @@ func Test_MatchRoute_ValidHTTPMethodAndPath(t *testing.T) {
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		Security := createSecurityContext(context)
+		Security := createOAuthContext(context)
 
 		route, _ := router.matchRoute(context, Security)
 		if route == nil {
@@ -271,7 +271,7 @@ func Test_MatchRoute_SendRequestToSecureResourceWithoutAccessToken(t *testing.T)
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		Security := createSecurityContext(context)
+		Security := createOAuthContext(context)
 
 		route, pathParams := router.matchRoute(context, Security)
 		if route != nil {
@@ -311,7 +311,7 @@ func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
 	// Setup test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := createRequestContext(r, w)
-		Security := createSecurityContext(context)
+		Security := createOAuthContext(context)
 
 		route, _ := router.matchRoute(context, Security)
 		if route == nil {
