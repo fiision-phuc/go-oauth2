@@ -115,7 +115,7 @@ func (r *ServerRouter) matchRoute(context *RequestContext, security *OAuthContex
 
 	// Match route
 	for _, route := range r.routes {
-		if ok, pathParams := route.match(context.request.Method, context.Path); ok {
+		if ok, pathParams := route.match(context.Method, context.Path); ok {
 			return route, pathParams
 		}
 	}

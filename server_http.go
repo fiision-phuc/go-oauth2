@@ -11,18 +11,18 @@ import (
 // ServeHTTP handle HTTP request and HTTP response.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	request := createRequestContext(r, w)
-	security := createOAuthContext(request)
+	oauth := createOAuthContext(request)
 
 	// Handle error
 	defer recovery(request, s.sandbox)
 
 	/* Condition validation: validate request method */
-	if !methodsValidation.MatchString(r.Method) {
+	if !methodsValidation.MatchString(request.Method) {
 		panic(util.Status405())
 	}
 
 	// Should redirect request to static folder or not?
-	if request.request.Method == Get && len(Cfg.StaticFolders) > 0 {
+	if request.Method == Get && len(Cfg.StaticFolders) > 0 {
 		for prefix, folder := range Cfg.StaticFolders {
 			if path := request.Path; strings.HasPrefix(path, prefix) {
 				path = strings.Replace(path, prefix, folder, 1)
@@ -41,11 +41,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Find route to handle request
-	if route, pathParams := s.router.matchRoute(request, security); route != nil {
+	if route, pathParams := s.router.matchRoute(request, oauth); route != nil {
 		if pathParams != nil {
 			request.PathParams = pathParams
 		}
-		route.invokeHandler(request, security)
+		route.invokeHandler(request, oauth)
 		return
 	}
 	panic(util.Status503())

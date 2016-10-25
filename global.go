@@ -26,6 +26,11 @@ const (
 	Unlink  = "unlink"
 )
 
+// Error messages.
+const (
+	invalidParameter = "Invalid \"%s\" parameter."
+)
+
 // OAuth2.0 flows.
 const (
 	// For apps running on a web server

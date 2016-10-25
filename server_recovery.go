@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/phuc0302/go-oauth2/util"
 )
 
 // recovery recovers server from panic state.
 func recovery(c *RequestContext, isDevelopment bool) {
 	if err := recover(); err != nil {
-		// Cast err to http status
 		var status *util.Status
 		if httpError, ok := err.(*util.Status); ok {
 			status = httpError
@@ -30,9 +30,13 @@ func recovery(c *RequestContext, isDevelopment bool) {
 		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "URI", c.Path))
 		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Address", c.request.RemoteAddr))
 		buffer.WriteString(fmt.Sprintf("%-12s: %s | %s\n", "Method", c.request.Proto, c.request.Method))
-		buffer.WriteString(fmt.Sprintf("%-12s: %s\n\n", "Request Time", time.Now().UTC().Format(time.RFC822)))
+		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Request Time", time.Now().UTC().Format(time.RFC822)))
 
 		if isDevelopment {
+			//			c.OutputText(status, buffer.String())
+			//		}
+			buffer.WriteString("\n")
+
 			// Write request
 			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "User Agent", c.request.UserAgent()))
 			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Referer", c.request.Referer()))
@@ -82,10 +86,12 @@ func recovery(c *RequestContext, isDevelopment bool) {
 
 			// Write stack trace
 			buffer.WriteString("\nStack Trace:\n")
-			callStack(0, &buffer)
+			callStack(3, &buffer)
 		}
-		description := buffer.String()
-		c.OutputText(status, description)
+
+		// Finalize result
+		logrus.Warningln(buffer.String())
+		c.OutputText(status, buffer.String())
 	}
 }
 

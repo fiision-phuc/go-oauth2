@@ -28,7 +28,7 @@ func (r *ServerRoute) bindHandler(method string, handler ContextHandler) {
 
 // invokeHandler invokes handler.
 func (r *ServerRoute) invokeHandler(c *RequestContext, s *OAuthContext) {
-	handler := r.handlers[c.request.Method]
+	handler := r.handlers[c.Method]
 	handler(c, s)
 }
 

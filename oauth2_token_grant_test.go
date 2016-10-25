@@ -34,7 +34,7 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "grant_type") {
+		if status.Description != fmt.Sprintf(invalidParameter, "grant_type") {
 			t.Errorf(test.ExpectedInvalidParameter, "grant_type", status.Description)
 		}
 	}
@@ -60,7 +60,7 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "client_id") {
+		if status.Description != fmt.Sprintf(invalidParameter, "client_id") {
 			t.Errorf(test.ExpectedInvalidParameter, "client_id", status.Description)
 		}
 	}
@@ -68,7 +68,7 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	// [Test 3] Missing client_secret
 	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, u.ClientID.Hex())))
 	status = util.ParseStatus(response)
-	if status.Description != fmt.Sprintf("Invalid %s parameter.", "client_secret") {
+	if status.Description != fmt.Sprintf(invalidParameter, "client_secret") {
 		t.Errorf(test.ExpectedInvalidParameter, "client_secret", status.Description)
 	}
 }
@@ -93,7 +93,7 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "client_secret") {
+		if status.Description != fmt.Sprintf(invalidParameter, "client_secret") {
 			t.Errorf(test.ExpectedInvalidParameter, "client_secret", status.Description)
 		}
 	}
@@ -124,7 +124,7 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "username or password") {
+		if status.Description != fmt.Sprintf(invalidParameter, "username or password") {
 			t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
 		}
 	}
@@ -155,7 +155,7 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "username or password") {
+		if status.Description != fmt.Sprintf(invalidParameter, "username or password") {
 			t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
 		}
 	}
@@ -271,7 +271,7 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "refresh_token") {
+		if status.Description != fmt.Sprintf(invalidParameter, "refresh_token") {
 			t.Errorf(test.ExpectedInvalidParameter, "refresh_token", status.Description)
 		}
 	}

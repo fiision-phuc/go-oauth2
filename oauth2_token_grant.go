@@ -16,10 +16,10 @@ type TokenGrant struct {
 
 // HandleForm validates authentication form.
 func (g *TokenGrant) HandleForm(c *RequestContext, s *OAuthContext) {
-	security := new(OAuthContext)
+	oauthContext := new(OAuthContext)
 
-	if err := g.validateForm(c, security); err == nil {
-		g.finalizeToken(c, security)
+	if err := g.validateForm(c, oauthContext); err == nil {
+		g.finalizeToken(c, oauthContext)
 	} else {
 		c.OutputError(err)
 	}
@@ -34,7 +34,7 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *OAuthContext) *util.Stat
 
 	// Bind
 	var inputForm struct {
-		GrantType    string `field:"grant_type" validation:"^\\w+?$"`
+		GrantType    string `field:"grant_type"`
 		ClientID     string `field:"client_id" validation:"^[0-9a-fA-F]{24}$"`
 		ClientSecret string `field:"client_secret" validation:"^[0-9a-fA-F]{24}$"`
 	}
@@ -42,29 +42,24 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *OAuthContext) *util.Stat
 
 	/* Condition validation: Validate grant_type */
 	if !grantsValidation.MatchString(inputForm.GrantType) {
-		return util.Status400WithDescription("Invalid grant_type parameter.")
+		return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "grant_type"))
 	}
 
-	/* Condition validation: Validate client_id */
-	if len(inputForm.ClientID) == 0 {
-		return util.Status400WithDescription("Invalid client_id parameter.")
-	}
-
-	/* Condition validation: Validate client_secret */
-	if len(inputForm.ClientSecret) == 0 {
-		return util.Status400WithDescription("Invalid client_secret parameter.")
+	/* Condition validation: Validate binding process */
+	if err != nil {
+		return util.Status400WithDescription(err.Error())
 	}
 
 	/* Condition validation: Check the store */
 	recordClient := store.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
 	if recordClient == nil {
-		return util.Status400WithDescription("Invalid client_id or client_secret parameter.")
+		return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "client_id or client_secret"))
 	}
 
 	/* Condition validation: Check grant_type for client */
 	clientGrantsValidation := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(recordClient.GrantTypes(), "|")))
 	if isGranted := clientGrantsValidation.MatchString(inputForm.GrantType); !isGranted {
-		return util.Status400WithDescription("The grant_type is unauthorised for this client_id.")
+		return util.Status400WithDescription("The \"grant_type\" is unauthorised for this \"client_id\".")
 	}
 	s.Client = recordClient
 
@@ -170,14 +165,14 @@ func (t *TokenGrant) handleClientCredentialsGrant() {
 // passwordFlow implements user's authentication with user's credential.
 func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) *util.Status {
 	var passwordForm struct {
-		Username string `username`
-		Password string `password`
+		Username string `field:"username" validation:"^\\w+$"`
+		Password string `field:"password" validation:"^\\w+$"`
 	}
 	c.BindForm(&passwordForm)
 
 	/* Condition validation: Validate username and password parameters */
 	if len(passwordForm.Username) == 0 || len(passwordForm.Password) == 0 {
-		return util.Status400WithDescription("Invalid username or password parameter.")
+		return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "username or password"))
 	}
 
 	/* Condition validation: Validate user's credentials */
@@ -185,8 +180,7 @@ func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) *util.Stat
 		s.User = recordUser
 		return nil
 	}
-	return util.Status400WithDescription("Invalid username or password parameter.")
-
+	return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "username or password"))
 }
 
 // useRefreshTokenFlow handle refresh token flow.
@@ -198,9 +192,9 @@ func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) *util.
 		refreshToken := store.FindRefreshToken(queryToken)
 
 		if refreshToken == nil || refreshToken.ClientID() != s.Client.ClientID() {
-			return util.Status400WithDescription("Invalid refresh_token parameter.")
+			return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "refresh_token"))
 		} else if refreshToken.IsExpired() {
-			return util.Status400WithDescription("refresh_token is expired.")
+			return util.Status400WithDescription("\refresh_token\" is expired.")
 		}
 		s.User = store.FindUserWithID(refreshToken.UserID())
 
@@ -219,7 +213,7 @@ func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) *util.
 		// Delete current refresh token
 		return nil
 	}
-	return util.Status400WithDescription("Invalid refresh_token parameter.")
+	return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "refresh_token"))
 }
 
 // finalizeToken summary and return result to client.
