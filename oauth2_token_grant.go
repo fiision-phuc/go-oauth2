@@ -16,17 +16,14 @@ type TokenGrant struct {
 
 // HandleForm validates authentication form.
 func (g *TokenGrant) HandleForm(c *RequestContext, s *OAuthContext) {
-	oauthContext := new(OAuthContext)
+	s = new(OAuthContext)
 
-	if err := g.validateForm(c, oauthContext); err == nil {
-		g.finalizeToken(c, oauthContext)
-	} else {
-		c.OutputError(err)
-	}
+	g.handleForm(c, s)
+	g.finalizeToken(c, s)
 }
 
-// validateForm validates general information
-func (g *TokenGrant) validateForm(c *RequestContext, s *OAuthContext) *util.Status {
+// handleForm validates general information
+func (g *TokenGrant) handleForm(c *RequestContext, s *OAuthContext) {
 	// If client_id and client_secret are not include, try to look at the authorization header
 	if c.QueryParams != nil && len(c.QueryParams["client_id"]) == 0 && len(c.QueryParams["client_secret"]) == 0 {
 		c.QueryParams["client_id"], c.QueryParams["client_secret"], _ = c.request.BasicAuth()
@@ -35,31 +32,31 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *OAuthContext) *util.Stat
 	// Bind
 	var inputForm struct {
 		GrantType    string `field:"grant_type"`
-		ClientID     string `field:"client_id" validation:"^[0-9a-fA-F]{24}$"`
-		ClientSecret string `field:"client_secret" validation:"^[0-9a-fA-F]{24}$"`
+		ClientID     string `field:"client_id" validation:"^\\w+$"`
+		ClientSecret string `field:"client_secret" validation:"^\\w+$"`
 	}
 	err := c.BindForm(&inputForm)
 
 	/* Condition validation: Validate grant_type */
 	if !grantsValidation.MatchString(inputForm.GrantType) {
-		return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "grant_type"))
+		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "grant_type")))
 	}
 
 	/* Condition validation: Validate binding process */
 	if err != nil {
-		return util.Status400WithDescription(err.Error())
+		panic(util.Status400WithDescription(err.Error()))
 	}
 
 	/* Condition validation: Check the store */
 	recordClient := store.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
 	if recordClient == nil {
-		return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "client_id or client_secret"))
+		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "client_id or client_secret")))
 	}
 
 	/* Condition validation: Check grant_type for client */
 	clientGrantsValidation := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(recordClient.GrantTypes(), "|")))
 	if isGranted := clientGrantsValidation.MatchString(inputForm.GrantType); !isGranted {
-		return util.Status400WithDescription("The \"grant_type\" is unauthorised for this \"client_id\".")
+		panic(util.Status400WithDescription("The \"grant_type\" is unauthorised for this \"client_id\"."))
 	}
 	s.Client = recordClient
 
@@ -76,17 +73,17 @@ func (g *TokenGrant) validateForm(c *RequestContext, s *OAuthContext) *util.Stat
 		//		break
 
 	case ClientCredentialsGrant:
-		// TODO: Going to do soon
-		//		g.handleClientCredentialsGrant()
+		g.handleClientCredentialsGrant(inputForm.ClientID, inputForm.ClientSecret, c, s)
 		break
 
 	case PasswordGrant:
-		return g.passwordFlow(c, s)
+		g.passwordFlow(c, s)
+		break
 
 	case RefreshTokenGrant:
-		return g.refreshTokenFlow(c, s)
+		g.refreshTokenFlow(c, s)
+		break
 	}
-	return nil
 }
 
 func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, values url.Values, client Client) {
@@ -139,31 +136,16 @@ func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, values url.
 	// });
 }
 
-func (t *TokenGrant) handleClientCredentialsGrant() {
-	// // Client credentials
-	// var clientId = this.client.clientId,
-	//   clientSecret = this.client.clientSecret;
-
-	// if (!clientId || !clientSecret) {
-	//   return done(error('invalid_client',
-	//     'Missing parameters. "client_id" and "client_secret" are required'));
-	// }
-
-	// var self = this;
-	// return this.model.getUserFromClient(clientId, clientSecret,
-	//     function (err, user) {
-	//   if (err) return done(error('server_error', false, err));
-	//   if (!user) {
-	//     return done(error('invalid_grant', 'Client credentials are invalid'));
-	//   }
-
-	//   self.user = user;
-	//   done();
-	// });
+func (t *TokenGrant) handleClientCredentialsGrant(clientID string, clientSecret string, c *RequestContext, s *OAuthContext) {
+	if user := store.FindUserWithClient(clientID, clientSecret); user != nil {
+		s.User = user
+	} else {
+		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "client_id or client_secret")))
+	}
 }
 
 // passwordFlow implements user's authentication with user's credential.
-func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) *util.Status {
+func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) {
 	var passwordForm struct {
 		Username string `field:"username" validation:"^\\w+$"`
 		Password string `field:"password" validation:"^\\w+$"`
@@ -172,19 +154,19 @@ func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) *util.Stat
 
 	/* Condition validation: Validate username and password parameters */
 	if len(passwordForm.Username) == 0 || len(passwordForm.Password) == 0 {
-		return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "username or password"))
+		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "username or password")))
 	}
 
 	/* Condition validation: Validate user's credentials */
 	if recordUser := store.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser != nil {
 		s.User = recordUser
-		return nil
+	} else {
+		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "username or password")))
 	}
-	return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "username or password"))
 }
 
 // useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) *util.Status {
+func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) {
 	/* Condition validation: Validate refresh_token parameter */
 	if queryToken := c.QueryParams["refresh_token"]; len(queryToken) > 0 {
 
@@ -192,9 +174,10 @@ func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) *util.
 		refreshToken := store.FindRefreshToken(queryToken)
 
 		if refreshToken == nil || refreshToken.ClientID() != s.Client.ClientID() {
-			return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "refresh_token"))
-		} else if refreshToken.IsExpired() {
-			return util.Status400WithDescription("\refresh_token\" is expired.")
+			panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "refresh_token")))
+		}
+		if refreshToken.IsExpired() {
+			panic(util.Status400WithDescription("\refresh_token\" is expired."))
 		}
 		s.User = store.FindUserWithID(refreshToken.UserID())
 
@@ -209,11 +192,9 @@ func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) *util.
 		// Update security context
 		s.RefreshToken = nil
 		s.AccessToken = nil
-
-		// Delete current refresh token
-		return nil
+	} else {
+		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "refresh_token")))
 	}
-	return util.Status400WithDescription(fmt.Sprintf(invalidParameter, "refresh_token"))
 }
 
 // finalizeToken summary and return result to client.
