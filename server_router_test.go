@@ -47,38 +47,38 @@ func Test_GroupRoles(t *testing.T) {
 }
 
 func Test_BindRole(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
+	//	u := new(TestUnit)
+	//	defer u.Teardown()
+	//	u.Setup()
 
-	// Setup router
-	r := createRouter()
-	r.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
-	r.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
-		r.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
-		r.bindRoute(Post, "", func(request *RequestContext, security *OAuthContext) {})
-		r.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
-	})
-	r.groupRoute(nil, "/private", func(s *Server) {
-		r.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
-		r.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
-	})
-	r.groupRoles("/private**", "r_admin")
+	//	// Setup router
+	//	r := createRouter()
+	//	r.bindRoute(Get, "/", func(request *RequestContext, security *OAuthContext) {})
+	//	r.groupRoute(nil, "/user/profile(.htm[l]?)?", func(s *Server) {
+	//		r.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+	//		r.bindRoute(Post, "", func(request *RequestContext, security *OAuthContext) {})
+	//		r.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
+	//	})
+	//	r.groupRoute(nil, "/private", func(s *Server) {
+	//		r.bindRoute(Get, "", func(request *RequestContext, security *OAuthContext) {})
+	//		r.bindRoute(Get, "/{profileID}", func(request *RequestContext, security *OAuthContext) {})
+	//	})
+	//	r.groupRoles("/private**", "r_admin")
 
-	// Setup test server
-	ts := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		context := createRequestContext(request, writer)
-		security := createOAuthContext(context)
+	//	// Setup test server
+	//	ts := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+	//		context := createRequestContext(request, writer)
+	//		security := createOAuthContext(context)
 
-		route, pathParams := r.matchRoute(context, security)
-		if route != nil {
-			t.Error(test.ExpectedNil)
-		}
-		if pathParams != nil {
-			t.Error(test.ExpectedNil)
-		}
-	}))
-	defer ts.Close()
+	//		route, pathParams := r.matchRoute(context, security)
+	//		if route != nil {
+	//			t.Error(test.ExpectedNil)
+	//		}
+	//		if pathParams != nil {
+	//			t.Error(test.ExpectedNil)
+	//		}
+	//	}))
+	//	defer ts.Close()
 
 	t.Error("Not yet implemented!")
 }
@@ -112,10 +112,6 @@ func Test_GroupRoute(t *testing.T) {
 }
 
 func Test_BindRoute(t *testing.T) {
-	//	u := new(TestUnit)
-	//	defer u.Teardown()
-	//	u.Setup()
-
 	router := createRouter()
 
 	// [Test 1] First bind

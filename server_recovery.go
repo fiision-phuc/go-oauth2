@@ -32,66 +32,71 @@ func recovery(c *RequestContext, isDevelopment bool) {
 		buffer.WriteString(fmt.Sprintf("%-12s: %s | %s\n", "Method", c.request.Proto, c.request.Method))
 		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Request Time", time.Now().UTC().Format(time.RFC822)))
 
-		if isDevelopment {
-			//			c.OutputText(status, buffer.String())
-			//		}
+		// If not development environment, we output here
+		if !isDevelopment {
+			c.OutputText(status, buffer.String())
+		}
+		buffer.WriteString("\n")
+
+		// Write request
+		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "User Agent", c.request.UserAgent()))
+		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Referer", c.request.Referer()))
+
+		// Write header
+		idx := 0
+		for header, value := range c.Header {
+			if header == "user-agent" || header == "referer" {
+				continue
+			}
+
+			if idx == 0 {
+				buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "Header", header, value))
+			} else {
+				buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "", header, value))
+			}
+			idx++
+		}
+
+		// Write Path Params
+		if c.PathParams != nil && len(c.PathParams) > 0 {
 			buffer.WriteString("\n")
-
-			// Write request
-			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "User Agent", c.request.UserAgent()))
-			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Referer", c.request.Referer()))
-
-			// Write header
-			idx := 0
-			for header, value := range c.Header {
-				if header == "user-agent" || header == "referer" {
-					continue
-				}
-
+			idx = 0
+			for key, value := range c.PathParams {
 				if idx == 0 {
-					buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "Header", header, value))
+					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Path Params", key, value))
 				} else {
-					buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "", header, value))
+					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
 				}
 				idx++
 			}
-
-			// Write Path Params
-			if c.PathParams != nil && len(c.PathParams) > 0 {
-				buffer.WriteString("\n")
-				idx = 0
-				for key, value := range c.PathParams {
-					if idx == 0 {
-						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Path Params", key, value))
-					} else {
-						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
-					}
-					idx++
-				}
-			}
-
-			// Write Query Params
-			if c.QueryParams != nil && len(c.QueryParams) > 0 {
-				buffer.WriteString("\n")
-				idx = 0
-				for key, value := range c.QueryParams {
-					if idx == 0 {
-						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Query Params", key, value))
-					} else {
-						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
-					}
-					idx++
-				}
-			}
-
-			// Write stack trace
-			buffer.WriteString("\nStack Trace:\n")
-			callStack(3, &buffer)
 		}
 
-		// Finalize result
+		// Write Query Params
+		if c.QueryParams != nil && len(c.QueryParams) > 0 {
+			buffer.WriteString("\n")
+			idx = 0
+			for key, value := range c.QueryParams {
+				if idx == 0 {
+					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Query Params", key, value))
+				} else {
+					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
+				}
+				idx++
+			}
+		}
+
+		// Write stack trace
+		buffer.WriteString("\nStack Trace:\n")
+		callStack(3, &buffer)
+
+		// If development environment, we output here
+		if isDevelopment {
+			c.OutputText(status, buffer.String())
+		}
+
+		// Log error
 		logrus.Warningln(buffer.String())
-		c.OutputText(status, buffer.String())
+
 	}
 }
 
@@ -137,12 +142,18 @@ func callFunc(pc uintptr) string {
 		name = name[lastslash+1:]
 	}
 
-	// Eliminate period prefix
-	if period := strings.Index(name, "."); period >= 0 {
-		name = name[period+1:]
-	}
+	//	// Eliminate period prefix
+	//	if period := strings.Index(name, "."); period >= 0 {
+	//		name = name[period+1:]
+	//	}
 
-	// Convert center dot to dot
-	name = strings.Replace(name, "·", ".", -1)
-	return string(name)
+	//	// Convert center dot to dot
+	//	name = strings.Replace(name, "·", ".", -1)
+	//	return string(name)
+
+	if tokens := strings.Split(name, "."); len(tokens) >= 2 {
+		return tokens[1]
+	} else {
+		return "???"
+	}
 }
