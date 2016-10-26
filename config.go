@@ -15,13 +15,7 @@ import (
 	"github.com/phuc0302/go-oauth2/util"
 )
 
-// Define configuration file's name.
-const (
-	debug   = "oauth2.debug.cfg"
-	release = "oauth2.release.cfg"
-)
-
-// Config describes a configuration  object  that  will  be  used  during application life time.
+// Config describes a configuration object that will be used during application life time.
 type Config struct {
 
 	// Server
@@ -58,8 +52,8 @@ type Config struct {
 	AuthorizationCodeDuration time.Duration `json:"authorization_code_duration"` // In seconds
 }
 
-// createConfig generates a default configuration file.
-func createConfig(configFile string) {
+// CreateConfig generates a default configuration file.
+func CreateConfig(configFile string) {
 	if util.FileExisted(configFile) {
 		os.Remove(configFile)
 	}
@@ -75,7 +69,7 @@ func createConfig(configFile string) {
 		ReadTimeout:   15,
 		WriteTimeout:  15,
 
-		AllowMethods: []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK},
+		AllowMethods: []string{Copy, Delete, Get, Head, Link, Options, Patch, Post, Purge, Put, Unlink},
 		RedirectPaths: map[string]int{
 			"/login": 401,
 		},
@@ -109,11 +103,11 @@ func createConfig(configFile string) {
 	file.Close()
 }
 
-// loadConfig retrieves previous configuration from file.
-func loadConfig(configFile string) Config {
+// LoadConfig retrieves previous configuration from file.
+func LoadConfig(configFile string) Config {
 	// Generate config file if neccessary
 	if !util.FileExisted(configFile) {
-		createConfig(configFile)
+		CreateConfig(configFile)
 	}
 
 	// Load config file

@@ -1,6 +1,10 @@
 package util
 
-import "net/http"
+import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+)
 
 type Status struct {
 	Code        int    `json:"status,omitempty"`
@@ -419,6 +423,17 @@ func Status511WithDescription(description string) *Status {
 	status := Status511()
 	status.Description = description
 	return status
+}
+
+// ParseStatus parses data into status object.
+func ParseStatus(response *http.Response) *Status {
+	data, _ := ioutil.ReadAll(response.Body)
+	response.Body.Close()
+
+	status := Status{}
+	json.Unmarshal(data, &status)
+
+	return &status
 }
 
 // MARK: Struct's private constructors

@@ -14,7 +14,7 @@ import (
 
 func Test_DefaultToken(t *testing.T) {
 	defer os.Remove(debug)
-	Cfg = loadConfig(debug)
+	Cfg = LoadConfig(debug)
 
 	token := DefaultToken{
 		ID:      bson.NewObjectId(),

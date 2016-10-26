@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/phuc0302/go-oauth2/mongo"
+	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/test"
 	"github.com/phuc0302/go-oauth2/util"
 )
@@ -21,8 +21,8 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -34,7 +34,7 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "grant_type") {
+		if status.Description != fmt.Sprintf(invalidParameter, "grant_type") {
 			t.Errorf(test.ExpectedInvalidParameter, "grant_type", status.Description)
 		}
 	}
@@ -47,8 +47,8 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -60,7 +60,7 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "client_id") {
+		if status.Description != fmt.Sprintf(invalidParameter, "client_id") {
 			t.Errorf(test.ExpectedInvalidParameter, "client_id", status.Description)
 		}
 	}
@@ -68,7 +68,7 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	// [Test 3] Missing client_secret
 	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, u.ClientID.Hex())))
 	status = util.ParseStatus(response)
-	if status.Description != fmt.Sprintf("Invalid %s parameter.", "client_secret") {
+	if status.Description != fmt.Sprintf(invalidParameter, "client_secret") {
 		t.Errorf(test.ExpectedInvalidParameter, "client_secret", status.Description)
 	}
 }
@@ -80,8 +80,8 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -93,7 +93,7 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "client_secret") {
+		if status.Description != fmt.Sprintf(invalidParameter, "client_secret") {
 			t.Errorf(test.ExpectedInvalidParameter, "client_secret", status.Description)
 		}
 	}
@@ -107,8 +107,8 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -124,7 +124,7 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "username or password") {
+		if status.Description != fmt.Sprintf(invalidParameter, "username or password") {
 			t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
 		}
 	}
@@ -137,8 +137,8 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -155,7 +155,7 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "username or password") {
+		if status.Description != fmt.Sprintf(invalidParameter, "username or password") {
 			t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
 		}
 	}
@@ -168,8 +168,8 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -185,8 +185,8 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 	if token1 == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		recordedAccessToken := TokenStore.FindAccessToken(token1.AccessToken)
-		recordedRefreshToken := TokenStore.FindRefreshToken(token1.RefreshToken)
+		recordedAccessToken := store.FindAccessToken(token1.AccessToken)
+		recordedRefreshToken := store.FindRefreshToken(token1.RefreshToken)
 		if recordedAccessToken == nil {
 			t.Error(test.ExpectedNotNil)
 		}
@@ -213,8 +213,8 @@ func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -244,8 +244,8 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -271,7 +271,7 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 		if status.Code != 400 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf("Invalid %s parameter.", "refresh_token") {
+		if status.Description != fmt.Sprintf(invalidParameter, "refresh_token") {
 			t.Errorf(test.ExpectedInvalidParameter, "refresh_token", status.Description)
 		}
 	}
@@ -342,8 +342,8 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 	// Setup server
 	controller := new(TokenGrant)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
-		controller.HandleForm(context)
+		context := createRequestContext(r, w)
+		controller.HandleForm(context, nil)
 	}))
 	defer ts.Close()
 
@@ -372,16 +372,16 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 			t.Errorf("Expected new access_token but found \"%s\".", token2.AccessToken)
 		}
 
-		accessToken1, _ := TokenStore.FindAccessToken(token1.AccessToken).(*DefaultToken)
+		accessToken1, _ := store.FindAccessToken(token1.AccessToken).(*DefaultToken)
 		if err := mongo.EntityWithID(TableAccessToken, accessToken1.ID, new(DefaultToken)); err == nil {
 			t.Error(test.ExpectedNil)
 		}
-		refreshToken1, _ := TokenStore.FindRefreshToken(token1.RefreshToken).(*DefaultToken)
+		refreshToken1, _ := store.FindRefreshToken(token1.RefreshToken).(*DefaultToken)
 		if err := mongo.EntityWithID(TableRefreshToken, refreshToken1.ID, new(DefaultToken)); err == nil {
 			t.Error(test.ExpectedNil)
 		}
 
-		accessToken2, _ := TokenStore.FindAccessToken(token2.AccessToken).(*DefaultToken)
+		accessToken2, _ := store.FindAccessToken(token2.AccessToken).(*DefaultToken)
 		if accessToken2 == nil {
 			t.Error(test.ExpectedNotNil)
 		} else {
@@ -389,7 +389,7 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 				t.Errorf("Expected new access_token but found \"%s\".", token2.AccessToken)
 			}
 		}
-		refreshToken2, _ := TokenStore.FindRefreshToken(token2.RefreshToken).(*DefaultToken)
+		refreshToken2, _ := store.FindRefreshToken(token2.RefreshToken).(*DefaultToken)
 		if refreshToken2 == nil {
 			t.Error(test.ExpectedNotNil)
 		} else {

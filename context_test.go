@@ -14,18 +14,14 @@ import (
 )
 
 func Test_BindForm(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var form struct {
-			UserID    string `userID`
-			ProfileID int64  `profileID`
+			UserID    string `field:"userID"`
+			ProfileID int64  `field:"profileID"`
 		}
 
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.BindForm(&form)
 
 		if form.UserID != "1" {
@@ -40,16 +36,12 @@ func Test_BindForm(t *testing.T) {
 }
 
 func Test_BindJSON(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
-		status := util.Status{}
-		context.BindJSON(&status)
+		status := new(util.Status)
+		context.BindJSON(status)
 
 		if status.Code != 200 {
 			t.Errorf(test.ExpectedNumberButFoundNumber, 200, status.Code)
@@ -69,13 +61,9 @@ func Test_BindJSON(t *testing.T) {
 }
 
 func Test_OutputHeader(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 
 		context.OutputHeader("test-header", "test-header-value")
 		context.OutputError(util.Status200())
@@ -89,13 +77,9 @@ func Test_OutputHeader(t *testing.T) {
 }
 
 func Test_OutputError(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.OutputError(util.Status400())
 	}))
 	defer ts.Close()
@@ -113,13 +97,9 @@ func Test_OutputError(t *testing.T) {
 }
 
 func Test_OutputRedirect(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.OutputRedirect(util.Status301(), "https://www.google.com")
 	}))
 	defer ts.Close()
@@ -134,13 +114,9 @@ func Test_OutputRedirect(t *testing.T) {
 }
 
 func Test_OutputText(t *testing.T) {
-	u := new(TestUnit)
-	defer u.Teardown()
-	u.Setup()
-
 	// Create test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		context := objectFactory.CreateRequestContext(r, w)
+		context := createRequestContext(r, w)
 		context.OutputText(util.Status200(), "Sample test!")
 	}))
 	defer ts.Close()

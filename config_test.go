@@ -12,7 +12,7 @@ import (
 
 func Test_CreateConfig(t *testing.T) {
 	defer os.Remove(debug)
-	createConfig(debug)
+	CreateConfig(debug)
 
 	if !util.FileExisted(debug) {
 		t.Errorf("Expected %s file had been created but found nil.", debug)
@@ -21,7 +21,7 @@ func Test_CreateConfig(t *testing.T) {
 
 func Test_LoadConfig(t *testing.T) {
 	defer os.Remove(debug)
-	config := loadConfig(debug)
+	config := LoadConfig(debug)
 
 	// Validate basic information
 	if config.Host != "localhost" {
@@ -57,15 +57,15 @@ func Test_LoadConfig(t *testing.T) {
 	}
 
 	// Validate allow methods
-	allowMethods := []string{COPY, DELETE, GET, HEAD, LINK, OPTIONS, PATCH, POST, PURGE, PUT, UNLINK}
+	allowMethods := []string{Copy, Delete, Get, Head, Link, Options, Patch, Post, Purge, Put, Unlink}
 	if !reflect.DeepEqual(allowMethods, config.AllowMethods) {
 		t.Errorf(test.ExpectedStringButFoundString, allowMethods, config.AllowMethods)
 	}
 	if methodsValidation == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		if !methodsValidation.MatchString(COPY) {
-			t.Errorf(test.ExpectedBoolButFoundBool, true, methodsValidation.MatchString(COPY))
+		if !methodsValidation.MatchString(Copy) {
+			t.Errorf(test.ExpectedBoolButFoundBool, true, methodsValidation.MatchString(Copy))
 		}
 	}
 
