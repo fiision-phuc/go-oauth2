@@ -2,7 +2,6 @@ package oauth2
 
 import (
 	"fmt"
-	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -65,7 +64,7 @@ func (g *TokenGrant) handleForm(c *RequestContext, s *OAuthContext) {
 
 	case AuthorizationCodeGrant:
 		// TODO: Going to do soon
-		//		g.handleAuthorizationCodeGrant(c, values, queryClient)
+		g.handleAuthorizationCodeGrant(c, s)
 		break
 
 		//	case ImplicitGrant:
@@ -86,35 +85,29 @@ func (g *TokenGrant) handleForm(c *RequestContext, s *OAuthContext) {
 	}
 }
 
-func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, values url.Values, client Client) {
-	//	/* Condition validation: Validate redirect_uri */
-	//	if len(queryClient.RedirectURI) == 0 {
-	//		err := util.Status400WithDescription("Missing redirect_uri parameter.")
-	//		c.OutputError(err)
-	//		return
-	//	}
+func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, s *OAuthContext) {
+	// Bind
+	var inputForm struct {
+		Code        string `field:"code" validation:"^\\w+$"`
+		RedirectURI string `field:"redirect_uri" validation:"^\\w+$"`
+	}
 
-	//	/* Condition validation: Check redirect_uri for client */
-	//	isAllowRedirectURI := false
-	//	for _, redirectURI := range recordClient.RedirectURIs {
-	//		if redirectURI == queryClient.RedirectURI {
-	//			isAllowRedirectURI = true
-	//			break
-	//		}
-	//	}
-	//	if !isAllowRedirectURI {
-	//		err := util.Status400WithDescription("The redirect_uri had not been registered for this client_id.")
-	//		c.OutputError(err)
-	//		return
-	//	}
+	/* Condition validation: Validate binding process */
+	err := c.BindForm(&inputForm)
+	if err != nil {
+		panic(util.Status400WithDescription(err.Error()))
+	}
 
-	/* Condition validation: Validate code */
-	authorizationCode := values.Get("code")
-	if len(authorizationCode) == 0 {
-		err := util.Status400()
-		err.Description = "Missing code parameter."
-		c.OutputError(err)
-		return
+	/* Condition validation: Check redirect_uri for client */
+	isAllow := false
+	for _, redirectURI := range s.Client.RedirectURIs() {
+		if redirectURI == queryClient.RedirectURI {
+			isAllow = true
+			break
+		}
+	}
+	if !isAllow {
+		panic(util.Status400WithDescription("The \"redirect_uri\" had not been registered for this \"client_id\"."))
 	}
 
 	//	t.store.FindAuthorizationCode(authorizationCode)
