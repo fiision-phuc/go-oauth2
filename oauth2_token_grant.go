@@ -101,7 +101,7 @@ func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, s *OAuthCon
 	/* Condition validation: Check redirect_uri for client */
 	isAllow := false
 	for _, redirectURI := range s.Client.RedirectURIs() {
-		if redirectURI == queryClient.RedirectURI {
+		if redirectURI == inputForm.RedirectURI {
 			isAllow = true
 			break
 		}

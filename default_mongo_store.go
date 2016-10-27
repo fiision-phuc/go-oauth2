@@ -214,7 +214,11 @@ func (d *DefaultMongoStore) deleteToken(table string, token Token) {
 		return
 	}
 
-	u := bson.ObjectIdHex(token.UserID())
-	c := bson.ObjectIdHex(token.ClientID())
-	mongo.DeleteEntityWithCriteria(table, bson.M{"user_id": u, "client_id": c})
+	if defaultToken, ok := token.(*DefaultToken); ok {
+		mongo.DeleteEntity(table, defaultToken.ID)
+	} else {
+		u := bson.ObjectIdHex(token.UserID())
+		c := bson.ObjectIdHex(token.ClientID())
+		mongo.DeleteEntityWithCriteria(table, bson.M{"user_id": u, "client_id": c})
+	}
 }
