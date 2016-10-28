@@ -28,7 +28,7 @@ const (
 
 // Error messages.
 const (
-	invalidParameter = "Invalid \"%s\" parameter."
+	InvalidParameter = "Invalid \"%s\" parameter."
 )
 
 // OAuth2.0 flows.

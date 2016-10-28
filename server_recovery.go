@@ -30,13 +30,7 @@ func recovery(c *RequestContext, isDevelopment bool) {
 		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "URI", c.Path))
 		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Address", c.request.RemoteAddr))
 		buffer.WriteString(fmt.Sprintf("%-12s: %s | %s\n", "Method", c.request.Proto, c.request.Method))
-		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Request Time", time.Now().UTC().Format(time.RFC822)))
-
-		// If not development environment, we output here
-		if !isDevelopment {
-			c.OutputText(status, buffer.String())
-		}
-		buffer.WriteString("\n")
+		buffer.WriteString(fmt.Sprintf("%-12s: %s\n\n", "Request Time", time.Now().UTC().Format(time.RFC822)))
 
 		// Write request
 		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "User Agent", c.request.UserAgent()))
@@ -89,14 +83,9 @@ func recovery(c *RequestContext, isDevelopment bool) {
 		buffer.WriteString("\nStack Trace:\n")
 		callStack(3, &buffer)
 
-		// If development environment, we output here
-		if isDevelopment {
-			c.OutputText(status, buffer.String())
-		}
-
 		// Log error
 		logrus.Warningln(buffer.String())
-
+		c.OutputError(status)
 	}
 }
 
