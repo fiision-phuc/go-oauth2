@@ -17,12 +17,12 @@ type TokenGrant struct {
 func (g *TokenGrant) HandleForm(c *RequestContext, s *OAuthContext) {
 	s = new(OAuthContext)
 
-	g.handleForm(c, s)
+	g.generalValidation(c, s)
 	g.finalizeToken(c, s)
 }
 
 // handleForm validates general information
-func (g *TokenGrant) handleForm(c *RequestContext, s *OAuthContext) {
+func (g *TokenGrant) generalValidation(c *RequestContext, s *OAuthContext) {
 	// If client_id and client_secret are not include, try to look at the authorization header
 	if c.QueryParams != nil && len(c.QueryParams["client_id"]) == 0 && len(c.QueryParams["client_secret"]) == 0 {
 		c.QueryParams["client_id"], c.QueryParams["client_secret"], _ = c.request.BasicAuth()
