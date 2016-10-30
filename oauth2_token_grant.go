@@ -47,7 +47,7 @@ func (g *TokenGrant) generalValidation(c *RequestContext, s *OAuthContext) {
 	}
 
 	/* Condition validation: Check the store */
-	recordClient := store.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
+	recordClient := Store.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
 	if recordClient == nil {
 		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "client_id or client_secret")))
 	}
@@ -130,7 +130,7 @@ func (t *TokenGrant) handleAuthorizationCodeGrant(c *RequestContext, s *OAuthCon
 }
 
 func (t *TokenGrant) handleClientCredentialsGrant(clientID string, clientSecret string, c *RequestContext, s *OAuthContext) {
-	if user := store.FindUserWithClient(clientID, clientSecret); user != nil {
+	if user := Store.FindUserWithClient(clientID, clientSecret); user != nil {
 		s.User = user
 	} else {
 		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "client_id or client_secret")))
@@ -141,7 +141,7 @@ func (t *TokenGrant) handleClientCredentialsGrant(clientID string, clientSecret 
 func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) {
 	var passwordForm struct {
 		Username string `field:"username" validation:"^\\w+$"`
-		Password string `field:"password" validation:"^\\w+$"`
+		Password string `field:"password" validation:"^\\w{8,32}$"`
 	}
 	c.BindForm(&passwordForm)
 
@@ -151,7 +151,7 @@ func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) {
 	}
 
 	/* Condition validation: Validate user's credentials */
-	if recordUser := store.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser != nil {
+	if recordUser := Store.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser != nil {
 		s.User = recordUser
 	} else {
 		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "username or password")))
@@ -164,7 +164,7 @@ func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) {
 	if queryToken := c.QueryParams["refresh_token"]; len(queryToken) > 0 {
 
 		/* Condition validation: Validate refresh_token */
-		refreshToken := store.FindRefreshToken(queryToken)
+		refreshToken := Store.FindRefreshToken(queryToken)
 
 		if refreshToken == nil || refreshToken.ClientID() != s.Client.ClientID() {
 			panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "refresh_token")))
@@ -172,14 +172,14 @@ func (g *TokenGrant) refreshTokenFlow(c *RequestContext, s *OAuthContext) {
 		if refreshToken.IsExpired() {
 			panic(util.Status400WithDescription("\refresh_token\" is expired."))
 		}
-		s.User = store.FindUserWithID(refreshToken.UserID())
+		s.User = Store.FindUserWithID(refreshToken.UserID())
 
 		// Delete current access token
-		accessToken := store.FindAccessTokenWithCredential(refreshToken.ClientID(), refreshToken.UserID())
-		store.DeleteAccessToken(accessToken)
+		accessToken := Store.FindAccessTokenWithCredential(refreshToken.ClientID(), refreshToken.UserID())
+		Store.DeleteAccessToken(accessToken)
 
 		// Delete current refresh token
-		store.DeleteRefreshToken(refreshToken)
+		Store.DeleteRefreshToken(refreshToken)
 		refreshToken = nil
 
 		// Update security context
@@ -196,14 +196,14 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *OAuthContext) {
 
 	// Generate access token if neccessary
 	if s.AccessToken == nil {
-		accessToken := store.FindAccessTokenWithCredential(s.Client.ClientID(), s.User.UserID())
+		accessToken := Store.FindAccessTokenWithCredential(s.Client.ClientID(), s.User.UserID())
 		if accessToken != nil && accessToken.IsExpired() {
-			store.DeleteAccessToken(accessToken)
+			Store.DeleteAccessToken(accessToken)
 			accessToken = nil
 		}
 
 		if accessToken == nil {
-			accessToken = store.CreateAccessToken(
+			accessToken = Store.CreateAccessToken(
 				s.Client.ClientID(),
 				s.User.UserID(),
 				now,
@@ -215,14 +215,14 @@ func (g *TokenGrant) finalizeToken(c *RequestContext, s *OAuthContext) {
 
 	// Generate refresh token if neccessary
 	if Cfg.AllowRefreshToken && s.RefreshToken == nil {
-		refreshToken := store.FindRefreshTokenWithCredential(s.Client.ClientID(), s.User.UserID())
+		refreshToken := Store.FindRefreshTokenWithCredential(s.Client.ClientID(), s.User.UserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
-			store.DeleteRefreshToken(refreshToken)
+			Store.DeleteRefreshToken(refreshToken)
 			refreshToken = nil
 		}
 
 		if refreshToken == nil {
-			refreshToken = store.CreateRefreshToken(
+			refreshToken = Store.CreateRefreshToken(
 				s.Client.ClientID(),
 				s.User.UserID(),
 				now,

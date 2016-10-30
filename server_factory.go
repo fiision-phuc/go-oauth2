@@ -45,7 +45,7 @@ func CreateServer(tokenStore TokenStore, isSandbox bool) *Server {
 	}
 
 	// Register global components
-	store = tokenStore
+	Store = tokenStore
 
 	// Create server
 	server := Server{
@@ -54,7 +54,7 @@ func CreateServer(tokenStore TokenStore, isSandbox bool) *Server {
 	}
 
 	// Setup OAuth2.0
-	if store != nil {
+	if Store != nil {
 		//	grantAuthorization := new(AuthorizationGrant)
 		tokenGrant := new(TokenGrant)
 
@@ -87,9 +87,9 @@ func createOAuthContext(c *RequestContext) *OAuthContext {
 	}
 
 	/* Condition validation: Validate expiration time */
-	if accessToken := store.FindAccessToken(tokenString); accessToken != nil && !accessToken.IsExpired() {
-		client := store.FindClientWithID(accessToken.ClientID())
-		user := store.FindUserWithID(accessToken.UserID())
+	if accessToken := Store.FindAccessToken(tokenString); accessToken != nil && !accessToken.IsExpired() {
+		client := Store.FindClientWithID(accessToken.ClientID())
+		user := Store.FindUserWithID(accessToken.UserID())
 		return &OAuthContext{
 			Client:      client,
 			User:        user,
@@ -99,8 +99,8 @@ func createOAuthContext(c *RequestContext) *OAuthContext {
 
 	/* Condition validation: If everything is not work out, try to look for basic auth */
 	if username, password, ok := c.BasicAuth(); ok {
-		client := store.FindClientWithCredential(username, password)
-		user := store.FindUserWithClient(username, password)
+		client := Store.FindClientWithCredential(username, password)
+		user := Store.FindUserWithClient(username, password)
 
 		if client != nil && user != nil {
 			return &OAuthContext{

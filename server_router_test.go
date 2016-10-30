@@ -317,7 +317,7 @@ func Test_MatchRoute_SendRequestToSecureResourceWithAccessToken(t *testing.T) {
 	defer ts.Close()
 
 	now := time.Now()
-	token := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	http.Get(fmt.Sprintf("%s/private?access_token=%s", ts.URL, token.Token()))
 	http.Get(fmt.Sprintf("%s/private/1?access_token=%s", ts.URL, token.Token()))

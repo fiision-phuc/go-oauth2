@@ -55,7 +55,6 @@ func BindForm(values map[string]string, inputForm interface{}) error {
 				// Validation input value before inject
 				if len(validation) > 0 {
 					regex := regexp.MustCompile(validation)
-
 					if !regex.MatchString(input) {
 						return fmt.Errorf("Invalid \"%s\" parameter.", field)
 					}

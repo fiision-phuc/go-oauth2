@@ -190,15 +190,15 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 		u.ClientID.Hex(),
 		u.ClientSecret.Hex(),
 		"admin",
-		"admin",
+		"Password",
 	)))
 
 	token1 := parseResult(response)
 	if token1 == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
-		recordedAccessToken := store.FindAccessToken(token1.AccessToken)
-		recordedRefreshToken := store.FindRefreshToken(token1.RefreshToken)
+		recordedAccessToken := Store.FindAccessToken(token1.AccessToken)
+		recordedRefreshToken := Store.FindRefreshToken(token1.RefreshToken)
 		if recordedAccessToken == nil {
 			t.Error(test.ExpectedNotNil)
 		}
@@ -392,16 +392,16 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 			t.Errorf("Expected new access_token but found \"%s\".", token2.AccessToken)
 		}
 
-		accessToken1, _ := store.FindAccessToken(token1.AccessToken).(*DefaultToken)
+		accessToken1, _ := Store.FindAccessToken(token1.AccessToken).(*DefaultToken)
 		if err := mongo.EntityWithID(TableAccessToken, accessToken1.ID, new(DefaultToken)); err == nil {
 			t.Error(test.ExpectedNil)
 		}
-		refreshToken1, _ := store.FindRefreshToken(token1.RefreshToken).(*DefaultToken)
+		refreshToken1, _ := Store.FindRefreshToken(token1.RefreshToken).(*DefaultToken)
 		if err := mongo.EntityWithID(TableRefreshToken, refreshToken1.ID, new(DefaultToken)); err == nil {
 			t.Error(test.ExpectedNil)
 		}
 
-		accessToken2, _ := store.FindAccessToken(token2.AccessToken).(*DefaultToken)
+		accessToken2, _ := Store.FindAccessToken(token2.AccessToken).(*DefaultToken)
 		if accessToken2 == nil {
 			t.Error(test.ExpectedNotNil)
 		} else {
@@ -409,7 +409,7 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 				t.Errorf("Expected new access_token but found \"%s\".", token2.AccessToken)
 			}
 		}
-		refreshToken2, _ := store.FindRefreshToken(token2.RefreshToken).(*DefaultToken)
+		refreshToken2, _ := Store.FindRefreshToken(token2.RefreshToken).(*DefaultToken)
 		if refreshToken2 == nil {
 			t.Error(test.ExpectedNotNil)
 		} else {

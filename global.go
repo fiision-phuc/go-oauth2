@@ -63,7 +63,7 @@ var (
 	Cfg Config
 
 	// Global public token store's instance.
-	store TokenStore
+	Store TokenStore
 
 	// Global internal private key.
 	privateKey *rsa.PrivateKey

@@ -40,7 +40,7 @@ func (u *TestUnit) Setup() {
 
 	u.Session, u.Database = mongo.GetMonotonicSession()
 	u.Username = "admin"
-	u.Password = "admin"
+	u.Password = "Password"
 	u.UserID = bson.NewObjectId()
 	u.ClientID = bson.NewObjectId()
 	u.ClientSecret = bson.NewObjectId()
@@ -48,7 +48,7 @@ func (u *TestUnit) Setup() {
 
 	// Define global variables
 	Cfg = LoadConfig(debug)
-	store = new(DefaultMongoStore)
+	Store = new(DefaultMongoStore)
 
 	// Generate test data
 	u.Client = &DefaultClient{
