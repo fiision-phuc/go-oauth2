@@ -22,70 +22,72 @@ func recovery(c *RequestContext, isDevelopment bool) {
 		} else {
 			status = util.Status500()
 		}
-
-		// Generate error report
-		var buffer bytes.Buffer
-		buffer.WriteString(fmt.Sprintf("[%d] %s\n", status.Code, status.Description))
-
-		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "URI", c.Path))
-		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Address", c.request.RemoteAddr))
-		buffer.WriteString(fmt.Sprintf("%-12s: %s | %s\n", "Method", c.request.Proto, c.request.Method))
-		buffer.WriteString(fmt.Sprintf("%-12s: %s\n\n", "Request Time", time.Now().UTC().Format(time.RFC822)))
-
-		// Write request
-		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "User Agent", c.request.UserAgent()))
-		buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Referer", c.request.Referer()))
-
-		// Write header
-		idx := 0
-		for header, value := range c.Header {
-			if header == "user-agent" || header == "referer" {
-				continue
-			}
-
-			if idx == 0 {
-				buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "Header", header, value))
-			} else {
-				buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "", header, value))
-			}
-			idx++
-		}
-
-		// Write Path Params
-		if c.PathParams != nil && len(c.PathParams) > 0 {
-			buffer.WriteString("\n")
-			idx = 0
-			for key, value := range c.PathParams {
-				if idx == 0 {
-					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Path Params", key, value))
-				} else {
-					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
-				}
-				idx++
-			}
-		}
-
-		// Write Query Params
-		if c.QueryParams != nil && len(c.QueryParams) > 0 {
-			buffer.WriteString("\n")
-			idx = 0
-			for key, value := range c.QueryParams {
-				if idx == 0 {
-					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Query Params", key, value))
-				} else {
-					buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
-				}
-				idx++
-			}
-		}
-
-		// Write stack trace
-		buffer.WriteString("\nStack Trace:\n")
-		callStack(3, &buffer)
-
-		// Log error
-		logrus.Warningln(buffer.String())
 		c.OutputError(status)
+
+		go func() {
+			// Generate error report
+			var buffer bytes.Buffer
+			buffer.WriteString(fmt.Sprintf("[%d] %s\n", status.Code, status.Description))
+
+			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "URI", c.Path))
+			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Address", c.request.RemoteAddr))
+			buffer.WriteString(fmt.Sprintf("%-12s: %s | %s\n", "Method", c.request.Proto, c.request.Method))
+			buffer.WriteString(fmt.Sprintf("%-12s: %s\n\n", "Request Time", time.Now().UTC().Format(time.RFC822)))
+
+			// Write request
+			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "User Agent", c.request.UserAgent()))
+			buffer.WriteString(fmt.Sprintf("%-12s: %s\n", "Referer", c.request.Referer()))
+
+			// Write header
+			idx := 0
+			for header, value := range c.Header {
+				if header == "user-agent" || header == "referer" {
+					continue
+				}
+
+				if idx == 0 {
+					buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "Header", header, value))
+				} else {
+					buffer.WriteString(fmt.Sprintf("%-12s: [%s] %s\n", "", header, value))
+				}
+				idx++
+			}
+
+			// Write Path Params
+			if c.PathParams != nil && len(c.PathParams) > 0 {
+				buffer.WriteString("\n")
+				idx = 0
+				for key, value := range c.PathParams {
+					if idx == 0 {
+						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Path Params", key, value))
+					} else {
+						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
+					}
+					idx++
+				}
+			}
+
+			// Write Query Params
+			if c.QueryParams != nil && len(c.QueryParams) > 0 {
+				buffer.WriteString("\n")
+				idx = 0
+				for key, value := range c.QueryParams {
+					if idx == 0 {
+						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "Query Params", key, value))
+					} else {
+						buffer.WriteString(fmt.Sprintf("%-12s: %s = %s\n", "", key, value))
+					}
+					idx++
+				}
+			}
+
+			// Write stack trace
+			buffer.WriteString("\nStack Trace:\n")
+			callStack(3, &buffer)
+
+			// Log error
+			logrus.Warningln(buffer.String())
+		}()
 	}
 }
 
