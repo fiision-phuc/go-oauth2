@@ -140,14 +140,12 @@ func (t *TokenGrant) handleClientCredentialsGrant(clientID string, clientSecret 
 // passwordFlow implements user's authentication with user's credential.
 func (g *TokenGrant) passwordFlow(c *RequestContext, s *OAuthContext) {
 	var passwordForm struct {
-		Username string `field:"username" validation:"^\\w+$"`
-		Password string `field:"password" validation:"^\\w{8,32}$"`
+		Username string `field:"username" validation:"^[^\\s]+$"`
+		Password string `field:"password" validation:"^[^\\s]{8,32}$"`
 	}
-	c.BindForm(&passwordForm)
-
-	/* Condition validation: Validate username and password parameters */
-	if len(passwordForm.Username) == 0 || len(passwordForm.Password) == 0 {
-		panic(util.Status400WithDescription(fmt.Sprintf(InvalidParameter, "username or password")))
+	if err := c.BindForm(&passwordForm); err != nil {
+		fmt.Println(err)
+		panic(util.Status400WithDescription(err.Error()))
 	}
 
 	/* Condition validation: Validate user's credentials */
