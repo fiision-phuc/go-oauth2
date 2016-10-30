@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,7 +18,6 @@ import (
 
 // Config describes a configuration object that will be used during application life time.
 type Config struct {
-
 	// Server
 	Host    string `json:"host"`
 	Port    int    `json:"port"`
@@ -31,7 +31,7 @@ type Config struct {
 
 	// HTTP Method
 	AllowMethods  []string          `json:"allow_methods"`
-	RedirectPaths map[string]int    `json:"redirect_paths"`
+	RedirectPaths map[string]string `json:"redirect_paths"`
 	StaticFolders map[string]string `json:"static_folders"`
 
 	// Log
@@ -41,11 +41,9 @@ type Config struct {
 	SlackUser    string `json:"slack_user"`
 	SlackChannel string `json:"slack_channel"`
 
-	// Jwt
-	PrivateKey []byte `json:"private_key"`
-
 	// OAuth2.0
 	GrantTypes                []string      `json:"grant_types"`
+	PrivateKey                []byte        `json:"private_key"`
 	AllowRefreshToken         bool          `json:"allow_refresh_token"`
 	AccessTokenDuration       time.Duration `json:"access_token_duration"`       // In seconds
 	RefreshTokenDuration      time.Duration `json:"refresh_token_duration"`      // In seconds
@@ -70,8 +68,8 @@ func CreateConfig(configFile string) {
 		WriteTimeout:  15,
 
 		AllowMethods: []string{Copy, Delete, Get, Head, Link, Options, Patch, Post, Purge, Put, Unlink},
-		RedirectPaths: map[string]int{
-			"/login": 401,
+		RedirectPaths: map[string]string{
+			"401": "/login",
 		},
 		StaticFolders: map[string]string{
 			"/assets":    "assets",
@@ -127,8 +125,10 @@ func LoadConfig(configFile string) Config {
 
 		// Define redirectPaths
 		redirectPaths = make(map[int]string, len(config.RedirectPaths))
-		for path, status := range config.RedirectPaths {
-			redirectPaths[status] = path
+		for s, path := range config.RedirectPaths {
+			if status, err := strconv.Atoi(s); err == nil {
+				redirectPaths[status] = path
+			}
 		}
 
 		// Define jwt

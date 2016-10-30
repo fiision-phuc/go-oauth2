@@ -267,7 +267,7 @@ func Test_CreateSecurityContext_WithGetAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now()
-	token := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as query param
 	http.Get(fmt.Sprintf("%s?access_token=%s", ts.URL, token.Token()))
@@ -303,7 +303,7 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now().UTC()
-	token := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as authorization header
 	request, _ := http.NewRequest("POST", ts.URL, nil)
@@ -344,3 +344,12 @@ func Test_CreateSecurityContext_WithPostAccessToken(t *testing.T) {
 //		t.Errorf(test.ExpectedBoolButFoundBool, true, ok)
 //	}
 //}
+
+func BenchmarkURLEncodeForm(b *testing.B) {
+	request, _ := http.NewRequest("POST", "http://localhost:8080/", strings.NewReader("userID=1&profileID=2"))
+	request.Header["content-type"] = []string{"application/x-www-form-urlencoded"}
+
+	for n := 0; n < b.N; n++ {
+		createRequestContext(request, nil)
+	}
+}

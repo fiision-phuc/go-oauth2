@@ -13,7 +13,7 @@ func Test_DefaultMongoStore_FindUserWithID(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	user := store.FindUserWithID(u.UserID.Hex())
+	user := Store.FindUserWithID(u.UserID.Hex())
 	if user == nil {
 		t.Errorf(test.ExpectedStringButFoundString, u.User1, user)
 	} else {
@@ -34,7 +34,7 @@ func Test_DefaultMongoStore_FindUserWithClient(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	user := store.FindUserWithClient(u.ClientID.Hex(), u.ClientSecret.Hex())
+	user := Store.FindUserWithClient(u.ClientID.Hex(), u.ClientSecret.Hex())
 	if user == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -55,7 +55,7 @@ func Test_DefaultMongoStore_FindUserWithCredential(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	user := store.FindUserWithCredential("admin", "admin")
+	user := Store.FindUserWithCredential("admin", "Password")
 	if user == nil {
 		t.Errorf(test.ExpectedStringButFoundString, u.User1, user)
 	} else {
@@ -76,7 +76,7 @@ func Test_DefaultMongoStore_FindClientWithID(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	client := store.FindClientWithID(u.ClientID.Hex())
+	client := Store.FindClientWithID(u.ClientID.Hex())
 	if client == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -100,7 +100,7 @@ func Test_DefaultMongoStore_FindClientWithCredential(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	client := store.FindClientWithCredential(u.ClientID.Hex(), u.ClientSecret.Hex())
+	client := Store.FindClientWithCredential(u.ClientID.Hex(), u.ClientSecret.Hex())
 	if client == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -124,7 +124,7 @@ func Test_DefaultMongoStore_CreateAccessToken(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	if token == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -145,8 +145,8 @@ func Test_DefaultMongoStore_FindAccessToken(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token1 := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
-	token2 := store.FindAccessToken(token1.Token())
+	token1 := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token2 := Store.FindAccessToken(token1.Token())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -167,8 +167,8 @@ func Test_DefaultMongoStore_FindAccessTokenWithCredential(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token1 := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
-	token2 := store.FindAccessTokenWithCredential(u.ClientID.Hex(), u.UserID.Hex())
+	token1 := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token2 := Store.FindAccessTokenWithCredential(u.ClientID.Hex(), u.UserID.Hex())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -189,10 +189,10 @@ func Test_DefaultMongoStore_DeleteAccessToken(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token1 := store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
-	store.DeleteAccessToken(token1)
+	token1 := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	Store.DeleteAccessToken(token1)
 
-	token2 := store.FindAccessTokenWithCredential(token1.ClientID(), token1.UserID())
+	token2 := Store.FindAccessTokenWithCredential(token1.ClientID(), token1.UserID())
 	if token2 != nil {
 		t.Errorf(test.ExpectedNil)
 	}
@@ -203,7 +203,7 @@ func Test_DefaultMongoStore_CreateRefreshToken(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token := store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token := Store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
 	if token == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -224,8 +224,8 @@ func Test_DefaultMongoStore_FindRefreshToken(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token1 := store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
-	token2 := store.FindRefreshToken(token1.Token())
+	token1 := Store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token2 := Store.FindRefreshToken(token1.Token())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -246,8 +246,8 @@ func Test_DefaultMongoStore_FindRefreshTokenWithCredential(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token1 := store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
-	token2 := store.FindRefreshTokenWithCredential(token1.ClientID(), token1.UserID())
+	token1 := Store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	token2 := Store.FindRefreshTokenWithCredential(token1.ClientID(), token1.UserID())
 	if token2 == nil {
 		t.Error(test.ExpectedNotNil)
 	} else {
@@ -268,10 +268,10 @@ func Test_DefaultMongoStore_DeleteRefreshToken(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
-	token1 := store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
-	store.DeleteRefreshToken(token1)
+	token1 := Store.CreateRefreshToken(u.ClientID.Hex(), u.UserID.Hex(), time.Now(), time.Now().Add(Cfg.AccessTokenDuration))
+	Store.DeleteRefreshToken(token1)
 
-	token2 := store.FindRefreshTokenWithCredential(token1.ClientID(), token1.UserID())
+	token2 := Store.FindRefreshTokenWithCredential(token1.ClientID(), token1.UserID())
 	if token2 != nil {
 		t.Errorf(test.ExpectedNil)
 	}

@@ -28,9 +28,8 @@ type OAuthContext struct {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // RequestContext describes a HTTP URL request scope.
 type RequestContext struct {
-	Method string
-	Path   string
-
+	Method      string
+	Path        string
 	Header      map[string]string
 	PathParams  map[string]string
 	QueryParams map[string]string
@@ -111,7 +110,6 @@ func (c *RequestContext) OutputError(status *util.Status) {
 	} else {
 		c.response.Header().Set("Content-Type", "application/problem+json")
 		c.response.WriteHeader(status.Code)
-
 		cause, _ := json.Marshal(status)
 		c.response.Write(cause)
 	}
@@ -127,18 +125,16 @@ func (c *RequestContext) OutputRedirect(status *util.Status, url string) {
 func (c *RequestContext) OutputJSON(status *util.Status, model interface{}) {
 	c.response.Header().Set("Content-Type", "application/json")
 	c.response.WriteHeader(status.Code)
-
 	data, _ := json.Marshal(model)
 	c.response.Write(data)
 }
 
 // OutputHTML returns a HTML page.
 func (c *RequestContext) OutputHTML(filePath string, model interface{}) {
-	tmpl, error := template.ParseFiles(filePath)
-	if error != nil {
-		c.OutputError(util.Status404())
-	} else {
+	if tmpl, err := template.ParseFiles(filePath); err == nil {
 		tmpl.Execute(c.response, model)
+	} else {
+		c.OutputError(util.Status404())
 	}
 }
 
