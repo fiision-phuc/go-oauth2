@@ -11,37 +11,17 @@ import (
 )
 
 func Test_CreateConfig(t *testing.T) {
-	defer os.Remove(debug)
-	CreateConfig(debug)
+	defer os.Remove(configFile)
+	CreateConfig()
 
-	if !util.FileExisted(debug) {
-		t.Errorf("Expected %s file had been created but found nil.", debug)
+	if !util.FileExisted(configFile) {
+		t.Errorf("Expected %s file had been created but found nil.", configFile)
 	}
 }
 
 func Test_LoadConfig(t *testing.T) {
-	defer os.Remove(debug)
-	config := LoadConfig(debug)
-
-	// Validate basic information
-	if config.Host != "localhost" {
-		t.Errorf(test.ExpectedStringButFoundString, "localhost", config.Host)
-	}
-	if config.Port != 8080 {
-		t.Errorf(test.ExpectedNumberButFoundNumber, 8080, config.Port)
-	}
-	if config.TLSPort != 8443 {
-		t.Errorf(test.ExpectedNumberButFoundNumber, 8443, config.TLSPort)
-	}
-	if config.HeaderSize != 5120 {
-		t.Errorf(test.ExpectedNumberButFoundNumber, 5120, config.HeaderSize)
-	}
-	if config.ReadTimeout != 15*time.Second {
-		t.Errorf(test.ExpectedNumberButFoundNumber, 15*time.Second, config.ReadTimeout)
-	}
-	if config.WriteTimeout != 15*time.Second {
-		t.Errorf(test.ExpectedNumberButFoundNumber, 15*time.Second, config.WriteTimeout)
-	}
+	defer os.Remove(configFile)
+	config := LoadConfig()
 
 	if config.AllowRefreshToken != true {
 		t.Errorf(test.ExpectedBoolButFoundBool, true, config.AllowRefreshToken)
@@ -54,36 +34,6 @@ func Test_LoadConfig(t *testing.T) {
 	}
 	if config.AuthorizationCodeDuration != 300*time.Second {
 		t.Errorf(test.ExpectedNumberButFoundNumber, 300*time.Second, config.AuthorizationCodeDuration)
-	}
-
-	// Validate allow methods
-	allowMethods := []string{Copy, Delete, Get, Head, Link, Options, Patch, Post, Purge, Put, Unlink}
-	if !reflect.DeepEqual(allowMethods, config.AllowMethods) {
-		t.Errorf(test.ExpectedStringButFoundString, allowMethods, config.AllowMethods)
-	}
-	if methodsValidation == nil {
-		t.Error(test.ExpectedNotNil)
-	} else {
-		if !methodsValidation.MatchString(Copy) {
-			t.Errorf(test.ExpectedBoolButFoundBool, true, methodsValidation.MatchString(Copy))
-		}
-	}
-
-	// Validate redirect paths
-	if redirectPaths == nil || len(redirectPaths) != 1 {
-		t.Error(test.ExpectedNotNil)
-	}
-	if redirectPaths[401] != "/login" {
-		t.Errorf(test.ExpectedStringButFoundString, "/login", redirectPaths[401])
-	}
-
-	// Validate static folders
-	staticFolders := map[string]string{
-		"/assets":    "assets",
-		"/resources": "resources",
-	}
-	if !reflect.DeepEqual(staticFolders, config.StaticFolders) {
-		t.Errorf(test.ExpectedStringButFoundString, staticFolders, config.StaticFolders)
 	}
 
 	// Validate private key

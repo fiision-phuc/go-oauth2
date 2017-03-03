@@ -9,41 +9,38 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/phuc0302/go-oauth2/util"
 )
 
+// Configuration file's name.
+const configFile = "oauth2.cfg"
+
+// OAuth2.0 flows.
+const (
+	// For apps running on a web server.
+	AuthorizationCodeGrant = "authorization_code"
+
+	// For application access.
+	ClientCredentialsGrant = "client_credentials"
+
+	// For browser-based or mobile apps.
+	ImplicitGrant = "implicit"
+
+	// For logging in with a username and password.
+	PasswordGrant = "password"
+
+	// Should allow refresh token or not.
+	RefreshTokenGrant = "refresh_token"
+)
+
 // Config describes a configuration object that will be used during application life time.
 type Config struct {
-	// Server
-	Host    string `json:"host"`
-	Port    int    `json:"port"`
-	TLSPort int    `json:"tls_port"`
+	GrantTypes []string `json:"grant_types"`
+	PrivateKey []byte   `json:"private_key"`
 
-	// Header
-	HeaderSize    int           `json:"header_size"`    // In KB
-	MultipartSize int64         `json:"multipart_size"` // In MB
-	ReadTimeout   time.Duration `json:"timeout_read"`   // In seconds
-	WriteTimeout  time.Duration `json:"timeout_write"`  // In seconds
-
-	// HTTP Method
-	AllowMethods  []string          `json:"allow_methods"`
-	RedirectPaths map[string]string `json:"redirect_paths"`
-	StaticFolders map[string]string `json:"static_folders"`
-
-	// Log
-	LogLevel     string `json:"log_level"`
-	SlackURL     string `json:"slack_url"`
-	SlackIcon    string `json:"slack_icon"`
-	SlackUser    string `json:"slack_user"`
-	SlackChannel string `json:"slack_channel"`
-
-	// OAuth2.0
-	GrantTypes                []string      `json:"grant_types"`
-	PrivateKey                []byte        `json:"private_key"`
 	AllowRefreshToken         bool          `json:"allow_refresh_token"`
 	AccessTokenDuration       time.Duration `json:"access_token_duration"`       // In seconds
 	RefreshTokenDuration      time.Duration `json:"refresh_token_duration"`      // In seconds
@@ -51,42 +48,19 @@ type Config struct {
 }
 
 // CreateConfig generates a default configuration file.
-func CreateConfig(configFile string) {
+func CreateConfig() {
 	if util.FileExisted(configFile) {
 		os.Remove(configFile)
 	}
 
 	// Create default config
 	config := Config{
-		Host:    "localhost",
-		Port:    8080,
-		TLSPort: 8443,
+		GrantTypes: []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
 
-		HeaderSize:    5,
-		MultipartSize: 1,
-		ReadTimeout:   15,
-		WriteTimeout:  15,
-
-		AllowMethods: []string{Copy, Delete, Get, Head, Link, Options, Patch, Post, Purge, Put, Unlink},
-		RedirectPaths: map[string]string{
-			"401": "/login",
-		},
-		StaticFolders: map[string]string{
-			"/assets":    "assets",
-			"/resources": "resources",
-		},
-
-		LogLevel:     "debug",
-		SlackURL:     "",
-		SlackIcon:    ":ghost:",
-		SlackUser:    "OAuth2",
-		SlackChannel: "#channel",
-
-		GrantTypes:                []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
 		AllowRefreshToken:         true,
+		AuthorizationCodeDuration: 300,
 		AccessTokenDuration:       259200,
 		RefreshTokenDuration:      7776000,
-		AuthorizationCodeDuration: 300,
 	}
 
 	// Generate jwt key
@@ -102,42 +76,27 @@ func CreateConfig(configFile string) {
 }
 
 // LoadConfig retrieves previous configuration from file.
-func LoadConfig(configFile string) Config {
+func LoadConfig() Config {
 	// Generate config file if neccessary
 	if !util.FileExisted(configFile) {
-		CreateConfig(configFile)
+		CreateConfig()
 	}
 
 	// Load config file
-	config := Config{}
+	var config Config
 	file, _ := os.Open(configFile)
 	bytes, _ := ioutil.ReadAll(file)
 
 	if err := json.Unmarshal(bytes, &config); err == nil {
-		// Convert duration to seconds
-		config.HeaderSize <<= 10
-		config.MultipartSize <<= 20
-		config.ReadTimeout *= time.Second
-		config.WriteTimeout *= time.Second
 		config.AccessTokenDuration *= time.Second
 		config.RefreshTokenDuration *= time.Second
 		config.AuthorizationCodeDuration *= time.Second
-
-		// Define redirectPaths
-		redirectPaths = make(map[int]string, len(config.RedirectPaths))
-		for s, path := range config.RedirectPaths {
-			if status, err := strconv.Atoi(s); err == nil {
-				redirectPaths[status] = path
-			}
-		}
 
 		// Define jwt
 		privateKey, _ = x509.ParsePKCS1PrivateKey(config.PrivateKey)
 
 		// Define regular expressions
-		//	regexp.MustCompile(`:[^/#?()\.\\]+`)
 		grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
-		methodsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.AllowMethods, "|")))
 	}
 	return config
 }
