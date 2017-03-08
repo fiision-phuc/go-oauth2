@@ -217,13 +217,13 @@ func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
 	u.Setup()
 
 	// Modify config
-	cfg.GrantTypes = []string{
+	Cfg.GrantTypes = []string{
 		AuthorizationCodeGrant,
 		ClientCredentialsGrant,
 		PasswordGrant,
 	}
-	cfg.AllowRefreshToken = false
-	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(cfg.GrantTypes, "|")))
+	Cfg.AllowRefreshToken = false
+	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(Cfg.GrantTypes, "|")))
 
 	// Setup server
 	controller := new(TokenGrant)

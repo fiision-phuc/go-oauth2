@@ -105,7 +105,7 @@ func Test_ValidateToken_WithGetAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now()
-	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as query param
 	http.Get(fmt.Sprintf("%s?access_token=%s", ts.URL, token.Token()))
@@ -145,7 +145,7 @@ func Test_ValidateToken_WithPostAccessToken(t *testing.T) {
 
 	// Generate token
 	now := time.Now().UTC()
-	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as authorization header
 	request, _ := http.NewRequest("POST", ts.URL, nil)
@@ -185,7 +185,7 @@ func Test_ValidateRoles_InvalidRoles(t *testing.T) {
 
 	// Generate token
 	now := time.Now().UTC()
-	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as authorization header
 	request, _ := http.NewRequest("POST", ts.URL, nil)
@@ -214,7 +214,7 @@ func Test_ValidateRoles_ValidRoles(t *testing.T) {
 
 	// Generate token
 	now := time.Now().UTC()
-	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(cfg.AccessTokenDuration))
+	token := Store.CreateAccessToken(u.ClientID.Hex(), u.UserID.Hex(), now, now.Add(Cfg.AccessTokenDuration))
 
 	// Send token as authorization header
 	request, _ := http.NewRequest("POST", ts.URL, nil)
