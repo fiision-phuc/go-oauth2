@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/phuc0302/go-oauth2/test"
-
+	"github.com/phuc0302/go-server/expected_format"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -27,7 +26,7 @@ func Test_MongoDBToken(t *testing.T) {
 	// Test token
 	tokenString := token.Token()
 	if len(tokenString) == 0 {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		jwtToken, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {

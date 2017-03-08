@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phuc0302/go-oauth2/util"
+	"github.com/phuc0302/go-server/util"
 )
 
 // Configuration file's name.

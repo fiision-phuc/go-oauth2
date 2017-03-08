@@ -1,6 +1,6 @@
 package oauth2
 
-import "github.com/phuc0302/go-oauth2/server"
+import "github.com/phuc0302/go-server"
 
 // OAuthResponse describes a granted response that will be returned to client.
 type OAuthResponse struct {

@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phuc0302/go-oauth2/server"
-	"github.com/phuc0302/go-oauth2/util"
+	"github.com/phuc0302/go-server"
+	"github.com/phuc0302/go-server/string_format"
+	"github.com/phuc0302/go-server/util"
 )
 
 // TokenGrant describes a token grant controller.
@@ -39,7 +40,7 @@ func (g *TokenGrant) generalValidation(c *server.RequestContext, s *OAuthContext
 
 	/* Condition validation: Validate grant_type */
 	if !grantsValidation.MatchString(inputForm.GrantType) {
-		panic(util.Status400WithDescription(fmt.Sprintf(server.InvalidParameter, "grant_type")))
+		panic(util.Status400WithDescription(fmt.Sprintf(stringFormat.InvalidParameter, "grant_type")))
 	}
 
 	/* Condition validation: Validate binding process */
@@ -50,7 +51,7 @@ func (g *TokenGrant) generalValidation(c *server.RequestContext, s *OAuthContext
 	/* Condition validation: Check the store */
 	recordClient := Store.FindClientWithCredential(inputForm.ClientID, inputForm.ClientSecret)
 	if recordClient == nil {
-		panic(util.Status400WithDescription(fmt.Sprintf(server.InvalidParameter, "client_id or client_secret")))
+		panic(util.Status400WithDescription(fmt.Sprintf(stringFormat.InvalidParameter, "client_id or client_secret")))
 	}
 
 	/* Condition validation: Check grant_type for client */
@@ -134,7 +135,7 @@ func (t *TokenGrant) handleClientCredentialsGrant(clientID string, clientSecret 
 	if user := Store.FindUserWithClient(clientID, clientSecret); user != nil {
 		s.User = user
 	} else {
-		panic(util.Status400WithDescription(fmt.Sprintf(server.InvalidParameter, "client_id or client_secret")))
+		panic(util.Status400WithDescription(fmt.Sprintf(stringFormat.InvalidParameter, "client_id or client_secret")))
 	}
 }
 
@@ -152,7 +153,7 @@ func (g *TokenGrant) passwordFlow(c *server.RequestContext, s *OAuthContext) {
 	if recordUser := Store.FindUserWithCredential(passwordForm.Username, passwordForm.Password); recordUser != nil {
 		s.User = recordUser
 	} else {
-		panic(util.Status400WithDescription(fmt.Sprintf(server.InvalidParameter, "username or password")))
+		panic(util.Status400WithDescription(fmt.Sprintf(stringFormat.InvalidParameter, "username or password")))
 	}
 }
 
@@ -165,7 +166,7 @@ func (g *TokenGrant) refreshTokenFlow(c *server.RequestContext, s *OAuthContext)
 		refreshToken := Store.FindRefreshToken(queryToken)
 
 		if refreshToken == nil || refreshToken.ClientID() != s.Client.ClientID() {
-			panic(util.Status400WithDescription(fmt.Sprintf(server.InvalidParameter, "refresh_token")))
+			panic(util.Status400WithDescription(fmt.Sprintf(stringFormat.InvalidParameter, "refresh_token")))
 		}
 		if refreshToken.IsExpired() {
 			panic(util.Status400WithDescription("\refresh_token\" is expired."))
@@ -184,7 +185,7 @@ func (g *TokenGrant) refreshTokenFlow(c *server.RequestContext, s *OAuthContext)
 		s.RefreshToken = nil
 		s.AccessToken = nil
 	} else {
-		panic(util.Status400WithDescription(fmt.Sprintf(server.InvalidParameter, "refresh_token")))
+		panic(util.Status400WithDescription(fmt.Sprintf(stringFormat.InvalidParameter, "refresh_token")))
 	}
 }
 

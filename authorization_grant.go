@@ -1,6 +1,6 @@
 package oauth2
 
-import "github.com/phuc0302/go-oauth2/server"
+import "github.com/phuc0302/go-server"
 
 type AuthorizationGrant struct {
 }

@@ -10,9 +10,10 @@ import (
 
 	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/oauth_table"
-	"github.com/phuc0302/go-oauth2/server"
-	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/util"
+	"github.com/phuc0302/go-server"
+	"github.com/phuc0302/go-server/expected_format"
+	"github.com/phuc0302/go-server/string_format"
+	"github.com/phuc0302/go-server/util"
 )
 
 func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
@@ -33,13 +34,13 @@ func Test_TokenGrant_validateForm_MissingGrantType(t *testing.T) {
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", nil)
 	status := util.ParseStatus(response)
 	if status == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if status.Code != 400 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
+			t.Errorf(expectedFormat.NumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf(server.InvalidParameter, "grant_type") {
-			t.Errorf(test.ExpectedInvalidParameter, "grant_type", status.Description)
+		if status.Description != fmt.Sprintf(stringFormat.InvalidParameter, "grant_type") {
+			t.Errorf(expectedFormat.InvalidParameter, "grant_type", status.Description)
 		}
 	}
 }
@@ -61,21 +62,21 @@ func Test_TokenGrant_validateForm_MissingClientID(t *testing.T) {
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s", AuthorizationCodeGrant)))
 	status := util.ParseStatus(response)
 	if status == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if status.Code != 400 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
+			t.Errorf(expectedFormat.NumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf(server.InvalidParameter, "client_id") {
-			t.Errorf(test.ExpectedInvalidParameter, "client_id", status.Description)
+		if status.Description != fmt.Sprintf(stringFormat.InvalidParameter, "client_id") {
+			t.Errorf(expectedFormat.InvalidParameter, "client_id", status.Description)
 		}
 	}
 
 	// [Test 3] Missing client_secret
 	response, _ = http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, u.ClientID.Hex())))
 	status = util.ParseStatus(response)
-	if status.Description != fmt.Sprintf(server.InvalidParameter, "client_secret") {
-		t.Errorf(test.ExpectedInvalidParameter, "client_secret", status.Description)
+	if status.Description != fmt.Sprintf(stringFormat.InvalidParameter, "client_secret") {
+		t.Errorf(expectedFormat.InvalidParameter, "client_secret", status.Description)
 	}
 }
 func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
@@ -96,13 +97,13 @@ func Test_TokenGrant_validateForm_MissingClientSecret(t *testing.T) {
 	response, _ := http.Post(ts.URL, "application/x-www-form-urlencoded", strings.NewReader(fmt.Sprintf("grant_type=%s&client_id=%s", AuthorizationCodeGrant, u.ClientID.Hex())))
 	status := util.ParseStatus(response)
 	if status == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if status.Code != 400 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
+			t.Errorf(expectedFormat.NumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf(server.InvalidParameter, "client_secret") {
-			t.Errorf(test.ExpectedInvalidParameter, "client_secret", status.Description)
+		if status.Description != fmt.Sprintf(stringFormat.InvalidParameter, "client_secret") {
+			t.Errorf(expectedFormat.InvalidParameter, "client_secret", status.Description)
 		}
 	}
 }
@@ -129,13 +130,13 @@ func Test_TokenGrant_passwordFlow_MissingUsername(t *testing.T) {
 	)))
 	status := util.ParseStatus(response)
 	if status == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if status.Code != 400 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
+			t.Errorf(expectedFormat.NumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf(server.InvalidParameter, "username or password") {
-			t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
+		if status.Description != fmt.Sprintf(stringFormat.InvalidParameter, "username or password") {
+			t.Errorf(expectedFormat.InvalidParameter, "username or password", status.Description)
 		}
 	}
 }
@@ -162,13 +163,13 @@ func Test_TokenGrant_passwordFlow_MissingPassword(t *testing.T) {
 	)))
 	status := util.ParseStatus(response)
 	if status == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if status.Code != 400 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
+			t.Errorf(expectedFormat.NumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf(server.InvalidParameter, "username or password") {
-			t.Errorf(test.ExpectedInvalidParameter, "username or password", status.Description)
+		if status.Description != fmt.Sprintf(stringFormat.InvalidParameter, "username or password") {
+			t.Errorf(expectedFormat.InvalidParameter, "username or password", status.Description)
 		}
 	}
 }
@@ -197,15 +198,15 @@ func Test_TokenGrant_passwordFlow_ValidParams(t *testing.T) {
 
 	token1 := parseResult(response)
 	if token1 == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		recordedAccessToken := Store.FindAccessToken(token1.AccessToken)
 		recordedRefreshToken := Store.FindRefreshToken(token1.RefreshToken)
 		if recordedAccessToken == nil {
-			t.Error(test.ExpectedNotNil)
+			t.Error(expectedFormat.NotNil)
 		}
 		if recordedRefreshToken == nil {
-			t.Error(test.ExpectedNotNil)
+			t.Error(expectedFormat.NotNil)
 		}
 	}
 }
@@ -244,10 +245,10 @@ func Test_TokenGrant_NotAllowRefreshToken(t *testing.T) {
 
 	token := parseResult(response)
 	if token == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if len(token.RefreshToken) > 0 {
-			t.Error(test.ExpectedNil)
+			t.Error(expectedFormat.Nil)
 		}
 	}
 }
@@ -284,13 +285,13 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 	)))
 	status := util.ParseStatus(response)
 	if status == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if status.Code != 400 {
-			t.Errorf(test.ExpectedNumberButFoundNumber, 400, status.Code)
+			t.Errorf(expectedFormat.NumberButFoundNumber, 400, status.Code)
 		}
-		if status.Description != fmt.Sprintf(server.InvalidParameter, "refresh_token") {
-			t.Errorf(test.ExpectedInvalidParameter, "refresh_token", status.Description)
+		if status.Description != fmt.Sprintf(stringFormat.InvalidParameter, "refresh_token") {
+			t.Errorf(expectedFormat.InvalidParameter, "refresh_token", status.Description)
 		}
 	}
 }
@@ -329,7 +330,7 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 //	)))
 //	token2 := parseResult(response)
 //	if token2 == nil {
-//		t.Error(test.ExpectedNotNil)
+//		t.Error(expectedFormat.NotNil)
 //	} else {
 //		if token2.AccessToken == token1.AccessToken {
 //			t.Errorf("Expected new access_token but found \"%s\".", token2.AccessToken)
@@ -338,19 +339,19 @@ func Test_TokenGrant_refreshTokenFlow_MissingRefreshToken(t *testing.T) {
 //		recordedAccessToken1 := TokenStore.FindAccessToken(token1.AccessToken)
 //		recordedRefreshToken1 := TokenStore.FindRefreshToken(token1.RefreshToken)
 //		if recordedAccessToken1 != nil {
-//			t.Error(test.ExpectedNil)
+//			t.Error(expectedFormat.Nil)
 //		}
 //		if recordedRefreshToken1 != nil {
-//			t.Error(test.ExpectedNil)
+//			t.Error(expectedFormat.Nil)
 //		}
 
 //		recordedAccessToken2 := TokenStore.FindAccessToken(token2.AccessToken)
 //		recordedRefreshToken2 := TokenStore.FindRefreshToken(token2.RefreshToken)
 //		if recordedAccessToken2 == nil {
-//			t.Error(test.ExpectedNotNil)
+//			t.Error(expectedFormat.NotNil)
 //		}
 //		if recordedRefreshToken2 == nil {
-//			t.Error(test.ExpectedNotNil)
+//			t.Error(expectedFormat.NotNil)
 //		}
 //	}
 //}
@@ -388,7 +389,7 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 	)))
 	token2 := parseResult(response)
 	if token2 == nil {
-		t.Error(test.ExpectedNotNil)
+		t.Error(expectedFormat.NotNil)
 	} else {
 		if token2.AccessToken == token1.AccessToken {
 			t.Errorf("Expected new access_token but found \"%s\".", token2.AccessToken)
@@ -396,16 +397,16 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 
 		accessToken1, _ := Store.FindAccessToken(token1.AccessToken).(*MongoDBToken)
 		if err := mongo.EntityWithID(oauthTable.AccessToken, accessToken1.ID, new(MongoDBToken)); err == nil {
-			t.Error(test.ExpectedNil)
+			t.Error(expectedFormat.Nil)
 		}
 		refreshToken1, _ := Store.FindRefreshToken(token1.RefreshToken).(*MongoDBToken)
 		if err := mongo.EntityWithID(oauthTable.RefreshToken, refreshToken1.ID, new(MongoDBToken)); err == nil {
-			t.Error(test.ExpectedNil)
+			t.Error(expectedFormat.Nil)
 		}
 
 		accessToken2, _ := Store.FindAccessToken(token2.AccessToken).(*MongoDBToken)
 		if accessToken2 == nil {
-			t.Error(test.ExpectedNotNil)
+			t.Error(expectedFormat.NotNil)
 		} else {
 			if accessToken2.ID == accessToken1.ID {
 				t.Errorf("Expected new access_token but found \"%s\".", token2.AccessToken)
@@ -413,7 +414,7 @@ func Test_TokenGrant_refreshTokenFlow_ValidParams(t *testing.T) {
 		}
 		refreshToken2, _ := Store.FindRefreshToken(token2.RefreshToken).(*MongoDBToken)
 		if refreshToken2 == nil {
-			t.Error(test.ExpectedNotNil)
+			t.Error(expectedFormat.NotNil)
 		} else {
 			if refreshToken2.ID == refreshToken1.ID {
 				t.Errorf("Expected new refresh_token but found \"%s\".", token2.RefreshToken)
