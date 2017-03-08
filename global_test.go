@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/phuc0302/go-oauth2/oauth_key"
-	"github.com/phuc0302/go-oauth2/server"
-	"github.com/phuc0302/go-oauth2/test"
-	"github.com/phuc0302/go-oauth2/util"
+	"github.com/phuc0302/go-server"
+	"github.com/phuc0302/go-server/expected_format"
+	"github.com/phuc0302/go-server/util"
 )
 
 func Test_ValidateToken_NoAccessToken(t *testing.T) {
@@ -32,7 +32,7 @@ func Test_ValidateToken_NoAccessToken(t *testing.T) {
 		f2 := f1(func(r *server.RequestContext) {})
 		f2(context)
 
-		t.Errorf(test.ExpectedPanic)
+		t.Errorf(expectedFormat.Panic)
 	}))
 	defer ts.Close()
 	http.Get(ts.URL)
@@ -53,13 +53,13 @@ func Test_ValidateToken_WithBasicAuth(t *testing.T) {
 
 		if security, ok := context.GetExtra(oauthKey.OAuthContext).(*OAuthContext); ok {
 			if security.Client == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 			if security.User == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 		} else {
-			t.Error(test.ExpectedNotNil)
+			t.Error(expectedFormat.NotNil)
 		}
 	}))
 	defer ts.Close()
@@ -86,19 +86,19 @@ func Test_ValidateToken_WithGetAccessToken(t *testing.T) {
 
 		if security, ok := context.GetExtra(oauthKey.OAuthContext).(*OAuthContext); ok {
 			if security.AccessToken == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 			if security.RefreshToken != nil {
-				t.Error(test.ExpectedNil)
+				t.Error(expectedFormat.Nil)
 			}
 			if security.Client == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 			if security.User == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 		} else {
-			t.Error(test.ExpectedNotNil)
+			t.Error(expectedFormat.NotNil)
 		}
 	}))
 	defer ts.Close()
@@ -126,19 +126,19 @@ func Test_ValidateToken_WithPostAccessToken(t *testing.T) {
 
 		if security, ok := context.GetExtra(oauthKey.OAuthContext).(*OAuthContext); ok {
 			if security.AccessToken == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 			if security.RefreshToken != nil {
-				t.Error(test.ExpectedNil)
+				t.Error(expectedFormat.Nil)
 			}
 			if security.Client == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 			if security.User == nil {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 		} else {
-			t.Error(test.ExpectedNotNil)
+			t.Error(expectedFormat.NotNil)
 		}
 	}))
 	defer ts.Close()
@@ -165,10 +165,10 @@ func Test_ValidateRoles_InvalidRoles(t *testing.T) {
 		defer func() {
 			if err, ok := recover().(*util.Status); ok {
 				if err.Code != 401 {
-					t.Errorf(test.ExpectedNumberButFoundNumber, 401, err.Code)
+					t.Errorf(expectedFormat.NumberButFoundNumber, 401, err.Code)
 				}
 			} else {
-				t.Error(test.ExpectedNotNil)
+				t.Error(expectedFormat.NotNil)
 			}
 		}()
 
@@ -204,7 +204,7 @@ func Test_ValidateRoles_ValidRoles(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := server.CreateContext(w, r)
 		f1 := func(c *server.RequestContext) {
-			c.OutputError(util.Status200())
+			c.OutputStatus(util.Status200())
 		}
 
 		f1 = server.Adapt(f1, ValidateToken(), ValidateRoles("r_admin"))
@@ -225,6 +225,6 @@ func Test_ValidateRoles_ValidRoles(t *testing.T) {
 
 	status := util.ParseStatus(response)
 	if status.Code != 200 {
-		t.Errorf(test.ExpectedNumberButFoundNumber, 200, status.Code)
+		t.Errorf(expectedFormat.NumberButFoundNumber, 200, status.Code)
 	}
 }

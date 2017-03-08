@@ -8,8 +8,8 @@ import (
 
 	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/oauth_key"
-	"github.com/phuc0302/go-oauth2/server"
-	"github.com/phuc0302/go-oauth2/util"
+	"github.com/phuc0302/go-server"
+	"github.com/phuc0302/go-server/util"
 )
 
 // Global variables.

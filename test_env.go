@@ -10,7 +10,7 @@ import (
 
 	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/oauth_table"
-	"github.com/phuc0302/go-oauth2/util"
+	"github.com/phuc0302/go-server/util"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
