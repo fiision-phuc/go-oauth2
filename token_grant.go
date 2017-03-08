@@ -206,14 +206,14 @@ func (g *TokenGrant) finalizeToken(c *server.RequestContext, s *OAuthContext) {
 				s.Client.ClientID(),
 				s.User.UserID(),
 				now,
-				now.Add(cfg.AccessTokenDuration),
+				now.Add(Cfg.AccessTokenDuration),
 			)
 		}
 		s.AccessToken = accessToken
 	}
 
 	// Generate refresh token if neccessary
-	if cfg.AllowRefreshToken && s.RefreshToken == nil {
+	if Cfg.AllowRefreshToken && s.RefreshToken == nil {
 		refreshToken := Store.FindRefreshTokenWithCredential(s.Client.ClientID(), s.User.UserID())
 		if refreshToken != nil && refreshToken.IsExpired() {
 			Store.DeleteRefreshToken(refreshToken)
@@ -225,7 +225,7 @@ func (g *TokenGrant) finalizeToken(c *server.RequestContext, s *OAuthContext) {
 				s.Client.ClientID(),
 				s.User.UserID(),
 				now,
-				now.Add(cfg.RefreshTokenDuration),
+				now.Add(Cfg.RefreshTokenDuration),
 			)
 		}
 		s.RefreshToken = refreshToken
@@ -240,7 +240,7 @@ func (g *TokenGrant) finalizeToken(c *server.RequestContext, s *OAuthContext) {
 	}
 
 	// Only add refresh_token if allowed
-	if cfg.AllowRefreshToken {
+	if Cfg.AllowRefreshToken {
 		tokenResponse.RefreshToken = s.RefreshToken.Token()
 	}
 	c.OutputJSON(util.Status200(), tokenResponse)

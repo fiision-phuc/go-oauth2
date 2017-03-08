@@ -14,11 +14,11 @@ import (
 
 // Global variables.
 var (
+	// Global public config's instance.
+	Cfg Config
+
 	// Global public token store's instance.
 	Store TokenStore
-
-	// Global public config's instance.
-	cfg Config
 
 	// Global internal private key.
 	privateKey *rsa.PrivateKey

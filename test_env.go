@@ -47,7 +47,7 @@ func (u *TestEnv) Setup() {
 	u.CreatedTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
 
 	// Define global variables
-	cfg = LoadConfig()
+	Cfg = LoadConfig()
 	Store = new(MongoDBStore)
 
 	// Generate test data
