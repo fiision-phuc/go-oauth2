@@ -180,11 +180,11 @@ func (d *MongoDBStore) queryTokenWithCredential(table string, clientID string, u
 		return nil
 	}
 
-	token := new(MongoDBToken)
-	if err := mongo.EntityWithCriteria(table, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, token); err != nil {
+	var token MongoDBToken
+	if err := mongo.EntityWithCriteria(table, bson.M{"user_id": bson.ObjectIdHex(userID), "client_id": bson.ObjectIdHex(clientID)}, &token); err != nil {
 		return nil
 	}
-	return token
+	return &token
 }
 
 // Create token
