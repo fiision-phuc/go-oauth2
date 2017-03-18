@@ -85,9 +85,9 @@ func GroupRoute(prefixURI string, groupHandler server.HandleGroupFunc) {
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindCopy(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindCopy(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -100,9 +100,9 @@ func BindCopy(patternURL string, handler server.HandleContextFunc, roles ...stri
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindDelete(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindDelete(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -115,9 +115,9 @@ func BindDelete(patternURL string, handler server.HandleContextFunc, roles ...st
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindGet(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindGet(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -130,9 +130,9 @@ func BindGet(patternURL string, handler server.HandleContextFunc, roles ...strin
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindHead(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindHead(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -145,9 +145,9 @@ func BindHead(patternURL string, handler server.HandleContextFunc, roles ...stri
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindLink(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindLink(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -160,9 +160,9 @@ func BindLink(patternURL string, handler server.HandleContextFunc, roles ...stri
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindOptions(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindOptions(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -175,9 +175,9 @@ func BindOptions(patternURL string, handler server.HandleContextFunc, roles ...s
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindPatch(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindPatch(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -190,9 +190,9 @@ func BindPatch(patternURL string, handler server.HandleContextFunc, roles ...str
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindPost(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindPost(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -205,9 +205,9 @@ func BindPost(patternURL string, handler server.HandleContextFunc, roles ...stri
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindPurge(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindPurge(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -220,9 +220,9 @@ func BindPurge(patternURL string, handler server.HandleContextFunc, roles ...str
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindPut(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindPut(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
@@ -235,9 +235,9 @@ func BindPut(patternURL string, handler server.HandleContextFunc, roles ...strin
 //
 // @param
 // - patternURL {string} (the URL matching pattern)
-// - handler {server.HandleContextFunc} (the callback func)
 // - roles {[]string} (a list of acceptable users' roles)
-func BindUnlink(patternURL string, handler server.HandleContextFunc, roles ...string) {
+// - handler {server.HandleContextFunc} (the callback func)
+func BindUnlink(patternURL string, roles []string, handler server.HandleContextFunc) {
 	if roles == nil || len(roles) == 0 {
 		roles = oauthRole.All()
 	}
