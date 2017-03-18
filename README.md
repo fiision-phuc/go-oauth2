@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// Bind handler with HTTP GET
-	oauth2.BindGet("/protected", f, oauthRole.All()...)
+	oauth2.BindGet("/protected", oauthRole.All(), f)
 
 	// Start server
 	oauth2.Run()
