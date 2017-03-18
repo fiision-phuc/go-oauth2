@@ -31,7 +31,7 @@ func CreateMongoDBStore() (tokenStore TokenStore) {
 	}
 
 	var privateKey *rsa.PrivateKey
-	if base64Encoded, ok := server.Cfg.GetExtension("JWT_KEY").(string); ok {
+	if base64Encoded, ok := server.Cfg.GetExtension("jwt_key").(string); ok {
 		if keyDER, err := base64.StdEncoding.DecodeString(base64Encoded); err == nil {
 			privateKey, _ = x509.ParsePKCS1PrivateKey(keyDER)
 		}
@@ -44,7 +44,7 @@ func CreateMongoDBStore() (tokenStore TokenStore) {
 
 		// Save to config
 		base64Encoded := base64.StdEncoding.EncodeToString(keyDER)
-		server.Cfg.SetExtension("JWT_KEY", base64Encoded)
+		server.Cfg.SetExtension("jwt_key", base64Encoded)
 		server.Cfg.Save()
 	}
 

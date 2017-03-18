@@ -42,6 +42,7 @@ func InitializeWithMongoDB(sandboxMode bool, bindService bool) {
 // - sandboxMode {bool} (instruction in which should bind authorize & token service or not)
 func Initialize(tokenStore TokenStore, sandboxMode bool, bindService bool) {
 	server.Initialize(sandboxMode)
+	loadConfig()
 	if tokenStore == nil {
 		tokenStore = CreateMongoDBStore()
 	}
