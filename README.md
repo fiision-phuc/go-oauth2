@@ -16,21 +16,37 @@ written in Node.js with some additional features.
 ### Example Server
 
 ````go
-import "github.com/phuc0302/go-oauth2"
+package main
 
-// Create server with sandbox mode enable.
-server := oauth2.DefaultServer(true)
+import (
+	"fmt"
 
-// Define routing server.
-server.Get("/protected", func(c *oauth2.Request, s *oauth2.Security) {
-  c.OutputText(utils.Status200(), "This is a protected resources.")
-})
+	"github.com/phuc0302/go-oauth2"
+	"github.com/phuc0302/go-oauth2/oauth_key"
+	"github.com/phuc0302/go-oauth2/oauth_role"
+	"github.com/phuc0302/go-server"
+	"github.com/phuc0302/go-server/util"
+)
 
-// Define who is able to access protected resources.
-server.GroupRole("/protected**", "r_user")
+func main() {
+	// Initialize server with sandbox mode enable and using MongoDB.
+	oauth2.InitializeWithMongoDB(true, true)
 
-// Start server.
-server.Run()
+	// Define handler
+	f := func(c *server.RequestContext) {
+		if s, ok := c.GetExtra(oauthKey.Context).(oauth2.OAuthContext); ok {
+			c.OutputText(util.Status200(), fmt.Sprintf("Hello, your ID is: %s", s.User.UserID()))
+		} else {
+			panic(util.Status401())
+		}
+	}
+
+	// Bind handler with HTTP GET
+	oauth2.BindGet("/protected", f, oauthRole.All()...)
+
+	// Start server
+	oauth2.Run()
+}
 ````
 
 ### Author
