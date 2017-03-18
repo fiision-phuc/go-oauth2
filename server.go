@@ -56,7 +56,7 @@ func Initialize(tokenStore TokenStore, sandboxMode bool, bindService bool) {
 
 		//	server.Get("/authorize", grantAuthorization.HandleForm)
 		server.BindGet("/token", tokenGrant.HandleForm)
-		server.BindGet("/token", tokenGrant.HandleForm)
+		server.BindPost("/token", tokenGrant.HandleForm)
 	}
 }
 
