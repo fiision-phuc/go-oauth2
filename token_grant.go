@@ -15,16 +15,23 @@ import (
 type TokenGrant struct {
 }
 
-// HandleForm validates authentication form.
-func (g *TokenGrant) HandleForm(c *server.RequestContext) {
+// HandleForm handles token request form.
+//
+// @param
+// - c {server.RequestContext} (a request context)
+func (t *TokenGrant) HandleForm(c *server.RequestContext) {
 	s := new(OAuthContext)
 
-	g.generalValidation(c, s)
-	g.finalizeToken(c, s)
+	t.generalValidation(c, s)
+	t.finalizeToken(c, s)
 }
 
-// handleForm validates general information
-func (g *TokenGrant) generalValidation(c *server.RequestContext, s *OAuthContext) {
+// generalValidation does general information validation.
+//
+// @param
+// - c {server.RequestContext} (a request context)
+// - s {OAuthContext} (an oauth context)
+func (t *TokenGrant) generalValidation(c *server.RequestContext, s *OAuthContext) {
 	// If client_id and client_secret are not include, try to look at the authorization header
 	if c.QueryParams != nil && len(c.QueryParams["client_id"]) == 0 && len(c.QueryParams["client_secret"]) == 0 {
 		c.QueryParams["client_id"], c.QueryParams["client_secret"], _ = c.BasicAuth()
@@ -66,7 +73,7 @@ func (g *TokenGrant) generalValidation(c *server.RequestContext, s *OAuthContext
 
 	case AuthorizationCodeGrant:
 		// TODO: Going to do soon
-		g.handleAuthorizationCodeGrant(c, s)
+		t.handleAuthorizationCodeGrant(c, s)
 		break
 
 		//	case ImplicitGrant:
@@ -74,19 +81,24 @@ func (g *TokenGrant) generalValidation(c *server.RequestContext, s *OAuthContext
 		//		break
 
 	case ClientCredentialsGrant:
-		g.handleClientCredentialsGrant(inputForm.ClientID, inputForm.ClientSecret, c, s)
+		t.handleClientCredentialsGrant(inputForm.ClientID, inputForm.ClientSecret, c, s)
 		break
 
 	case PasswordGrant:
-		g.passwordFlow(c, s)
+		t.passwordFlow(c, s)
 		break
 
 	case RefreshTokenGrant:
-		g.refreshTokenFlow(c, s)
+		t.refreshTokenFlow(c, s)
 		break
 	}
 }
 
+// handleAuthorizationCodeGrant handles authorization code grant flow.
+//
+// @param
+// - c {server.RequestContext} (a request context)
+// - s {OAuthContext} (an oauth context)
 func (t *TokenGrant) handleAuthorizationCodeGrant(c *server.RequestContext, s *OAuthContext) {
 	// Bind
 	var inputForm struct {
@@ -131,6 +143,11 @@ func (t *TokenGrant) handleAuthorizationCodeGrant(c *server.RequestContext, s *O
 	// });
 }
 
+// handleClientCredentialsGrant handles client credentials grant flow.
+//
+// @param
+// - c {server.RequestContext} (a request context)
+// - s {OAuthContext} (an oauth context)
 func (t *TokenGrant) handleClientCredentialsGrant(clientID string, clientSecret string, c *server.RequestContext, s *OAuthContext) {
 	if user := Store.FindUserWithClient(clientID, clientSecret); user != nil {
 		s.User = user
@@ -139,8 +156,12 @@ func (t *TokenGrant) handleClientCredentialsGrant(clientID string, clientSecret 
 	}
 }
 
-// passwordFlow implements user's authentication with user's credential.
-func (g *TokenGrant) passwordFlow(c *server.RequestContext, s *OAuthContext) {
+// passwordFlow handles password grant flow.
+//
+// @param
+// - c {server.RequestContext} (a request context)
+// - s {OAuthContext} (an oauth context)
+func (t *TokenGrant) passwordFlow(c *server.RequestContext, s *OAuthContext) {
 	var passwordForm struct {
 		Username string `field:"username" validation:"^[^\\s]+$"`
 		Password string `field:"password" validation:"^[^\\s]{8,32}$"`
@@ -157,8 +178,12 @@ func (g *TokenGrant) passwordFlow(c *server.RequestContext, s *OAuthContext) {
 	}
 }
 
-// useRefreshTokenFlow handle refresh token flow.
-func (g *TokenGrant) refreshTokenFlow(c *server.RequestContext, s *OAuthContext) {
+// refreshTokenFlow handles refresh token grant flow.
+//
+// @param
+// - c {server.RequestContext} (a request context)
+// - s {OAuthContext} (an oauth context)
+func (t *TokenGrant) refreshTokenFlow(c *server.RequestContext, s *OAuthContext) {
 	/* Condition validation: Validate refresh_token parameter */
 	if queryToken := c.QueryParams["refresh_token"]; len(queryToken) > 0 {
 
@@ -189,8 +214,12 @@ func (g *TokenGrant) refreshTokenFlow(c *server.RequestContext, s *OAuthContext)
 	}
 }
 
-// finalizeToken summary and return result to client.
-func (g *TokenGrant) finalizeToken(c *server.RequestContext, s *OAuthContext) {
+// finalizeToken finalizes token response.
+//
+// @param
+// - c {server.RequestContext} (a request context)
+// - s {OAuthContext} (an oauth context)
+func (t *TokenGrant) finalizeToken(c *server.RequestContext, s *OAuthContext) {
 	now := time.Now()
 
 	// Generate access token if neccessary

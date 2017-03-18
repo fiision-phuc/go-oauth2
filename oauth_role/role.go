@@ -10,3 +10,19 @@ const (
 	Web     = "r_web"
 	Windows = "r_windows"
 )
+
+// All returns an array that contains all roles.
+func All() []string {
+	a := []string{Admin, Android, IOS, Manager, User, Web, Windows}
+	return a
+}
+
+// AllDevices returns an array that contains all device roles.
+func AllDevices() []string {
+	return []string{Admin, Android, IOS, Web, Windows}
+}
+
+// AllDevices returns an array that contains all user roles.
+func allUsers() []string {
+	return []string{Admin, Manager, User}
+}

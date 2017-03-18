@@ -10,6 +10,7 @@ import (
 
 	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/oauth_table"
+	"github.com/phuc0302/go-server"
 	"github.com/phuc0302/go-server/util"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -37,6 +38,7 @@ type TestEnv struct {
 // Setup initializes environment.
 func (u *TestEnv) Setup() {
 	mongo.ConnectMongo()
+	server.Initialize(true)
 
 	u.Session, u.Database = mongo.GetMonotonicSession()
 	u.Username = "admin"
@@ -47,8 +49,8 @@ func (u *TestEnv) Setup() {
 	u.CreatedTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
 
 	// Define global variables
-	Cfg = LoadConfig()
-	Store = new(MongoDBStore)
+	Cfg = loadConfig()
+	Store = CreateMongoDBStore()
 
 	// Generate test data
 	u.Client = &MongoDBClient{
@@ -107,7 +109,7 @@ func (u *TestEnv) Setup() {
 // Teardown cleans up environment.
 func (u *TestEnv) Teardown() {
 	os.Remove(mongo.ConfigFile)
-	os.Remove(configFile)
+	os.Remove(server.Debug)
 
 	os.RemoveAll("resources")
 

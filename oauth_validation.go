@@ -1,39 +1,42 @@
 package oauth2
 
 import (
-	"crypto/rsa"
 	"fmt"
 	"regexp"
 	"strings"
 
-	"github.com/phuc0302/go-mongo"
 	"github.com/phuc0302/go-oauth2/oauth_key"
 	"github.com/phuc0302/go-server"
 	"github.com/phuc0302/go-server/util"
 )
 
-// Global variables.
-var (
-	// Global public config's instance.
-	Cfg Config
+// OAuthContext describes a user's oauth scope.
+type OAuthContext struct {
 
-	// Global public token store's instance.
-	Store TokenStore
+	// Registered user. Always available.
+	User User
+	// Registered client. Always available.
+	Client Client
+	// Access token that had been given to user. Always available.
+	AccessToken Token
+	// Refresh token that had been given to user. Might not be available all the time.
+	RefreshToken Token
+}
 
-	// Global internal private key.
-	privateKey *rsa.PrivateKey
-)
+// OAuthResponse describes a granted response that will be returned to client.
+type OAuthResponse struct {
+	TokenType    string `json:"token_type,omitempty"`
+	AccessToken  string `json:"access_token,omitempty"`
+	ExpiresIn    int64  `json:"expires_in,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 
-// Global regex.
-var (
-	// Bearer regex.
-	bearerFinder = regexp.MustCompile("^(B|b)earer\\s.+$")
+	Roles []string `json:"roles,omitempty"`
+}
 
-	// OAuth2 grant regex.
-	grantsValidation *regexp.Regexp
-)
-
-// ValidateToken returns a wrapper oauth token for HandleContextFunc.
+// ValidateToken returns a wrapper oauth token validation func before HandleContextFunc.
+//
+// @return
+// - func {server.Adapter} (a wrapper func around developer's server.HandleContextFunc)
 func ValidateToken() server.Adapter {
 	return func(f server.HandleContextFunc) server.HandleContextFunc {
 		return func(c *server.RequestContext) {
@@ -58,7 +61,7 @@ func ValidateToken() server.Adapter {
 					User:        user,
 					AccessToken: accessToken,
 				}
-				c.SetExtra(oauthKey.OAuthContext, oauthContext)
+				c.SetExtra(oauthKey.Context, oauthContext)
 
 			} else if username, password, ok := c.BasicAuth(); ok {
 				client := Store.FindClientWithCredential(username, password)
@@ -70,7 +73,7 @@ func ValidateToken() server.Adapter {
 						User:        user,
 						AccessToken: accessToken,
 					}
-					c.SetExtra(oauthKey.OAuthContext, oauthContext)
+					c.SetExtra(oauthKey.Context, oauthContext)
 				}
 			} else {
 				panic(util.Status401())
@@ -80,7 +83,13 @@ func ValidateToken() server.Adapter {
 	}
 }
 
-// ValidateToken returns a wrapper oauth token for HandleContextFunc.
+// ValidateRoles returns a wrapper user's roles validation func before HandleContextFunc.
+//
+// @param
+// - roles {[]string} (a list of acceptable users' roles)
+//
+// @return
+// - func {server.Adapter} (a wrapper func around developer's server.HandleContextFunc)
 func ValidateRoles(roles ...string) server.Adapter {
 	return func(f server.HandleContextFunc) server.HandleContextFunc {
 		/* Condition validation: validate role input */
@@ -89,7 +98,7 @@ func ValidateRoles(roles ...string) server.Adapter {
 		}
 
 		return func(c *server.RequestContext) {
-			if oauthContext, ok := c.GetExtra(oauthKey.OAuthContext).(*OAuthContext); ok && Store != nil && oauthContext.User != nil {
+			if oauthContext, ok := c.GetExtra(oauthKey.Context).(*OAuthContext); ok && Store != nil && oauthContext.User != nil {
 				roleValidator := regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(roles, "|")))
 				isAuthorized := false
 
@@ -110,33 +119,4 @@ func ValidateRoles(roles ...string) server.Adapter {
 			f(c)
 		}
 	}
-}
-
-// CreateServer returns a server with custom components.
-func CreateServer(tokenStore TokenStore, sandboxMode bool) *server.Server {
-	LoadConfig()
-
-	// Register global components
-	Store = tokenStore
-
-	// Create server
-	server := server.CreateServer(sandboxMode)
-
-	// Setup OAuth2.0
-	if Store != nil {
-		//	grantAuthorization := new(AuthorizationGrant)
-		tokenGrant := new(TokenGrant)
-
-		//	server.Get("/authorize", grantAuthorization.HandleForm)
-		server.Get("/token", tokenGrant.HandleForm)
-		server.Post("/token", tokenGrant.HandleForm)
-	}
-	return server
-}
-
-// DefaultServer returns a server with build in components.
-func DefaultServer(sandboxMode bool) *server.Server {
-	mongo.ConnectMongo()
-	tokenStore := new(MongoDBStore)
-	return CreateServer(tokenStore, sandboxMode)
 }

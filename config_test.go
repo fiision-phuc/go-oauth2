@@ -6,22 +6,49 @@ import (
 	"testing"
 	"time"
 
+	"github.com/phuc0302/go-oauth2/oauth_key"
+	"github.com/phuc0302/go-server"
 	"github.com/phuc0302/go-server/expected_format"
-	"github.com/phuc0302/go-server/util"
 )
 
-func Test_CreateConfig(t *testing.T) {
-	defer os.Remove(configFile)
-	CreateConfig()
+func Test_CreateConfigWithPanic(t *testing.T) {
+	defer os.Remove(server.Debug)
+	defer func() {
+		if err := recover(); err != nil {
+			// Panic had been fired.
+		}
+	}()
 
-	if !util.FileExisted(configFile) {
-		t.Errorf("Expected %s file had been created but found nil.", configFile)
+	createConfig()
+	t.Error(expectedFormat.Panic)
+}
+
+func Test_LoadConfigWithPanic(t *testing.T) {
+	defer os.Remove(server.Debug)
+	defer func() {
+		if err := recover(); err != nil {
+			// Panic had been fired.
+		}
+	}()
+
+	loadConfig()
+	t.Error(expectedFormat.Panic)
+}
+
+func Test_CreateConfig(t *testing.T) {
+	defer os.Remove(server.Debug)
+	server.Initialize(true)
+	createConfig()
+
+	if server.Cfg.GetExtension(oauthKey.Config) == nil {
+		t.Error(expectedFormat.NotNil)
 	}
 }
 
 func Test_LoadConfig(t *testing.T) {
-	defer os.Remove(configFile)
-	config := LoadConfig()
+	defer os.Remove(server.Debug)
+	server.Initialize(true)
+	config := loadConfig()
 
 	if config.AllowRefreshToken != true {
 		t.Errorf(expectedFormat.BoolButFoundBool, true, config.AllowRefreshToken)
@@ -34,11 +61,6 @@ func Test_LoadConfig(t *testing.T) {
 	}
 	if config.AuthorizationCodeDuration != 300*time.Second {
 		t.Errorf(expectedFormat.NumberButFoundNumber, 300*time.Second, config.AuthorizationCodeDuration)
-	}
-
-	// Validate private key
-	if privateKey == nil {
-		t.Errorf(expectedFormat.NotNil)
 	}
 
 	// Validate grant types
