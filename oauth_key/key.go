@@ -1,5 +1,6 @@
 package oauthKey
 
 const (
-	OAuthContext = "oauth_context"
+	Config  = "oauth_config"
+	Context = "oauth_context"
 )

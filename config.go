@@ -1,22 +1,15 @@
 package oauth2
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/phuc0302/go-server/util"
+	"github.com/phuc0302/go-oauth2/oauth_key"
+	"github.com/phuc0302/go-server"
 )
-
-// Configuration file's name.
-const configFile = "oauth2.cfg"
 
 // OAuth2.0 flows.
 const (
@@ -38,23 +31,25 @@ const (
 
 // Config describes a configuration object that will be used during application life time.
 type Config struct {
-	GrantTypes []string `json:"grant_types"`
-	PrivateKey []byte   `json:"private_key"`
+	AllowRefreshToken bool `json:"allow_refresh_token"`
 
-	AllowRefreshToken         bool          `json:"allow_refresh_token"`
+	GrantTypes                []string      `json:"grant_types"`
 	AccessTokenDuration       time.Duration `json:"access_token_duration"`       // In seconds
 	RefreshTokenDuration      time.Duration `json:"refresh_token_duration"`      // In seconds
 	AuthorizationCodeDuration time.Duration `json:"authorization_code_duration"` // In seconds
 }
 
-// CreateConfig generates a default configuration file.
-func CreateConfig() {
-	if util.FileExisted(configFile) {
-		os.Remove(configFile)
+// createConfig generates a default oauth2 configuration.
+//
+// @return
+// - config {Config} (an instance of oauth2's configuration)
+func createConfig() (config *Config) {
+	if server.Cfg == nil {
+		panic("Server is not yet being initialized! Please run: 'server.Initialize'.")
 	}
 
 	// Create default config
-	config := Config{
+	config = &Config{
 		GrantTypes: []string{AuthorizationCodeGrant, ClientCredentialsGrant, PasswordGrant, RefreshTokenGrant},
 
 		AllowRefreshToken:         true,
@@ -63,40 +58,40 @@ func CreateConfig() {
 		RefreshTokenDuration:      7776000,
 	}
 
-	// Generate jwt key
-	privateKey, _ := rsa.GenerateKey(rand.Reader, 1024)
-	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
-	config.PrivateKey = privateKeyDer
-
-	// Create new file
-	configJSON, _ := json.MarshalIndent(config, "", "  ")
-	file, _ := os.Create(configFile)
-	file.Write(configJSON)
-	file.Close()
+	server.Cfg.SetExtension(oauthKey.Config, *config)
+	server.Cfg.Save()
+	return
 }
 
-// LoadConfig retrieves previous configuration from file.
-func LoadConfig() Config {
+// loadConfig retrieves previous configuration from file.
+//
+// @return
+// - config {Config} (an instance of oauth2's configuration)
+func loadConfig() (config *Config) {
+	if server.Cfg == nil {
+		panic("Server is not yet being initialized! Please run: 'server.Initialize'.")
+	}
+
 	// Generate config file if neccessary
-	if !util.FileExisted(configFile) {
-		CreateConfig()
+	if info := server.Cfg.GetExtension(oauthKey.Config); info != nil {
+		if configJSON, err := json.Marshal(info); err == nil {
+
+			config = new(Config)
+			if err = json.Unmarshal(configJSON, config); err == nil {
+				// Everything is good to go.
+			} else {
+				config = createConfig()
+			}
+		} else {
+			config = createConfig()
+		}
+	} else {
+		config = createConfig()
 	}
 
-	// Load config file
-	var config Config
-	file, _ := os.Open(configFile)
-	bytes, _ := ioutil.ReadAll(file)
-
-	if err := json.Unmarshal(bytes, &config); err == nil {
-		config.AccessTokenDuration *= time.Second
-		config.RefreshTokenDuration *= time.Second
-		config.AuthorizationCodeDuration *= time.Second
-
-		// Define jwt
-		privateKey, _ = x509.ParsePKCS1PrivateKey(config.PrivateKey)
-
-		// Define regular expressions
-		grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
-	}
-	return config
+	grantsValidation = regexp.MustCompile(fmt.Sprintf("^(%s)$", strings.Join(config.GrantTypes, "|")))
+	config.AuthorizationCodeDuration *= time.Second
+	config.RefreshTokenDuration *= time.Second
+	config.AccessTokenDuration *= time.Second
+	return
 }

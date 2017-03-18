@@ -5,8 +5,29 @@ import (
 	"testing"
 	"time"
 
+	"github.com/phuc0302/go-server"
 	"github.com/phuc0302/go-server/expected_format"
 )
+
+func Test_MongoDBStore_CreateMongoDBStore(t *testing.T) {
+	u := new(TestEnv)
+	defer u.Teardown()
+	u.Setup()
+
+	if mongoStore, ok := Store.(*MongoDBStore); ok {
+		if mongoStore.privateKey == nil {
+			t.Error(expectedFormat.NotNil)
+		}
+
+		if _, ok := server.Cfg.GetExtension("JWT_KEY").(string); ok {
+			// Everything is fine.
+		} else {
+			t.Error(expectedFormat.NotNil)
+		}
+	} else {
+		t.Error("Expected Store should be instance of M")
+	}
+}
 
 func Test_MongoDBStore_FindUserWithID(t *testing.T) {
 	u := new(TestEnv)

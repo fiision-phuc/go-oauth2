@@ -51,7 +51,7 @@ func Test_ValidateToken_WithBasicAuth(t *testing.T) {
 		f2 := f1(func(r *server.RequestContext) {})
 		f2(context)
 
-		if security, ok := context.GetExtra(oauthKey.OAuthContext).(*OAuthContext); ok {
+		if security, ok := context.GetExtra(oauthKey.Context).(*OAuthContext); ok {
 			if security.Client == nil {
 				t.Error(expectedFormat.NotNil)
 			}
@@ -84,7 +84,7 @@ func Test_ValidateToken_WithGetAccessToken(t *testing.T) {
 		f2 := f1(func(r *server.RequestContext) {})
 		f2(context)
 
-		if security, ok := context.GetExtra(oauthKey.OAuthContext).(*OAuthContext); ok {
+		if security, ok := context.GetExtra(oauthKey.Context).(*OAuthContext); ok {
 			if security.AccessToken == nil {
 				t.Error(expectedFormat.NotNil)
 			}
@@ -124,7 +124,7 @@ func Test_ValidateToken_WithPostAccessToken(t *testing.T) {
 		f2 := f1(func(r *server.RequestContext) {})
 		f2(context)
 
-		if security, ok := context.GetExtra(oauthKey.OAuthContext).(*OAuthContext); ok {
+		if security, ok := context.GetExtra(oauthKey.Context).(*OAuthContext); ok {
 			if security.AccessToken == nil {
 				t.Error(expectedFormat.NotNil)
 			}

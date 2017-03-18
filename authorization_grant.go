@@ -5,12 +5,6 @@ import "github.com/phuc0302/go-server"
 type AuthorizationGrant struct {
 }
 
-/**
- * Check Request Params
- *
- * @param  {Function} done
- * @this   OAuth
- */
 func (a *AuthorizationGrant) HandleForm(c *server.RequestContext, s *OAuthContext) {
 	var inputForm struct {
 		ClientID     string `field:"client_id" validation:"^\\w+$"`

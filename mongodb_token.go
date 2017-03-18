@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"crypto/rsa"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -14,6 +15,8 @@ type MongoDBToken struct {
 	Client  bson.ObjectId `bson:"client_id,omitempty"`
 	Created time.Time     `bson:"created_time,omitempty"`
 	Expired time.Time     `bson:"expired_time,omitempty"`
+
+	privateKey *rsa.PrivateKey
 }
 
 // ClientID returns client_id.
@@ -42,7 +45,7 @@ func (t *MongoDBToken) Token() string {
 	}
 
 	// Generate token
-	tokenString, _ := token.SignedString(privateKey)
+	tokenString, _ := token.SignedString(t.privateKey)
 	return tokenString
 }
 

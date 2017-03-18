@@ -15,11 +15,15 @@ func Test_MongoDBToken(t *testing.T) {
 	defer u.Teardown()
 	u.Setup()
 
+	mongoStore, _ := Store.(*MongoDBStore)
+
 	token := MongoDBToken{
 		ID:      bson.NewObjectId(),
 		User:    bson.NewObjectId(),
 		Client:  bson.NewObjectId(),
 		Created: time.Now(),
+
+		privateKey: mongoStore.privateKey,
 	}
 	token.Expired = token.Created.Add(Cfg.RefreshTokenDuration)
 
@@ -32,7 +36,7 @@ func Test_MongoDBToken(t *testing.T) {
 			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
 			}
-			return &privateKey.PublicKey, nil
+			return &token.privateKey.PublicKey, nil
 		})
 
 		if err != nil || !jwtToken.Valid {
