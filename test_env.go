@@ -25,8 +25,8 @@ type TestEnv struct {
 	User2  User
 	Client Client
 
-	ExpiredAccessToken  Token
-	ExpiredRefreshToken Token
+	//	ExpiredAccessToken  Token
+	//	ExpiredRefreshToken Token
 
 	Username     string
 	Password     string
@@ -73,25 +73,25 @@ func (u *TestEnv) Setup() {
 		Roles: []string{"r_device"},
 	}
 
-	u.ExpiredAccessToken = &MongoDBToken{
-		ID:      bson.NewObjectId(),
-		User:    u.UserID,
-		Client:  u.ClientID,
-		Created: u.CreatedTime,
-		Expired: u.CreatedTime.Add(Cfg.AccessTokenDuration),
-	}
-	u.ExpiredRefreshToken = &MongoDBToken{
-		ID:      bson.NewObjectId(),
-		User:    u.UserID,
-		Client:  u.ClientID,
-		Created: u.CreatedTime,
-		Expired: u.CreatedTime.Add(Cfg.RefreshTokenDuration),
-	}
+	//	u.ExpiredAccessToken = &MongoDBToken{
+	//		ID:      bson.NewObjectId(),
+	//		User:    u.UserID,
+	//		Client:  u.ClientID,
+	//		Created: u.CreatedTime,
+	//		Expired: u.CreatedTime.Add(Cfg.AccessTokenDuration),
+	//	}
+	//	u.ExpiredRefreshToken = &MongoDBToken{
+	//		ID:      bson.NewObjectId(),
+	//		User:    u.UserID,
+	//		Client:  u.ClientID,
+	//		Created: u.CreatedTime,
+	//		Expired: u.CreatedTime.Add(Cfg.RefreshTokenDuration),
+	//	}
 
 	u.Database.C(oauthTable.User).Insert(u.User1, u.User2)
 	u.Database.C(oauthTable.Client).Insert(u.Client)
-	u.Database.C(TableAccessToken).Insert(u.ExpiredAccessToken)
-	u.Database.C(TableRefreshToken).Insert(u.ExpiredRefreshToken)
+	//	u.Database.C(oauthTable.AccessToken).Insert(u.ExpiredAccessToken)
+	//	u.Database.C(oauthTable.RefreshToken).Insert(u.ExpiredRefreshToken)
 
 	// Generate test resources
 	util.CreateDir("resources", (os.ModeDir | os.ModePerm))
