@@ -19,7 +19,7 @@ func Test_MongoDBStore_CreateMongoDBStore(t *testing.T) {
 			t.Error(expectedFormat.NotNil)
 		}
 
-		if _, ok := server.Cfg.GetExtension("JWT_KEY").(string); ok {
+		if _, ok := server.Cfg.GetExtension("jwt_key").(string); ok {
 			// Everything is fine.
 		} else {
 			t.Error(expectedFormat.NotNil)

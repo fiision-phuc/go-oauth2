@@ -21,11 +21,12 @@ type TestEnv struct {
 	Session  *mgo.Session
 	Database *mgo.Database
 
-	Client Client
 	User1  User
 	User2  User
-	//	ExpiredAccessToken  IToken
-	//	ExpiredRefreshToken IToken
+	Client Client
+
+	ExpiredAccessToken  Token
+	ExpiredRefreshToken Token
 
 	Username     string
 	Password     string
@@ -37,8 +38,7 @@ type TestEnv struct {
 
 // Setup initializes environment.
 func (u *TestEnv) Setup() {
-	mongo.ConnectMongo()
-	server.Initialize(true)
+	InitializeWithMongoDB(true, false)
 
 	u.Session, u.Database = mongo.GetMonotonicSession()
 	u.Username = "admin"
@@ -47,10 +47,6 @@ func (u *TestEnv) Setup() {
 	u.ClientID = bson.NewObjectId()
 	u.ClientSecret = bson.NewObjectId()
 	u.CreatedTime, _ = time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
-
-	// Define global variables
-	Cfg = loadConfig()
-	Store = CreateMongoDBStore()
 
 	// Generate test data
 	u.Client = &MongoDBClient{
@@ -77,25 +73,25 @@ func (u *TestEnv) Setup() {
 		Roles: []string{"r_device"},
 	}
 
-	//	u.ExpiredAccessToken = &DefaultToken{
-	//		ID:      bson.NewObjectId(),
-	//		User:    u.UserID,
-	//		Client:  u.ClientID,
-	//		Created: u.CreatedTime,
-	//		Expired: u.CreatedTime.Add(Cfg.AccessTokenDuration),
-	//	}
-	//	u.ExpiredRefreshToken = &DefaultToken{
-	//		ID:      bson.NewObjectId(),
-	//		User:    u.UserID,
-	//		Client:  u.ClientID,
-	//		Created: u.CreatedTime,
-	//		Expired: u.CreatedTime.Add(Cfg.RefreshTokenDuration),
-	//	}
+	u.ExpiredAccessToken = &MongoDBToken{
+		ID:      bson.NewObjectId(),
+		User:    u.UserID,
+		Client:  u.ClientID,
+		Created: u.CreatedTime,
+		Expired: u.CreatedTime.Add(Cfg.AccessTokenDuration),
+	}
+	u.ExpiredRefreshToken = &MongoDBToken{
+		ID:      bson.NewObjectId(),
+		User:    u.UserID,
+		Client:  u.ClientID,
+		Created: u.CreatedTime,
+		Expired: u.CreatedTime.Add(Cfg.RefreshTokenDuration),
+	}
 
 	u.Database.C(oauthTable.User).Insert(u.User1, u.User2)
 	u.Database.C(oauthTable.Client).Insert(u.Client)
-	//	u.Database.C(TableAccessToken).Insert(u.ExpiredAccessToken)
-	//	u.Database.C(TableRefreshToken).Insert(u.ExpiredRefreshToken)
+	u.Database.C(TableAccessToken).Insert(u.ExpiredAccessToken)
+	u.Database.C(TableRefreshToken).Insert(u.ExpiredRefreshToken)
 
 	// Generate test resources
 	util.CreateDir("resources", (os.ModeDir | os.ModePerm))
