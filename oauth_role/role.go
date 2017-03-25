@@ -23,6 +23,6 @@ func AllDevices() []string {
 }
 
 // AllDevices returns an array that contains all user roles.
-func allUsers() []string {
+func AllUsers() []string {
 	return []string{Admin, Manager, User}
 }
